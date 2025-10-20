@@ -72,7 +72,7 @@
 		<!-- Main Form Card -->
 		<div class="bg-white rounded-2xl shadow-xl p-8">
 			<!-- Email/Password Login -->
-			<form on:submit={handleLogin} class="space-y-6">
+			<form onsubmit={handleLogin} class="space-y-6">
 				<div>
 					<label for="username" class="block text-sm font-medium text-gray-700 mb-2">
 						Username or Email
@@ -173,7 +173,7 @@
 			<div class="mt-6 grid grid-cols-2 gap-3">
 				<button
 					type="button"
-					on:click={handleGoogleLogin}
+					onclick={handleGoogleLogin}
 					class="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
 				>
 					<svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -187,7 +187,7 @@
 
 				<button
 					type="button"
-					on:click={handleTelegramLogin}
+					onclick={handleTelegramLogin}
 					class="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
 				>
 					<svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="#0088cc">

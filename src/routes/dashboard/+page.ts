@@ -3,6 +3,6 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async (event) => {
 	return {
-		...load_GetDashboardStats({ event })
+		...(await load_GetDashboardStats({ event }))
 	};
 };

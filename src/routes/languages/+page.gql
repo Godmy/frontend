@@ -1,0 +1,7 @@
+query GetLanguages {
+	languages @list(name: "Languages_Page") {
+		id
+		name
+		code
+	}
+}

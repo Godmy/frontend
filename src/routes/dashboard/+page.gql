@@ -1,0 +1,11 @@
+query GetDashboardStats {
+	concepts {
+		id
+	}
+	languages {
+		id
+	}
+	dictionaries {
+		id
+	}
+}

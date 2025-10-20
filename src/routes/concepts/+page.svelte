@@ -23,6 +23,7 @@
 				path
 				depth
 				parentId
+				@list(name: "Concepts_Page", connection: false)
 			}
 		}
 	`);
@@ -40,7 +41,9 @@
 
 	const DeleteConcept = graphql(`
 		mutation DeleteConcept($conceptId: Int!) {
-			deleteConcept(conceptId: $conceptId)
+			deleteConcept(conceptId: $conceptId) {
+				id @Concept_delete
+			}
 		}
 	`);
 

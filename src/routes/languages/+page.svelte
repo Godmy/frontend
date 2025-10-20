@@ -6,17 +6,9 @@
 	import { errorHandler } from '$lib/errors';
 	import { notificationStore } from '$lib/notifications';
 	import type { LanguageInput } from '$lib/api/languages';
+	import type { PageData } from './$types';
 
-	// Houdini Query - автоматическое кеширование
-	const GetLanguages = graphql(`
-		query GetLanguages {
-			languages @list(name: "Languages_Page") {
-				id
-				name
-				code
-			}
-		}
-	`);
+	let { data }: { data: PageData } = $props();
 
 	// Houdini Mutations
 	const CreateLanguage = graphql(`
@@ -25,6 +17,7 @@
 				id
 				name
 				code
+				@list(name: "Languages_Page", connection: false)
 			}
 		}
 	`);
@@ -41,12 +34,11 @@
 
 	const DeleteLanguage = graphql(`
 		mutation DeleteLanguage($languageId: Int!) {
-			deleteLanguage(languageId: $languageId)
+			deleteLanguage(languageId: $languageId) {
+				id @Language_delete
+			}
 		}
 	`);
-
-	// Загрузка данных
-	const { data } = GetLanguages.fetch();
 
 	let showForm = $state(false);
 	let editingLanguage = $state<any>(undefined);
@@ -118,8 +110,8 @@
 		<main>
 			<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 				<div class="px-4 sm:px-0">
-					{#if $data}
-						<LanguageList languages={$data.languages} onEdit={handleEdit} onDelete={handleDelete} />
+					{#if data.GetLanguages}
+						<LanguageList languages={data.GetLanguages.languages} onEdit={handleEdit} onDelete={handleDelete} />
 					{:else}
 						<div class="flex justify-center py-12">
 							<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>

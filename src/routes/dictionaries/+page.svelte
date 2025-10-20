@@ -5,33 +5,10 @@
 	import DictionaryForm from '$lib/components/dictionaries/DictionaryForm.svelte';
 	import { errorHandler } from '$lib/errors';
 	import { notificationStore } from '$lib/notifications';
-	import { languageStore } from '$lib/stores/languageStore.svelte';
 	import type { DictionaryInput } from '$lib/api/dictionaries';
+	import type { PageData } from './$types';
 
-	// Houdini Query - загрузка всех необходимых данных с фильтрацией по языку
-	const GetDictionariesData = graphql(`
-		query GetDictionariesData($languageId: Int) {
-			dictionaries(languageId: $languageId) @list(name: "Dictionaries_Page") {
-				id
-				name
-				description
-				image
-				languageId
-				conceptId
-			}
-			languages {
-				id
-				name
-				code
-			}
-			concepts {
-				id
-				path
-				depth
-				parentId
-			}
-		}
-	`);
+	let { data }: { data: PageData } = $props();
 
 	// Houdini Mutations
 	const CreateDictionary = graphql(`
@@ -65,14 +42,6 @@
 			deleteDictionary(dictionaryId: $dictionaryId)
 		}
 	`);
-
-	// Загрузка данных с фильтрацией по выбранному языку
-	// Автоматически обновляется при изменении languageStore.currentLanguageId
-	const { data } = GetDictionariesData.fetch({
-		variables: {
-			languageId: languageStore.currentLanguageId
-		}
-	});
 
 	let showForm = $state(false);
 	let editingDictionary = $state<any>(undefined);
@@ -153,11 +122,11 @@
 		<main>
 			<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 				<div class="px-4 sm:px-0">
-					{#if $data}
+					{#if data.GetDictionariesData}
 						<DictionaryList
-							dictionaries={$data.dictionaries}
-							languages={$data.languages}
-							concepts={$data.concepts}
+							dictionaries={data.GetDictionariesData.dictionaries}
+							languages={data.GetDictionariesData.languages}
+							concepts={data.GetDictionariesData.concepts}
 							onEdit={handleEdit}
 							onDelete={handleDelete}
 						/>
@@ -175,8 +144,8 @@
 {#if showForm}
 	<DictionaryForm
 		dictionary={editingDictionary}
-		languages={$data?.languages || []}
-		concepts={$data?.concepts || []}
+		languages={data.GetDictionariesData?.languages || []}
+		concepts={data.GetDictionariesData?.concepts || []}
 		onSubmit={handleSubmit}
 		onCancel={handleCancel}
 	/>
