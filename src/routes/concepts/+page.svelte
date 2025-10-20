@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { graphql } from '$houdini';
 	import Navigation from '$lib/components/Navigation.svelte';
-	import ConceptList from '$lib/components/concepts/ConceptList.svelte';
+	import ConceptTree from '$lib/components/concepts/ConceptTree.svelte';
 	import ConceptForm from '$lib/components/concepts/ConceptForm.svelte';
 	import { errorHandler } from '$lib/errors';
 	import { notificationStore } from '$lib/notifications';
@@ -70,6 +70,34 @@
 		}
 	}
 
+	async function handleMove(conceptId: number, newParentId: number | null) {
+		try {
+			// Найти концепцию для обновления depth
+			const concept = $data?.concepts.find((c) => c.id === conceptId);
+			if (!concept) return;
+
+			// Вычислить новый depth
+			let newDepth = 0;
+			if (newParentId !== null) {
+				const parent = $data?.concepts.find((c) => c.id === newParentId);
+				if (parent) {
+					newDepth = parent.depth + 1;
+				}
+			}
+
+			await UpdateConcept.mutate({
+				conceptId,
+				input: {
+					parentId: newParentId,
+					depth: newDepth
+				}
+			});
+			notificationStore.success('Concept moved successfully');
+		} catch (error) {
+			errorHandler.handle(error);
+		}
+	}
+
 	async function handleSubmit(formData: ConceptInput) {
 		try {
 			if (editingConcept) {
@@ -123,7 +151,12 @@
 			<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 				<div class="px-4 sm:px-0">
 					{#if $data}
-						<ConceptList concepts={$data.concepts} onEdit={handleEdit} onDelete={handleDelete} />
+						<ConceptTree
+							concepts={$data.concepts}
+							onEdit={handleEdit}
+							onDelete={handleDelete}
+							onMove={handleMove}
+						/>
 					{:else}
 						<div class="flex justify-center py-12">
 							<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
