@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output
+build
+.svelte-kit
+dist
+
+# Development
+.env
+.env.local
+.env.development
+*.log
+
+# Testing
+coverage
+.nyc_output
+playwright-report
+test-results
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.github
+
+# Documentation
+README.md
+IMPROVEMENTS.md
+SETUP.md
+SCRIPTS.md
+
+# CI/CD
+.github

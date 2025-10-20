@@ -1,0 +1,203 @@
+type AuthPayload {
+  accessToken: String!
+  refreshToken: String!
+  tokenType: String!
+}
+
+type Concept {
+  depth: Int!
+  id: Int!
+  parentId: Int
+  path: String!
+}
+
+input ConceptInput {
+  depth: Int!
+  parentId: Int = null
+  path: String!
+}
+
+input ConceptUpdateInput {
+  depth: Int = null
+  parentId: Int = null
+  path: String = null
+}
+
+type Dictionary {
+  conceptId: Int!
+  description: String
+  id: Int!
+  image: String
+  languageId: Int!
+  name: String!
+}
+
+input DictionaryInput {
+  conceptId: Int!
+  description: String = null
+  image: String = null
+  languageId: Int!
+  name: String!
+}
+
+input DictionaryUpdateInput {
+  conceptId: Int = null
+  description: String = null
+  image: String = null
+  languageId: Int = null
+  name: String = null
+}
+
+input EmailVerificationInput {
+  token: String!
+}
+
+input GoogleAuthInput {
+  idToken: String!
+}
+
+type Language {
+  code: String!
+  id: Int!
+  name: String!
+}
+
+input LanguageInput {
+  code: String!
+  name: String!
+}
+
+input LanguageUpdateInput {
+  code: String = null
+  name: String = null
+}
+
+type MessageResponse {
+  message: String!
+  success: Boolean!
+}
+
+type Mutation {
+  addPermissionToRole(input: PermissionInput!, roleId: Int!): Role!
+  assignRoleToUser(roleName: String!, userId: Int!): Boolean!
+  createConcept(input: ConceptInput!): Concept!
+  createDictionary(input: DictionaryInput!): Dictionary!
+  createLanguage(input: LanguageInput!): Language!
+  createRole(input: RoleInput!): Role!
+  deleteConcept(conceptId: Int!): Boolean!
+  deleteDictionary(dictionaryId: Int!): Boolean!
+  deleteLanguage(languageId: Int!): Boolean!
+  login(input: UserLoginInput!): AuthPayload!
+  loginWithGoogle(input: GoogleAuthInput!): AuthPayload!
+  loginWithTelegram(input: TelegramAuthInput!): AuthPayload!
+  refreshToken(input: RefreshTokenInput!): AuthPayload!
+  register(input: UserRegistrationInput!): AuthPayload!
+  removeRoleFromUser(roleName: String!, userId: Int!): Boolean!
+  requestPasswordReset(input: PasswordResetRequestInput!): MessageResponse!
+  resendVerificationEmail(email: String!): MessageResponse!
+  resetPassword(input: PasswordResetInput!): MessageResponse!
+  updateConcept(conceptId: Int!, input: ConceptUpdateInput!): Concept!
+  updateDictionary(dictionaryId: Int!, input: DictionaryUpdateInput!): Dictionary!
+  updateLanguage(input: LanguageUpdateInput!, languageId: Int!): Language!
+  updateProfile(firstName: String = null, language: String = null, lastName: String = null, timezone: String = null): User!
+  updateRole(input: RoleUpdateInput!, roleId: Int!): Role!
+  verifyEmail(input: EmailVerificationInput!): MessageResponse!
+}
+
+input PasswordResetInput {
+  newPassword: String!
+  token: String!
+}
+
+input PasswordResetRequestInput {
+  email: String!
+}
+
+type Permission {
+  action: String!
+  id: Int!
+  resource: String!
+  roleId: Int!
+  scope: String!
+}
+
+input PermissionInput {
+  action: String!
+  resource: String!
+  scope: String! = "own"
+}
+
+type Query {
+  concept(conceptId: Int!): Concept
+  concepts: [Concept!]!
+  dictionaries(conceptId: Int = null, languageId: Int = null): [Dictionary!]!
+  dictionary(dictionaryId: Int!): Dictionary
+  language(languageId: Int!): Language
+  languages: [Language!]!
+  me: User!
+  myRoles: [Role!]!
+  role(roleId: Int!): Role!
+  roles: [Role!]!
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
+}
+
+type Role {
+  description: String
+  id: Int!
+  name: String!
+  permissions: [Permission!]!
+}
+
+input RoleInput {
+  description: String = null
+  name: String!
+}
+
+input RoleUpdateInput {
+  description: String = null
+  name: String = null
+}
+
+input TelegramAuthInput {
+  authDate: String!
+  firstName: String = null
+  hash: String!
+  id: String!
+  lastName: String = null
+  photoUrl: String = null
+  username: String = null
+}
+
+type User {
+  email: String!
+  id: Int!
+  isActive: Boolean!
+  isVerified: Boolean!
+  profile: UserProfile
+  username: String!
+}
+
+input UserLoginInput {
+  password: String!
+  username: String!
+}
+
+type UserProfile {
+  avatar: String
+  firstName: String
+  id: Int!
+  language: String!
+  lastName: String
+  timezone: String!
+}
+
+input UserRegistrationInput {
+  email: String!
+  firstName: String = null
+  lastName: String = null
+  password: String!
+  username: String!
+}
