@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { ProtectedRoute, useAuth, usePermissions, RequirePermission, RequireRole } from '$lib/auth';
 	import { goto } from '$app/navigation';
-	import { graphql } from '$houdini';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 
 	const auth = useAuth();
 	const permissions = usePermissions();
@@ -11,38 +13,21 @@
 		goto('/login');
 	}
 
-	// GraphQL Query для статистики dashboard
-	const GetDashboardStats = graphql(`
-		query GetDashboardStats {
-			concepts {
-				id
-			}
-			languages {
-				id
-			}
-			dictionaries {
-				id
-			}
-		}
-	`);
-
-	const { data } = GetDashboardStats.fetch();
-
 	// Реактивная статистика на основе загруженных данных
 	let stats = $derived([
 		{
 			name: 'Total Concepts',
-			value: $data?.concepts?.length?.toString() || '0',
+			value: data.GetDashboardStats?.concepts?.length?.toString() || '0',
 			icon: '📚'
 		},
 		{
 			name: 'Languages',
-			value: $data?.languages?.length?.toString() || '0',
+			value: data.GetDashboardStats?.languages?.length?.toString() || '0',
 			icon: '🌍'
 		},
 		{
 			name: 'Dictionaries',
-			value: $data?.dictionaries?.length?.toString() || '0',
+			value: data.GetDashboardStats?.dictionaries?.length?.toString() || '0',
 			icon: '📖'
 		},
 		{

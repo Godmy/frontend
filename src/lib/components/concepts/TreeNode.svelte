@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Concept } from '$lib/api/concepts';
 	import type { Writable } from 'svelte/store';
+	import TreeNode from './TreeNode.svelte';
 
 	type TreeConcept = Concept & { children?: Concept[] };
 
@@ -164,6 +165,7 @@
 		tabindex="0"
 		aria-expanded={hasChildren ? isExpanded : undefined}
 		aria-level={level + 1}
+		aria-selected="false"
 	>
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-2 flex-1 min-w-0">
@@ -246,7 +248,7 @@
 	{#if hasChildren && isExpanded}
 		<ul class="children" role="group">
 			{#each concept.children as child}
-				<svelte:self
+				<TreeNode
 					concept={child}
 					{expandedNodes}
 					{onEdit}

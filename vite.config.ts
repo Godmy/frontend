@@ -5,6 +5,9 @@ import { sveltekit } from '@sveltejs/kit/vite';
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	server: {
+		fs: {
+			allow: ['.', '.houdini', 'src', 'node_modules', '.svelte-kit']
+		},
 		proxy: {
 			'/graphql': {
 				target: 'http://127.0.0.1:8000',

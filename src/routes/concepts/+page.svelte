@@ -6,18 +6,14 @@
 	import { errorHandler } from '$lib/errors';
 	import { notificationStore } from '$lib/notifications';
 	import type { ConceptInput } from '$lib/api/concepts';
+	import type { PageData } from './$types';
 
-	// Houdini Query - автоматическое кеширование
-	const GetConcepts = graphql(`
-		query GetConcepts {
-			concepts @list(name: "Concepts_Page") {
-				id
-				path
-				depth
-				parentId
-			}
-		}
-	`);
+	let { data }: { data: PageData } = $props();
+
+	// Debug logging
+	$effect(() => {
+		console.log('Concepts page data:', data);
+	});
 
 	// Houdini Mutations
 	const CreateConcept = graphql(`
@@ -48,9 +44,6 @@
 		}
 	`);
 
-	// Загрузка данных
-	const { data } = GetConcepts.fetch();
-
 	let showForm = $state(false);
 	let editingConcept = $state<any>(undefined);
 
@@ -73,13 +66,13 @@
 	async function handleMove(conceptId: number, newParentId: number | null) {
 		try {
 			// Найти концепцию для обновления depth
-			const concept = $data?.concepts.find((c) => c.id === conceptId);
+			const concept = data.GetConcepts?.concepts.find((c) => c.id === conceptId);
 			if (!concept) return;
 
 			// Вычислить новый depth
 			let newDepth = 0;
 			if (newParentId !== null) {
-				const parent = $data?.concepts.find((c) => c.id === newParentId);
+				const parent = data.GetConcepts?.concepts.find((c) => c.id === newParentId);
 				if (parent) {
 					newDepth = parent.depth + 1;
 				}
@@ -150,9 +143,9 @@
 		<main>
 			<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 				<div class="px-4 sm:px-0">
-					{#if $data}
+					{#if data.GetConcepts}
 						<ConceptTree
-							concepts={$data.concepts}
+							concepts={data.GetConcepts.concepts || []}
 							onEdit={handleEdit}
 							onDelete={handleDelete}
 							onMove={handleMove}
