@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { graphql } from '$houdini';
+	import { invalidate } from '$app/navigation';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import LanguageList from '$lib/components/languages/LanguageList.svelte';
 	import LanguageForm from '$lib/components/languages/LanguageForm.svelte';
@@ -17,7 +18,6 @@
 				id
 				name
 				code
-				@list(name: "Languages_Page", connection: false)
 			}
 		}
 	`);
@@ -34,9 +34,7 @@
 
 	const DeleteLanguage = graphql(`
 		mutation DeleteLanguage($languageId: Int!) {
-			deleteLanguage(languageId: $languageId) {
-				id @Language_delete
-			}
+			deleteLanguage(languageId: $languageId)
 		}
 	`);
 
@@ -53,6 +51,8 @@
 			try {
 				await DeleteLanguage.mutate({ languageId: id });
 				notificationStore.success('Language deleted successfully');
+				// Перезагрузить данные после мутации
+				await invalidate('app:languages');
 			} catch (error) {
 				errorHandler.handle(error);
 			}
@@ -78,6 +78,8 @@
 			}
 			showForm = false;
 			editingLanguage = undefined;
+			// Перезагрузить данные после мутации
+			await invalidate('app:languages');
 		} catch (error) {
 			errorHandler.handle(error);
 		}

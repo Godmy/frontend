@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { graphql } from '$houdini';
+	import { invalidate } from '$app/navigation';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import ConceptTree from '$lib/components/concepts/ConceptTree.svelte';
 	import ConceptForm from '$lib/components/concepts/ConceptForm.svelte';
@@ -23,7 +24,6 @@
 				path
 				depth
 				parentId
-				@list(name: "Concepts_Page", connection: false)
 			}
 		}
 	`);
@@ -41,9 +41,7 @@
 
 	const DeleteConcept = graphql(`
 		mutation DeleteConcept($conceptId: Int!) {
-			deleteConcept(conceptId: $conceptId) {
-				id @Concept_delete
-			}
+			deleteConcept(conceptId: $conceptId)
 		}
 	`);
 
@@ -60,6 +58,7 @@
 			try {
 				await DeleteConcept.mutate({ conceptId: id });
 				notificationStore.success('Concept deleted successfully');
+				await invalidate('app:concepts');
 			} catch (error) {
 				errorHandler.handle(error);
 			}
@@ -89,6 +88,7 @@
 				}
 			});
 			notificationStore.success('Concept moved successfully');
+			await invalidate('app:concepts');
 		} catch (error) {
 			errorHandler.handle(error);
 		}
@@ -114,6 +114,7 @@
 			}
 			showForm = false;
 			editingConcept = undefined;
+			await invalidate('app:concepts');
 		} catch (error) {
 			errorHandler.handle(error);
 		}

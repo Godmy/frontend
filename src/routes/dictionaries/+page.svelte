@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { graphql } from '$houdini';
+	import { invalidate } from '$app/navigation';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import DictionaryList from '$lib/components/dictionaries/DictionaryList.svelte';
 	import DictionaryForm from '$lib/components/dictionaries/DictionaryForm.svelte';
@@ -56,6 +57,7 @@
 			try {
 				await DeleteDictionary.mutate({ dictionaryId: id });
 				notificationStore.success('Dictionary deleted successfully');
+				await invalidate('app:dictionaries');
 			} catch (error) {
 				errorHandler.handle(error);
 			}
@@ -90,6 +92,7 @@
 			}
 			showForm = false;
 			editingDictionary = undefined;
+			await invalidate('app:dictionaries');
 		} catch (error) {
 			errorHandler.handle(error);
 		}
