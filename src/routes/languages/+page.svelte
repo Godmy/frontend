@@ -11,6 +11,13 @@
 
 	let { data }: { data: PageData } = $props();
 
+	// Debug logging
+	$effect(() => {
+		console.log('[Languages] Page data updated:', data);
+		console.log('[Languages] Languages count:', data.GetLanguages?.languages?.length || 0);
+		console.log('[Languages] Languages:', data.GetLanguages?.languages);
+	});
+
 	// Houdini Mutations
 	const CreateLanguage = graphql(`
 		mutation CreateLanguage($input: LanguageInput!) {
@@ -61,26 +68,32 @@
 
 	async function handleSubmit(formData: LanguageInput) {
 		try {
+			console.log('[Languages] Submitting form data:', formData);
 			if (editingLanguage) {
-				await UpdateLanguage.mutate({
+				const result = await UpdateLanguage.mutate({
 					languageId: editingLanguage.id,
 					input: {
 						name: formData.name,
 						code: formData.code
 					}
 				});
+				console.log('[Languages] Update result:', result);
 				notificationStore.success('Language updated successfully');
 			} else {
-				await CreateLanguage.mutate({
+				const result = await CreateLanguage.mutate({
 					input: formData
 				});
+				console.log('[Languages] Create result:', result);
 				notificationStore.success('Language created successfully');
 			}
 			showForm = false;
 			editingLanguage = undefined;
 			// Перезагрузить данные после мутации
+			console.log('[Languages] Invalidating cache...');
 			await invalidate('app:languages');
+			console.log('[Languages] Cache invalidated, data should reload');
 		} catch (error) {
+			console.error('[Languages] Error:', error);
 			errorHandler.handle(error);
 		}
 	}
