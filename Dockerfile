@@ -3,19 +3,25 @@
 # Stage 1: Build
 FROM node:20-alpine AS builder
 
+# Устанавливаем yarn
+RUN apk add --no-cache yarn
+
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
+# Генерируем SvelteKit конфигурацию
+RUN npx svelte-kit sync
+
 # Build the application
-RUN npm run build
+RUN yarn build
 
 # Stage 2: Production
 FROM node:20-alpine
