@@ -34,7 +34,12 @@ export interface DictionaryEntry {
  */
 export function dictionariesToMap(dictionaries: DictionaryEntry[]): TranslationsMap {
 	return dictionaries.reduce((acc, dict) => {
-		acc[dict.concept.path] = dict.name;
+		// Check if dict.concept and dict.concept.path exist before accessing
+		if (dict?.concept?.path) {
+			acc[dict.concept.path] = dict.name;
+		} else {
+			console.warn('Dictionary entry missing concept.path:', dict);
+		}
 		return acc;
 	}, {} as TranslationsMap);
 }
