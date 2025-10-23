@@ -1,12 +1,17 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { ProtectedRoute, useAuth, usePermissions, RequirePermission, RequireRole } from '$lib/auth';
 	import { goto } from '$app/navigation';
+	import { t } from '$lib/utils/i18n';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	const auth = useAuth();
 	const permissions = usePermissions();
+
+	// Получить переводы из layout
+	const trans = $derived($page.data.translations || {});
 
 	async function handleLogout() {
 		await auth.logout();
@@ -16,17 +21,17 @@
 	// Реактивная статистика на основе загруженных данных
 	let stats = $derived([
 		{
-			name: 'Total Concepts',
+			name: t(trans, 'ui/dashboard/stats/concepts', 'Total Concepts'),
 			value: data.GetDashboardStats?.concepts?.length?.toString() || '0',
 			icon: '📚'
 		},
 		{
-			name: 'Languages',
+			name: t(trans, 'ui/dashboard/stats/languages', 'Supported Languages'),
 			value: data.GetDashboardStats?.languages?.length?.toString() || '0',
 			icon: '🌍'
 		},
 		{
-			name: 'Dictionaries',
+			name: t(trans, 'ui/dictionaries/title', 'Dictionaries'),
 			value: data.GetDashboardStats?.dictionaries?.length?.toString() || '0',
 			icon: '📖'
 		},
@@ -39,7 +44,7 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard - Multipult</title>
+	<title>{t(trans, 'ui/dashboard/title', 'Dashboard')} - Multipult</title>
 </svelte:head>
 
 <ProtectedRoute>
@@ -50,7 +55,7 @@
 			<div class="px-4 py-6 sm:px-0">
 				<div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white mb-8">
 					<h2 class="text-3xl font-bold mb-2">
-						Welcome back, {auth.user?.profile?.firstName || auth.user?.username}! 👋
+						{t(trans, 'ui/dashboard/welcome', 'Welcome back')}, {auth.user?.profile?.firstName || auth.user?.username}! 👋
 					</h2>
 					<p class="text-indigo-100">
 						Here's what's happening with your content today.

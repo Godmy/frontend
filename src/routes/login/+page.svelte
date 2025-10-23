@@ -2,12 +2,17 @@
 	import { useAuth } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { t } from '$lib/utils/i18n';
 
 	let username = $state('');
 	let password = $state('');
 	let rememberMe = $state(false);
 
 	const auth = useAuth();
+
+	// Get translations from layout
+	const trans = $derived($page.data.translations || {});
 
 	// Debug: отслеживание изменения auth.error
 	$effect(() => {
@@ -54,7 +59,7 @@
 </script>
 
 <svelte:head>
-	<title>Login - Multipult</title>
+	<title>{t(trans, 'ui/auth/login/title', 'Sign in to your account')} - Multipult</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -63,10 +68,10 @@
 		<!-- Header -->
 		<div class="text-center">
 			<h2 class="text-4xl font-extrabold text-gray-900">
-				Welcome back
+				{t(trans, 'ui/auth/login/welcomeBack', 'Welcome back')}
 			</h2>
 			<p class="mt-2 text-sm text-gray-600">
-				Sign in to your account to continue
+				{t(trans, 'ui/auth/login/subtitle', 'Sign in to your account to continue')}
 			</p>
 		</div>
 
@@ -76,7 +81,7 @@
 			<form onsubmit={handleLogin} class="space-y-6">
 				<div>
 					<label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-						Username or Email
+						{t(trans, 'ui/auth/usernameOrEmail', 'Username or Email')}
 					</label>
 					<input
 						id="username"
@@ -85,13 +90,13 @@
 						bind:value={username}
 						disabled={auth.isLoading}
 						class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-						placeholder="Enter your username"
+						placeholder={t(trans, 'ui/auth/usernamePlaceholder', 'Enter your username')}
 					/>
 				</div>
 
 				<div>
 					<label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-						Password
+						{t(trans, 'ui/auth/password', 'Password')}
 					</label>
 					<input
 						id="password"
@@ -100,7 +105,7 @@
 						bind:value={password}
 						disabled={auth.isLoading}
 						class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-						placeholder="Enter your password"
+						placeholder={t(trans, 'ui/auth/passwordPlaceholder', 'Enter your password')}
 					/>
 				</div>
 
@@ -113,13 +118,13 @@
 							class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
 						/>
 						<label for="remember-me" class="ml-2 block text-sm text-gray-700">
-							Remember me
+							{t(trans, 'ui/auth/rememberMe', 'Remember me')}
 						</label>
 					</div>
 
 					<div class="text-sm">
 						<a href="/forgot-password" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
-							Forgot password?
+							{t(trans, 'ui/auth/forgotPassword', 'Forgot password?')}
 						</a>
 					</div>
 				</div>
@@ -151,9 +156,9 @@
 							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
 						</svg>
-						Signing in...
+						{t(trans, 'ui/auth/signingIn', 'Signing in...')}
 					{:else}
-						Sign in
+						{t(trans, 'ui/button/signIn', 'Sign in')}
 					{/if}
 				</button>
 			</form>
@@ -165,7 +170,7 @@
 						<div class="w-full border-t border-gray-300"></div>
 					</div>
 					<div class="relative flex justify-center text-sm">
-						<span class="px-2 bg-white text-gray-500">Or continue with</span>
+						<span class="px-2 bg-white text-gray-500">{t(trans, 'ui/auth/orContinueWith', 'Or continue with')}</span>
 					</div>
 				</div>
 			</div>
@@ -202,9 +207,9 @@
 		<!-- Sign Up Link -->
 		<div class="text-center">
 			<p class="text-sm text-gray-600">
-				Don't have an account?
+				{t(trans, 'ui/auth/noAccount', "Don't have an account?")}
 				<a href="/register" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
-					Sign up for free
+					{t(trans, 'ui/auth/signUpFree', 'Sign up for free')}
 				</a>
 			</p>
 		</div>

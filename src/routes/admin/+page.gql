@@ -1,10 +1,14 @@
 query GetAdminStats {
-	users {
-		id
-		username
-		email
-		isActive
-		isVerified
+	allUsers(limit: 100) {
+		users {
+			id
+			username
+			email
+			isActive
+			isVerified
+		}
+		total
+		hasMore
 	}
 	roles {
 		id

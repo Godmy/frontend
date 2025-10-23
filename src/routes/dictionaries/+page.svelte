@@ -1,14 +1,19 @@
 <script lang="ts">
 	import { graphql } from '$houdini';
 	import { invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
 	import DictionaryList from '$lib/components/dictionaries/DictionaryList.svelte';
 	import DictionaryForm from '$lib/components/dictionaries/DictionaryForm.svelte';
 	import { errorHandler } from '$lib/errors';
 	import { notificationStore } from '$lib/notifications';
+	import { t } from '$lib/utils/i18n';
 	import type { DictionaryInput } from '$lib/api/dictionaries';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// Get translations from layout
+	const trans = $derived($page.data.translations || {});
 
 	// Houdini Mutations
 	const CreateDictionary = graphql(`
@@ -52,10 +57,10 @@
 	}
 
 	async function handleDelete(id: number) {
-		if (confirm('Are you sure you want to delete this dictionary?')) {
+		if (confirm(t(trans, 'ui/dictionaries/confirmDelete', 'Are you sure you want to delete this dictionary?'))) {
 			try {
 				await DeleteDictionary.mutate({ dictionaryId: id });
-				notificationStore.success('Dictionary deleted successfully');
+				notificationStore.success(t(trans, 'ui/dictionaries/deleteSuccess', 'Dictionary deleted successfully'));
 				await invalidate('app:dictionaries');
 			} catch (error) {
 				errorHandler.handle(error);
@@ -76,7 +81,7 @@
 						conceptId: formData.conceptId
 					}
 				});
-				notificationStore.success('Dictionary updated successfully');
+				notificationStore.success(t(trans, 'ui/dictionaries/updateSuccess', 'Dictionary updated successfully'));
 			} else {
 				await CreateDictionary.mutate({
 					input: {
@@ -87,7 +92,7 @@
 						conceptId: formData.conceptId
 					}
 				});
-				notificationStore.success('Dictionary created successfully');
+				notificationStore.success(t(trans, 'ui/dictionaries/createSuccess', 'Dictionary created successfully'));
 			}
 			showForm = false;
 			editingDictionary = undefined;
@@ -103,17 +108,23 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{t(trans, 'ui/dictionaries/title', 'Dictionaries')} - Multipult</title>
+</svelte:head>
+
 <div class="min-h-screen bg-gray-50">
 	<div class="py-10">
 		<header class="mb-8">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex justify-between items-center">
-					<h1 class="text-3xl font-bold leading-tight text-gray-900">Dictionaries</h1>
+					<h1 class="text-3xl font-bold leading-tight text-gray-900">
+						{t(trans, 'ui/dictionaries/title', 'Dictionaries')}
+					</h1>
 					<button
 						onclick={() => { showForm = true; }}
 						class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 					>
-						Add Dictionary
+						{t(trans, 'ui/dictionaries/create', 'Add Dictionary')}
 					</button>
 				</div>
 			</div>

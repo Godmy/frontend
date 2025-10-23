@@ -2,10 +2,14 @@
 	import { page } from '$app/stores';
 	import { useAuth } from '$lib/auth';
 	import { goto } from '$app/navigation';
+	import { t } from '$lib/utils/i18n';
 	import LanguageSwitcher from './LanguageSwitcher.svelte';
 
 	const auth = useAuth();
 	let currentPath = $derived($page.url.pathname);
+
+	// Получить переводы из layout
+	const trans = $derived($page.data.translations || {});
 
 	// Определяем тип страницы на основе пути
 	let isPublicPage = $derived(currentPath === '/' || currentPath === '/login' || currentPath === '/register' || currentPath === '/forgot-password');
@@ -39,25 +43,25 @@
 							href="/dashboard"
 							class="{isActive('/dashboard') ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'} px-3 py-2 text-sm font-medium border-b-2 transition-colors"
 						>
-							Dashboard
+							{t(trans, 'ui/nav/dashboard', 'Dashboard')}
 						</a>
 						<a
 							href="/concepts"
 							class="{isActive('/concepts') ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'} px-3 py-2 text-sm font-medium border-b-2 transition-colors"
 						>
-							Concepts
+							{t(trans, 'ui/nav/concepts', 'Concepts')}
 						</a>
 						<a
 							href="/languages"
 							class="{isActive('/languages') ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'} px-3 py-2 text-sm font-medium border-b-2 transition-colors"
 						>
-							Languages
+							{t(trans, 'ui/nav/languages', 'Languages')}
 						</a>
 						<a
 							href="/dictionaries"
 							class="{isActive('/dictionaries') ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'} px-3 py-2 text-sm font-medium border-b-2 transition-colors"
 						>
-							Dictionaries
+							{t(trans, 'ui/nav/dictionaries', 'Dictionaries')}
 						</a>
 					</div>
 				{/if}
@@ -85,7 +89,7 @@
 						onclick={handleLogout}
 						class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
 					>
-						Logout
+						{t(trans, 'ui/button/logout', 'Logout')}
 					</button>
 				{:else}
 					<!-- Auth buttons для неавторизованных -->
@@ -93,13 +97,13 @@
 						href="/login"
 						class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
 					>
-						Sign in
+						{t(trans, 'ui/button/signIn', 'Sign in')}
 					</a>
 					<a
 						href="/register"
 						class="px-6 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all"
 					>
-						Get Started
+						{t(trans, 'ui/button/getStarted', 'Get Started')}
 					</a>
 				{/if}
 			</div>

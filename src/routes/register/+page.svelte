@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { useAuth } from '$lib/auth';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { t } from '$lib/utils/i18n';
 
 	let username = $state('');
 	let email = $state('');
@@ -13,22 +15,25 @@
 	const auth = useAuth();
 	let localError = $state<string | null>(null);
 
+	// Get translations from layout
+	const trans = $derived($page.data.translations || {});
+
 	async function handleRegister() {
 		localError = null;
 
 		// Валидация
 		if (password !== confirmPassword) {
-			localError = 'Passwords do not match';
+			localError = t(trans, 'ui/auth/register/passwordMismatch', 'Passwords do not match');
 			return;
 		}
 
 		if (!agreeToTerms) {
-			localError = 'Please agree to the Terms and Conditions';
+			localError = t(trans, 'ui/auth/register/agreeTerms', 'Please agree to the Terms and Conditions');
 			return;
 		}
 
 		if (password.length < 8) {
-			localError = 'Password must be at least 8 characters';
+			localError = t(trans, 'ui/auth/register/passwordLength', 'Password must be at least 8 characters');
 			return;
 		}
 
@@ -56,15 +61,15 @@
 		if (/\d/.test(password)) score++;
 		if (/[^a-zA-Z\d]/.test(password)) score++;
 
-		if (score <= 2) return { score, label: 'Weak', color: 'bg-red-500' };
-		if (score <= 3) return { score, label: 'Fair', color: 'bg-yellow-500' };
-		if (score <= 4) return { score, label: 'Good', color: 'bg-blue-500' };
-		return { score, label: 'Strong', color: 'bg-green-500' };
+		if (score <= 2) return { score, label: t(trans, 'ui/auth/register/passwordWeak', 'Weak'), color: 'bg-red-500' };
+		if (score <= 3) return { score, label: t(trans, 'ui/auth/register/passwordFair', 'Fair'), color: 'bg-yellow-500' };
+		if (score <= 4) return { score, label: t(trans, 'ui/auth/register/passwordGood', 'Good'), color: 'bg-blue-500' };
+		return { score, label: t(trans, 'ui/auth/register/passwordStrong', 'Strong'), color: 'bg-green-500' };
 	});
 </script>
 
 <svelte:head>
-	<title>Sign Up - Multipult</title>
+	<title>{t(trans, 'ui/auth/register/title', 'Create your account')} - Multipult</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -73,10 +78,10 @@
 		<!-- Header -->
 		<div class="text-center">
 			<h2 class="text-4xl font-extrabold text-gray-900">
-				Create your account
+				{t(trans, 'ui/auth/register/title', 'Create your account')}
 			</h2>
 			<p class="mt-2 text-sm text-gray-600">
-				Join us and start managing your content
+				{t(trans, 'ui/auth/register/subtitle', 'Join us and start managing your content')}
 			</p>
 		</div>
 
@@ -87,7 +92,7 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
 						<label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-							Username *
+							{t(trans, 'ui/auth/username', 'Username')} *
 						</label>
 						<input
 							id="username"
@@ -96,13 +101,13 @@
 							bind:value={username}
 							disabled={auth.isLoading}
 							class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-							placeholder="johndoe"
+							placeholder={t(trans, 'ui/auth/register/usernamePlaceholder', 'johndoe')}
 						/>
 					</div>
 
 					<div>
 						<label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-							Email address *
+							{t(trans, 'ui/auth/email', 'Email address')} *
 						</label>
 						<input
 							id="email"
@@ -111,7 +116,7 @@
 							bind:value={email}
 							disabled={auth.isLoading}
 							class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-							placeholder="john@example.com"
+							placeholder={t(trans, 'ui/auth/register/emailPlaceholder', 'john@example.com')}
 						/>
 					</div>
 				</div>
@@ -120,7 +125,7 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
 						<label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
-							First Name
+							{t(trans, 'ui/auth/firstName', 'First Name')}
 						</label>
 						<input
 							id="firstName"
@@ -128,13 +133,13 @@
 							bind:value={firstName}
 							disabled={auth.isLoading}
 							class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-							placeholder="John"
+							placeholder={t(trans, 'ui/auth/register/firstNamePlaceholder', 'John')}
 						/>
 					</div>
 
 					<div>
 						<label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
-							Last Name
+							{t(trans, 'ui/auth/lastName', 'Last Name')}
 						</label>
 						<input
 							id="lastName"
@@ -142,7 +147,7 @@
 							bind:value={lastName}
 							disabled={auth.isLoading}
 							class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-							placeholder="Doe"
+							placeholder={t(trans, 'ui/auth/register/lastNamePlaceholder', 'Doe')}
 						/>
 					</div>
 				</div>
@@ -150,7 +155,7 @@
 				<!-- Password -->
 				<div>
 					<label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-						Password *
+						{t(trans, 'ui/auth/password', 'Password')} *
 					</label>
 					<input
 						id="password"
@@ -159,13 +164,13 @@
 						bind:value={password}
 						disabled={auth.isLoading}
 						class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-						placeholder="At least 8 characters"
+						placeholder={t(trans, 'ui/auth/register/passwordPlaceholder', 'At least 8 characters')}
 					/>
 
 					{#if password}
 						<div class="mt-2">
 							<div class="flex items-center justify-between mb-1">
-								<span class="text-xs text-gray-600">Password strength:</span>
+								<span class="text-xs text-gray-600">{t(trans, 'ui/auth/register/passwordStrengthLabel', 'Password strength:')}</span>
 								<span class="text-xs font-medium {passwordStrength().color.replace('bg-', 'text-')}">
 									{passwordStrength().label}
 								</span>
@@ -183,7 +188,7 @@
 				<!-- Confirm Password -->
 				<div>
 					<label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
-						Confirm Password *
+						{t(trans, 'ui/auth/confirmPassword', 'Confirm Password')} *
 					</label>
 					<input
 						id="confirmPassword"
@@ -192,10 +197,10 @@
 						bind:value={confirmPassword}
 						disabled={auth.isLoading}
 						class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-						placeholder="Re-enter your password"
+						placeholder={t(trans, 'ui/auth/register/confirmPasswordPlaceholder', 'Re-enter your password')}
 					/>
 					{#if confirmPassword && password !== confirmPassword}
-						<p class="mt-1 text-sm text-red-600">Passwords do not match</p>
+						<p class="mt-1 text-sm text-red-600">{t(trans, 'ui/auth/register/passwordMismatch', 'Passwords do not match')}</p>
 					{/if}
 				</div>
 
@@ -208,10 +213,10 @@
 						class="h-4 w-4 mt-1 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
 					/>
 					<label for="terms" class="ml-2 block text-sm text-gray-700">
-						I agree to the
-						<a href="/terms" class="text-indigo-600 hover:text-indigo-500 font-medium">Terms and Conditions</a>
-						and
-						<a href="/privacy" class="text-indigo-600 hover:text-indigo-500 font-medium">Privacy Policy</a>
+						{t(trans, 'ui/auth/register/agreePrefix', 'I agree to the')}
+						<a href="/terms" class="text-indigo-600 hover:text-indigo-500 font-medium">{t(trans, 'ui/auth/register/terms', 'Terms and Conditions')}</a>
+						{t(trans, 'ui/auth/register/and', 'and')}
+						<a href="/privacy" class="text-indigo-600 hover:text-indigo-500 font-medium">{t(trans, 'ui/auth/register/privacy', 'Privacy Policy')}</a>
 					</label>
 				</div>
 
@@ -244,9 +249,9 @@
 							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
 						</svg>
-						Creating account...
+						{t(trans, 'ui/auth/register/creatingAccount', 'Creating account...')}
 					{:else}
-						Create account
+						{t(trans, 'ui/button/register', 'Create account')}
 					{/if}
 				</button>
 			</form>
@@ -255,9 +260,9 @@
 		<!-- Sign In Link -->
 		<div class="text-center">
 			<p class="text-sm text-gray-600">
-				Already have an account?
+				{t(trans, 'ui/auth/register/haveAccount', 'Already have an account?')}
 				<a href="/login" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
-					Sign in here
+					{t(trans, 'ui/auth/register/signInHere', 'Sign in here')}
 				</a>
 			</p>
 		</div>

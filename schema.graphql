@@ -127,6 +127,32 @@ input PermissionInput {
   scope: String! = "own"
 }
 
+type AdminUser {
+  id: Int!
+  username: String!
+  email: String!
+  isActive: Boolean!
+  isVerified: Boolean!
+  createdAt: String!
+  updatedAt: String
+  firstName: String
+  lastName: String
+  roles: [String!]!
+}
+
+type AllUsersResponse {
+  users: [AdminUser!]!
+  total: Int!
+  hasMore: Boolean!
+}
+
+input UserFilters {
+  isActive: Boolean
+  isVerified: Boolean
+  roleName: String
+  search: String
+}
+
 type Query {
   concept(conceptId: Int!): Concept
   concepts: [Concept!]!
@@ -138,6 +164,7 @@ type Query {
   myRoles: [Role!]!
   role(roleId: Int!): Role!
   roles: [Role!]!
+  allUsers(limit: Int = 50, offset: Int = 0, filters: UserFilters): AllUsersResponse!
 }
 
 input RefreshTokenInput {

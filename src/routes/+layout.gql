@@ -1,0 +1,6 @@
+query GetUITranslations($languageId: Int!) {
+	dictionaries(languageId: $languageId) {
+		conceptId
+		name
+	}
+}

@@ -35,3 +35,16 @@ export {
 	parseDate
 } from './date';
 export type { DateFormat } from './date';
+
+// i18n utilities
+export {
+	t,
+	tParams,
+	hasTranslation,
+	dictionariesToMap,
+	getTranslationsByPrefix,
+	mergeTranslations,
+	findMissingTranslations,
+	createNamespaceT
+} from './i18n';
+export type { TranslationsMap, DictionaryEntry } from './i18n';

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { graphql } from '$houdini';
 	import { languageStore } from '$lib/stores/languageStore.svelte';
+	import { t } from '$lib/utils/i18n';
 	import { onMount } from 'svelte';
 
 	/**
@@ -8,6 +10,9 @@
 	 * Dropdown для переключения между языками
 	 * Автоматически обновляет все queries через languageStore
 	 */
+
+	// Получить переводы из layout
+	const trans = $derived($page.data.translations || {});
 
 	// Загрузить все доступные языки
 	const GetLanguagesForSwitcher = graphql(`
@@ -51,7 +56,7 @@
 
 <div class="flex items-center space-x-2">
 	<label for="language-select" class="text-sm font-medium text-gray-700">
-		Language:
+		{t(trans, 'ui/label/language', 'Language:')}
 	</label>
 	<select
 		id="language-select"
@@ -60,7 +65,7 @@
 		disabled={isLoading}
 		class="block rounded-md border-gray-300 py-1.5 pl-3 pr-10 text-sm focus:border-indigo-500 focus:ring-indigo-500 shadow-sm disabled:opacity-50"
 	>
-		<option value="">All Languages</option>
+		<option value="">{t(trans, 'ui/common/allLanguages', 'All Languages')}</option>
 		{#if !isLoading}
 			{#each languages as language}
 				<option value={language.id}>
