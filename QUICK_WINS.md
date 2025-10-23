@@ -38,7 +38,7 @@ export function debounce<T extends (...args: any[]) => any>(
 ---
 
 ### 2. Добавить индикатор сетевого статуса
-**Оценка:** 20 минут | **Статус:** ⏳ Не начато
+**Оценка:** 20 минут | **Статус:** ✅ Завершено
 
 **Описание:**
 Показывать баннер когда пользователь offline.
@@ -47,26 +47,10 @@ export function debounce<T extends (...args: any[]) => any>(
 - `src/lib/stores/online.store.ts` - создать store
 - `src/routes/+layout.svelte` - добавить компонент
 
-**Код:**
-```typescript
-// src/lib/stores/online.store.ts
-let isOnline = $state(navigator.onLine);
-
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => {
-    isOnline = true;
-  });
-  window.addEventListener('offline', () => {
-    isOnline = false;
-  });
-}
-
-export const onlineStore = {
-  get isOnline() {
-    return isOnline;
-  }
-};
-```
+**Реализация:**
+- Создан reactive store для отслеживания online/offline статуса
+- Добавлен sticky баннер с предупреждением при потере соединения
+- Автоматическое скрытие баннера при восстановлении соединения
 
 ---
 
@@ -492,6 +476,18 @@ export const storage = {
 
 ## Выполненные Quick Wins
 
+### ✅ 1. Debounce для поиска
+**Статус:** ✅ Завершено (2025-01-21)
+**Файлы:**
+- `src/lib/utils/debounce.ts`
+- `src/lib/components/ui/SearchBar.svelte` (обновлен)
+
+### ✅ 2. Индикатор сетевого статуса
+**Статус:** ✅ Завершено (2025-10-22)
+**Файлы:**
+- `src/lib/stores/online.store.svelte.ts`
+- `src/routes/+layout.svelte` (обновлен)
+
 ### ✅ 4. Empty State компонент
 **Статус:** ✅ Завершено (2025-01-21)
 **Файлы:** `src/lib/components/ui/EmptyState.svelte`
@@ -505,12 +501,6 @@ export const storage = {
 ### ✅ 6. Badge компонент
 **Статус:** ✅ Завершено (2025-01-21)
 **Файлы:** `src/lib/components/ui/Badge.svelte`
-
-### ✅ 1. Debounce для поиска
-**Статус:** ✅ Завершено (2025-01-21)
-**Файлы:**
-- `src/lib/utils/debounce.ts`
-- `src/lib/components/ui/SearchBar.svelte` (обновлен)
 
 ### ✅ 9. Форматирование дат
 **Статус:** ✅ Завершено (2025-01-21)

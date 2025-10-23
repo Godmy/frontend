@@ -57,7 +57,8 @@
 	<title>Login - Multipult</title>
 </svelte:head>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
+	<div class="flex items-center justify-center">
 	<div class="max-w-md w-full space-y-8">
 		<!-- Header -->
 		<div class="text-center">
@@ -207,5 +208,6 @@
 				</a>
 			</p>
 		</div>
+	</div>
 	</div>
 </div>

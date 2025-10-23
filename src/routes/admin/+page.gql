@@ -1,0 +1,20 @@
+query GetAdminStats {
+	users {
+		id
+		username
+		email
+		isActive
+		isVerified
+	}
+	roles {
+		id
+		name
+		description
+		permissions {
+			id
+			resource
+			action
+			scope
+		}
+	}
+}

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { graphql } from '$houdini';
 	import { invalidate } from '$app/navigation';
-	import Navigation from '$lib/components/Navigation.svelte';
 	import ConceptTree from '$lib/components/concepts/ConceptTree.svelte';
 	import ConceptForm from '$lib/components/concepts/ConceptForm.svelte';
 	import { errorHandler } from '$lib/errors';
@@ -127,8 +126,6 @@
 </script>
 
 <div class="min-h-screen bg-gray-50">
-	<Navigation />
-
 	<div class="py-10">
 		<header class="mb-8">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

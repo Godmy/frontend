@@ -18,31 +18,6 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-	<!-- Navigation -->
-	<nav class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<div class="flex justify-between h-16">
-				<div class="flex items-center">
-					<h1 class="text-2xl font-bold text-indigo-600">Multipult</h1>
-				</div>
-
-				<div class="flex items-center space-x-4">
-					<a
-						href="/login"
-						class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-					>
-						Sign in
-					</a>
-					<a
-						href="/register"
-						class="px-6 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all"
-					>
-						Get Started
-					</a>
-				</div>
-			</div>
-		</div>
-	</nav>
 
 	<!-- Hero Section -->
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
