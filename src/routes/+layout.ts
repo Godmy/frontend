@@ -4,18 +4,36 @@ import type { LayoutLoad } from './$types';
 import { GetUITranslationsStore } from '$houdini';
 
 /**
+ * In-memory cache для переводов
+ * Key: languageId, Value: translations object
+ */
+const translationsCache = new Map<number, Record<string, string>>();
+
+/**
  * Layout Load Function
  * Загружает все UI-переводы для текущего выбранного языка
  * Переводы будут доступны во всех дочерних страницах через $page.data.translations
+ *
+ * Использует in-memory кэш для быстрого переключения языков
  */
 export const load: LayoutLoad = async (event) => {
-	// Получить текущий выбранный язык (или fallback на English = 2)
-	const languageId = languageStore.currentLanguageId || 2;
+	// Получить текущий выбранный язык (или fallback на Русский = 1)
+	const languageId = languageStore.currentLanguageId || 1;
 
-	// Создать Houdini store
+	// Проверить кэш
+	const cached = translationsCache.get(languageId);
+	if (cached) {
+		console.log(`[i18n] Using cached translations for language ${languageId}`);
+		return {
+			translations: cached,
+			languageId
+		};
+	}
+
+	// Кэша нет - загрузить с сервера
+	console.log(`[i18n] Loading translations for language ${languageId} from server...`);
 	const store = new GetUITranslationsStore();
 
-	// Загрузить UI-переводы
 	const result = await store.fetch({
 		event,
 		variables: {
@@ -26,6 +44,10 @@ export const load: LayoutLoad = async (event) => {
 	// Преобразовать массив Dictionary в Map объект
 	const translationsArray = result.data?.dictionaries || [];
 	const translations = dictionariesToMap(translationsArray);
+
+	// Сохранить в кэш
+	translationsCache.set(languageId, translations);
+	console.log(`[i18n] Cached ${Object.keys(translations).length} translations for language ${languageId}`);
 
 	return {
 		translations,

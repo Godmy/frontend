@@ -7,7 +7,8 @@
 const STORAGE_KEY = 'multipult_selected_language_id';
 
 class LanguageStore {
-	private _currentLanguageId = $state<number | null>(null);
+	// По умолчанию русский язык (id=1)
+	private _currentLanguageId = $state<number | null>(1);
 
 	/**
 	 * Получить ID текущего выбранного языка
@@ -21,7 +22,7 @@ class LanguageStore {
 	 * Установить текущий язык
 	 * @param languageId - ID языка или null для "все языки"
 	 */
-	setLanguage(languageId: number | null): void {
+	async setLanguage(languageId: number | null): Promise<void> {
 		this._currentLanguageId = languageId;
 
 		// Сохранить в localStorage
@@ -30,6 +31,15 @@ class LanguageStore {
 				localStorage.setItem(STORAGE_KEY, languageId.toString());
 			} else {
 				localStorage.removeItem(STORAGE_KEY);
+			}
+
+			// Перезагрузить все load functions для обновления UI
+			// Это вызовет +layout.ts, который подхватит переводы из кэша
+			try {
+				const { invalidateAll } = await import('$app/navigation');
+				await invalidateAll();
+			} catch (error) {
+				console.warn('[LanguageStore] Could not invalidate - not in browser context', error);
 			}
 		}
 	}

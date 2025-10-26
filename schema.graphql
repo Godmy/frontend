@@ -24,6 +24,7 @@ input ConceptUpdateInput {
 }
 
 type Dictionary {
+  concept: Concept
   conceptId: Int!
   description: String
   id: Int!

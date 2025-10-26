@@ -25,6 +25,12 @@
 
 		return unsubscribe;
 	});
+
+	// Реактивно отслеживать изменение языка и показывать в консоли
+	$effect(() => {
+		const langId = languageStore.currentLanguageId;
+		console.log('[Layout] Current language ID changed to:', langId);
+	});
 </script>
 
 <svelte:head>

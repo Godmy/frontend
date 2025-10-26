@@ -8,8 +8,8 @@ function getGraphQLEndpoint(): string {
 		// Server-side (SSR)
 		return (
 			process.env.API_BASE_URL ||
-			(process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/graphql/` : null) ||
-			'http://backend:8000/graphql/'
+			(process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/graphql` : null) ||
+			'http://backend:8000/graphql'
 		);
 	}
 

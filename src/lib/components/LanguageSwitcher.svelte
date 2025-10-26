@@ -27,6 +27,7 @@
 
 	let languages = $state<Array<{ id: number; name: string; code: string }>>([]);
 	let isLoading = $state(true);
+	let isSwitching = $state(false);
 
 	onMount(async () => {
 		const result = await GetLanguagesForSwitcher.fetch();
@@ -36,17 +37,24 @@
 		isLoading = false;
 	});
 
-	function handleLanguageChange(event: Event) {
+	async function handleLanguageChange(event: Event) {
 		const target = event.currentTarget as HTMLSelectElement;
 		const value = target.value;
 
-		if (value === '' || value === 'all') {
-			languageStore.setLanguage(null);
-		} else {
-			const languageId = parseInt(value, 10);
-			if (!isNaN(languageId)) {
-				languageStore.setLanguage(languageId);
+		isSwitching = true;
+		try {
+			if (value === '' || value === 'all') {
+				await languageStore.setLanguage(null);
+			} else {
+				const languageId = parseInt(value, 10);
+				if (!isNaN(languageId)) {
+					await languageStore.setLanguage(languageId);
+				}
 			}
+		} catch (error) {
+			console.error('[LanguageSwitcher] Error switching language:', error);
+		} finally {
+			isSwitching = false;
 		}
 	}
 
@@ -62,8 +70,8 @@
 		id="language-select"
 		value={selectedValue}
 		onchange={handleLanguageChange}
-		disabled={isLoading}
-		class="block rounded-md border-gray-300 py-1.5 pl-3 pr-10 text-sm focus:border-indigo-500 focus:ring-indigo-500 shadow-sm disabled:opacity-50"
+		disabled={isLoading || isSwitching}
+		class="block rounded-md border-gray-300 py-1.5 pl-3 pr-10 text-sm focus:border-indigo-500 focus:ring-indigo-500 shadow-sm disabled:opacity-50 transition-opacity"
 	>
 		<option value="">{t(trans, 'ui/common/allLanguages', 'All Languages')}</option>
 		{#if !isLoading}

@@ -33,13 +33,14 @@ function getGraphQLEndpoint(): string {
 		// Try to get server-side API URL from environment
 		const serverEndpoint =
 			import.meta.env.API_BASE_URL ||
-			import.meta.env.BACKEND_URL && `${import.meta.env.BACKEND_URL}/graphql/` ||
-			'http://backend:8000/graphql/';
+			import.meta.env.BACKEND_URL && `${import.meta.env.BACKEND_URL}/graphql` ||
+			'http://backend:8000/graphql';
 		return serverEndpoint;
 	}
 
 	// On client (browser), use the configured endpoint
-	return getEnvVar('VITE_GRAPHQL_ENDPOINT', '/graphql/');
+	// Note: No trailing slash - matches vite.config.ts proxy setting
+	return getEnvVar('VITE_GRAPHQL_ENDPOINT', '/graphql');
 }
 
 function getBooleanEnvVar(key: string, defaultValue = false): boolean {

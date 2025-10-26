@@ -1,6 +1,11 @@
 query GetUITranslations($languageId: Int!) {
 	dictionaries(languageId: $languageId) {
+		id
 		conceptId
 		name
+		concept {
+			id
+			path
+		}
 	}
 }
