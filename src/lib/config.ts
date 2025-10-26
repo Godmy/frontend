@@ -21,6 +21,27 @@ function getEnvVar(key: string, defaultValue?: string): string {
 	return value ?? defaultValue ?? '';
 }
 
+// Helper to determine if we're running on the server
+function isServer(): boolean {
+	return typeof window === 'undefined';
+}
+
+// Get GraphQL endpoint based on environment (server vs client)
+function getGraphQLEndpoint(): string {
+	// On server (SSR), use internal Docker network endpoint
+	if (isServer()) {
+		// Try to get server-side API URL from environment
+		const serverEndpoint =
+			import.meta.env.API_BASE_URL ||
+			import.meta.env.BACKEND_URL && `${import.meta.env.BACKEND_URL}/graphql/` ||
+			'http://backend:8000/graphql/';
+		return serverEndpoint;
+	}
+
+	// On client (browser), use the configured endpoint
+	return getEnvVar('VITE_GRAPHQL_ENDPOINT', '/graphql/');
+}
+
 function getBooleanEnvVar(key: string, defaultValue = false): boolean {
 	const value = import.meta.env[key];
 	if (value === undefined) return defaultValue;
@@ -30,7 +51,7 @@ function getBooleanEnvVar(key: string, defaultValue = false): boolean {
 const appEnv = getEnvVar('VITE_APP_ENV', 'development') as AppConfig['appEnv'];
 
 export const config: AppConfig = {
-	graphqlEndpoint: getEnvVar('VITE_GRAPHQL_ENDPOINT'),
+	graphqlEndpoint: getGraphQLEndpoint(),
 	appEnv,
 	appUrl: getEnvVar('VITE_APP_URL', 'http://localhost:5173'),
 	isDevelopment: appEnv === 'development',

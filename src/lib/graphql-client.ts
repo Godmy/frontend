@@ -6,11 +6,18 @@ export async function graphqlRequest<T = any>(query: string, variables?: any): P
 	logger.log('GraphQL Request:', { query, variables });
 
 	try {
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		};
+
+		// For SSR requests, add Origin header to satisfy CORS
+		if (typeof window === 'undefined') {
+			headers['Origin'] = 'http://humansontology_frontend:3000';
+		}
+
 		const response = await fetch(GRAPHQL_URL, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
+			headers,
 			body: JSON.stringify({
 				query,
 				variables,
