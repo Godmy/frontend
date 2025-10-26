@@ -1,4 +1,4 @@
-query GetDictionariesData($languageId: Int) {
+query GetDictionariesData($languageId: Int!) {
 	dictionaries(languageId: $languageId) @list(name: "Dictionaries_Page") {
 		id
 		name
@@ -6,6 +6,12 @@ query GetDictionariesData($languageId: Int) {
 		image
 		languageId
 		conceptId
+		concept {
+			id
+			path
+			depth
+			parentId
+		}
 	}
 	languages {
 		id

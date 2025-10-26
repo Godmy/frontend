@@ -13,13 +13,18 @@
 
 	let { dictionaries, languages, concepts, onEdit, onDelete }: Props = $props();
 
+	// Create Maps for O(1) lookups (derived automatically updates when data changes)
+	const languagesMap = $derived(new Map(languages?.map((l) => [l.id, l]) || []));
+
+	const conceptsMap = $derived(new Map(concepts?.map((c) => [c.id, c]) || []));
+
 	function getLanguageName(languageId: number) {
-		const language = languages?.find(l => l.id === languageId);
+		const language = languagesMap.get(languageId);
 		return language ? language.name : `Language #${languageId}`;
 	}
 
 	function getConceptPath(conceptId: number) {
-		const concept = concepts?.find(c => c.id === conceptId);
+		const concept = conceptsMap.get(conceptId);
 		return concept ? concept.path : `Concept #${conceptId}`;
 	}
 </script>
