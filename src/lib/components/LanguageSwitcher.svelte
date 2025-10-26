@@ -14,6 +14,13 @@
 	// Получить переводы из layout
 	const trans = $derived($page.data.translations || {});
 
+	// Debug: отслеживать изменения переводов
+	$effect(() => {
+		const transKeys = Object.keys(trans);
+		console.log('[LanguageSwitcher] Translations updated, keys count:', transKeys.length);
+		console.log('[LanguageSwitcher] Sample translation:', trans['ui/label/language']);
+	});
+
 	// Загрузить все доступные языки
 	const GetLanguagesForSwitcher = graphql(`
 		query GetLanguagesForSwitcher {

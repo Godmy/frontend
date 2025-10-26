@@ -2,6 +2,7 @@ import { languageStore } from '$lib/stores/languageStore.svelte';
 import { dictionariesToMap } from '$lib/utils/i18n';
 import type { LayoutLoad } from './$types';
 import { GetUITranslationsStore } from '$houdini';
+import { browser } from '$app/environment';
 
 /**
  * In-memory cache для переводов
@@ -17,13 +18,18 @@ const translationsCache = new Map<number, Record<string, string>>();
  * Использует in-memory кэш для быстрого переключения языков
  */
 export const load: LayoutLoad = async (event) => {
+	// Указать зависимость от language_id - это заставит SvelteKit перезапускать load при invalidate
+	event.depends('app:language');
+
 	// Получить текущий выбранный язык (или fallback на Русский = 1)
 	const languageId = languageStore.currentLanguageId || 1;
+
+	console.log(`[+layout.ts load] Called with languageId=${languageId}, browser=${browser}`);
 
 	// Проверить кэш
 	const cached = translationsCache.get(languageId);
 	if (cached) {
-		console.log(`[i18n] Using cached translations for language ${languageId}`);
+		console.log(`[i18n] Using cached translations for language ${languageId}, keys:`, Object.keys(cached).length);
 		return {
 			translations: cached,
 			languageId

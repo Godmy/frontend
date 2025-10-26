@@ -23,7 +23,11 @@ class LanguageStore {
 	 * @param languageId - ID языка или null для "все языки"
 	 */
 	async setLanguage(languageId: number | null): Promise<void> {
+		console.log(`[LanguageStore.setLanguage] Setting language to ${languageId}, current=${this._currentLanguageId}`);
+
 		this._currentLanguageId = languageId;
+
+		console.log(`[LanguageStore.setLanguage] After assignment, _currentLanguageId=${this._currentLanguageId}`);
 
 		// Сохранить в localStorage
 		if (typeof window !== 'undefined') {
@@ -33,11 +37,15 @@ class LanguageStore {
 				localStorage.removeItem(STORAGE_KEY);
 			}
 
+			console.log(`[LanguageStore.setLanguage] About to invalidate, currentLanguageId getter returns=${this.currentLanguageId}`);
+
 			// Перезагрузить все load functions для обновления UI
 			// Это вызовет +layout.ts, который подхватит переводы из кэша
 			try {
-				const { invalidateAll } = await import('$app/navigation');
-				await invalidateAll();
+				const { invalidate } = await import('$app/navigation');
+				// Используем специфичный ключ зависимости вместо invalidateAll
+				await invalidate('app:language');
+				console.log(`[LanguageStore.setLanguage] Invalidated app:language, new languageId=${languageId}`);
 			} catch (error) {
 				console.warn('[LanguageStore] Could not invalidate - not in browser context', error);
 			}

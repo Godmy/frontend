@@ -33,7 +33,12 @@ export interface DictionaryEntry {
  * // => { "ui/nav/dashboard": "Dashboard", "ui/button/login": "Login" }
  */
 export function dictionariesToMap(dictionaries: DictionaryEntry[]): TranslationsMap {
-	return dictionaries.reduce((acc, dict) => {
+	console.log('[dictionariesToMap] Processing', dictionaries.length, 'dictionaries');
+	if (dictionaries.length > 0) {
+		console.log('[dictionariesToMap] First entry sample:', JSON.stringify(dictionaries[0]));
+	}
+
+	const result = dictionaries.reduce((acc, dict) => {
 		// Check if dict.concept and dict.concept.path exist before accessing
 		if (dict?.concept?.path) {
 			acc[dict.concept.path] = dict.name;
@@ -42,6 +47,9 @@ export function dictionariesToMap(dictionaries: DictionaryEntry[]): Translations
 		}
 		return acc;
 	}, {} as TranslationsMap);
+
+	console.log('[dictionariesToMap] Result keys count:', Object.keys(result).length);
+	return result;
 }
 
 /**
