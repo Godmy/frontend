@@ -29,3 +29,9 @@ export { default as KeyboardShortcutsHelp } from './KeyboardShortcutsHelp.svelte
 export { default as Badge } from './Badge.svelte';
 export { default as CopyButton } from './CopyButton.svelte';
 export { default as EmptyState } from './EmptyState.svelte';
+export { default as Button } from './Button.svelte';
+export { default as Alert } from './Alert.svelte';
+export { default as InputField } from './InputField.svelte';
+export { default as Breadcrumbs } from './Breadcrumbs.svelte';
+export { default as Avatar } from './Avatar.svelte';
+export { default as Tooltip } from './Tooltip.svelte';
