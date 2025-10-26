@@ -1,5 +1,6 @@
 import { HoudiniClient } from '$houdini';
 import { config } from '$lib/config';
+import { STORAGE_KEYS } from '$lib/auth/constants';
 
 // Определить правильный GraphQL endpoint
 function getGraphQLEndpoint(): string {
@@ -30,6 +31,12 @@ export default new HoudiniClient({
 		// For SSR requests, add Origin header to satisfy CORS
 		if (typeof window === 'undefined') {
 			headers['Origin'] = 'http://humansontology_frontend:3000';
+		} else {
+			// On client-side, add auth token if available
+			const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+			if (token) {
+				headers['Authorization'] = `Bearer ${token}`;
+			}
 		}
 
 		return { headers };

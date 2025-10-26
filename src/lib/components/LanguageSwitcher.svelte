@@ -83,7 +83,7 @@
 		<option value="">{t(trans, 'ui/common/allLanguages', 'All Languages')}</option>
 		{#if !isLoading}
 			{#each languages as language}
-				<option value={language.id}>
+				<option value={language.id.toString()}>
 					{language.name} ({language.code})
 				</option>
 			{/each}
