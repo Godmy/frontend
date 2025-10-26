@@ -18,6 +18,19 @@
 		goto('/login');
 	}
 
+	// Debug: Логирование загруженных данных
+	$effect(() => {
+		console.log('[Dashboard] Data loaded:', {
+			GetDashboardStats: data.GetDashboardStats,
+			concepts: data.GetDashboardStats?.concepts,
+			conceptsLength: data.GetDashboardStats?.concepts?.length,
+			languages: data.GetDashboardStats?.languages,
+			languagesLength: data.GetDashboardStats?.languages?.length,
+			dictionaries: data.GetDashboardStats?.dictionaries,
+			dictionariesLength: data.GetDashboardStats?.dictionaries?.length
+		});
+	});
+
 	// Реактивная статистика на основе загруженных данных
 	let stats = $derived([
 		{

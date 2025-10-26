@@ -18,6 +18,13 @@
 	// Debug logging
 	$effect(() => {
 		console.log('Concepts page data:', data);
+		console.log('GetConcepts object:', data.GetConcepts);
+		console.log('GetConcepts.data:', data.GetConcepts?.data);
+		console.log('GetConcepts.concepts:', data.GetConcepts?.concepts);
+		if (data.GetConcepts) {
+			console.log('GetConcepts keys:', Object.keys(data.GetConcepts));
+			console.log('GetConcepts type:', typeof data.GetConcepts);
+		}
 	});
 
 	// Houdini Mutations

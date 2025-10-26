@@ -496,6 +496,281 @@
 
 ---
 
+### 13. Добавить компонент визуализации графов (D3.js/Vis-network)
+**Оценка:** 30 минут | **Статус:** ⏳ Не начато
+
+**Описание:**
+Базовый компонент для визуализации графов с поддержкой D3.js и Vis-network.
+
+**Файлы:**
+- `src/lib/components/ui/GraphVisualization.svelte` - создать компонент
+- `src/lib/utils/graphUtils.ts` - утилиты для работы с графами
+
+**Код:**
+```svelte
+<script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
+  import type { Concept } from '../../types';
+
+  interface GraphNode {
+    id: string;
+    label: string;
+    type: 'concept' | 'dictionary' | 'language';
+    x?: number;
+    y?: number;
+  }
+
+  interface GraphEdge {
+    from: string;
+    to: string;
+    label?: string;
+  }
+
+  interface GraphData {
+    nodes: GraphNode[];
+    edges: GraphEdge[];
+  }
+
+  interface Props {
+    data: GraphData;
+    width?: number;
+    height?: number;
+    type?: 'force-directed' | 'hierarchical' | 'network';
+  }
+
+  let props: Props = $props();
+  let container: HTMLElement;
+  let width = $state(props.width || 600);
+  let height = $state(props.height || 400);
+  let type = $state(props.type || 'force-directed');
+
+  // Placeholder for actual D3/Vis-network implementation
+  function renderGraph(): void {
+    if (!container) return;
+    
+    // Clear previous content
+    container.innerHTML = '';
+    
+    // Create SVG container
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', width.toString());
+    svg.setAttribute('height', height.toString());
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    
+    // Simple visualization for demo purposes
+    const nodes = props.data.nodes;
+    const edges = props.data.edges;
+    
+    // Draw edges first (so they appear behind nodes)
+    edges.forEach(edge => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', '100');
+      line.setAttribute('y1', '100');
+      line.setAttribute('x2', '200');
+      line.setAttribute('y2', '200');
+      line.setAttribute('stroke', '#999');
+      line.setAttribute('stroke-width', '1');
+      svg.appendChild(line);
+    });
+    
+    // Draw nodes
+    nodes.forEach((node, index) => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      const x = 100 + index * 50;
+      const y = 100 + (index % 2) * 50;
+      
+      circle.setAttribute('cx', x.toString());
+      circle.setAttribute('cy', y.toString());
+      circle.setAttribute('r', '20');
+      circle.setAttribute('fill', node.type === 'concept' ? '#4f46e5' : 
+                         node.type === 'dictionary' ? '#10b981' : '#0ea5e9');
+      
+      svg.appendChild(circle);
+      
+      // Add label
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', x.toString());
+      text.setAttribute('y', (y + 5).toString());
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('fill', 'white');
+      text.setAttribute('font-size', '10px');
+      text.textContent = node.label.substring(0, 8) + (node.label.length > 8 ? '...' : '');
+      svg.appendChild(text);
+    });
+    
+    container.appendChild(svg);
+  }
+
+  onMount(() => {
+    renderGraph();
+  });
+
+  $: if (props.data) {
+    renderGraph();
+  }
+</script>
+
+<div bind:this={container} class="graph-visualization border rounded-lg bg-white shadow-sm">
+  <!-- Graph will be rendered here -->
+</div>
+
+<style>
+  .graph-visualization {
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .graph-visualization svg {
+    background: white;
+    border-radius: 0.5rem;
+  }
+</style>
+```
+
+**Причина высокого приоритета:**
+- Фундамент для визуализации онтологий
+- Подготовка к интеграции с D3.js и Vis-network
+- Демонстрация будущих возможностей
+
+---
+
+### 14. Добавить компонент иерархического дерева
+**Оценка:** 25 минут | **Статус:** ⏳ Не начато
+
+**Описание:**
+Компонент для отображения иерархических структур онтологий.
+
+**Файлы:**
+- `src/lib/components/ui/HierarchyTree.svelte` - создать компонент
+
+**Код:**
+```svelte
+<script lang="ts">
+  interface TreeNode {
+    id: string;
+    label: string;
+    children?: TreeNode[];
+    expanded?: boolean;
+    type?: 'concept' | 'dictionary' | 'language';
+  }
+
+  interface Props {
+    data: TreeNode;
+    showIcons?: boolean;
+    selectable?: boolean;
+  }
+
+  let props: Props = $props();
+  let showIcons = $state(props.showIcons !== false);
+  let selectable = $state(props.selectable || false);
+  let selectedNode = $state<string | null>(null);
+
+  function toggleNode(node: TreeNode): void {
+    node.expanded = !node.expanded;
+  }
+
+  function selectNode(nodeId: string): void {
+    if (selectable) {
+      selectedNode = nodeId;
+    }
+  }
+
+  function getNodeIcon(type: string = 'concept'): string {
+    switch (type) {
+      case 'concept':
+        return `<svg class="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>`;
+      case 'dictionary':
+        return `<svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`;
+      case 'language':
+        return `<svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>`;
+      default:
+        return `<svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>`;
+    }
+  }
+
+  function renderTree(node: TreeNode, level: number = 0): import('svelte').Snippet {
+    return `
+      <div class="tree-node" style="margin-left: ${level * 20}px;">
+        <div 
+          class="flex items-center p-2 rounded-md cursor-pointer hover:bg-gray-100 ${selectedNode === node.id ? 'bg-indigo-50 border-indigo-200' : ''}"
+          onclick="() => { ${selectable ? `selectNode('${node.id}')` : ''}; toggleNode(node); }"
+        >
+          {#if node.children && node.children.length > 0}
+            <span class="mr-2">
+              {#if node.expanded}
+                <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              {:else}
+                <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              {/if}
+            </span>
+          {:else}
+            <span class="mr-2 w-4"></span>
+          {/if}
+          
+          {#if ${showIcons}}
+            <span class="mr-2">
+              {@html getNodeIcon(node.type)}
+            </span>
+          {/if}
+          
+          <span class="text-sm font-medium text-gray-900">${node.label}</span>
+          
+          {#if node.children && node.children.length > 0}
+            <span class="ml-2 text-xs text-gray-500">
+              (${node.children.length})
+            </span>
+          {/if}
+        </div>
+        
+        {#if node.expanded && node.children && node.children.length > 0}
+          <div class="ml-4 border-l border-gray-200 pl-2">
+            {#each node.children as child}
+              {@html renderTree(child, level + 1)}
+            {/each}
+          </div>
+        {/if}
+      </div>
+    `;
+  }
+</script>
+
+<div class="hierarchy-tree bg-white rounded-lg border p-4">
+  <div class="tree-root">
+    {@html renderTree(props.data, 0)}
+  </div>
+</div>
+
+<style>
+  .hierarchy-tree {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  .tree-node {
+    transition: all 0.2s ease;
+  }
+  
+  .tree-node:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+</style>
+```
+
+**Причина высокого приоритета:**
+- Визуализация иерархических структур онтологий
+- Подготовка к интеграции с D3.js hierarchy layouts
+- Улучшение UX для навигации по концепциям
+
+---
+
 ## Приоритизация
 
 **Критический приоритет (делать первыми - максимальный эффект):**
@@ -515,6 +790,8 @@
 10. Breadcrumbs (#7) - улучшает навигацию
 11. Avatar (#8) - для будущего профильного функционала
 12. Tooltip (#9) - nice to have
+13. Graph Visualization (#13) - фундамент для визуализации
+14. Hierarchy Tree (#14) - для отображения иерархий
 
 ---
 
