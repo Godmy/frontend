@@ -25,6 +25,8 @@ VITE_APP_URL=http://localhost:5173
 VITE_DEBUG=true
 ```
 
+**Примечание:** В production `VITE_GRAPHQL_ENDPOINT` может быть `/graphql/` для использования proxy через Vite, как указано в `vite.config.ts`.
+
 ### 3. Генерация типов Houdini
 
 ```bash
@@ -230,6 +232,23 @@ yarn generate:watch
 1. Перезапустите dev сервер после изменения `.env`
 2. Проверьте что переменные начинаются с `VITE_`
 3. Используйте `import.meta.env.VITE_*` для доступа
+
+### Проблемы с подключением к backend
+
+Если при разработке возникают проблемы с подключением к GraphQL API, проверьте настройки proxy в `vite.config.ts`:
+
+```typescript
+server: {
+  proxy: {
+    '/graphql': {
+      target: 'http://127.0.0.1:8000',
+      changeOrigin: true,
+    }
+  }
+}
+```
+
+Эта настройка позволяет использовать `/graphql/` в `VITE_GRAPHQL_ENDPOINT`, который будет проксирован к `http://127.0.0.1:8000/graphql/`.
 
 ---
 

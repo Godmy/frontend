@@ -346,6 +346,75 @@ Tests run automatically in CI pipeline:
     files: ./coverage/lcov.info
 ```
 
+## Test Configuration
+
+Tests are configured in `vite.config.ts` with the following settings:
+
+```typescript
+test: {
+  expect: { requireAssertions: true },
+  coverage: {
+    provider: 'v8',
+    reporter: ['text', 'json', 'html', 'lcov'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/.svelte-kit/**',
+      '**/coverage/**',
+      '**/*.config.*',
+      '**/demo.spec.ts',
+      '**/*.spec.ts',
+      '**/*.test.ts',
+      '**/types.ts',
+      '**/constants.ts',
+      '**/$houdini/**',
+      '**/houdini.config.js',
+      '**/playwright.config.ts',
+      '**/svelte.config.js'
+    ],
+    // Coverage thresholds (80%+ goal)
+    thresholds: {
+      lines: 80,
+      functions: 80,
+      branches: 75,
+      statements: 80
+    },
+    // Include all source files in coverage report
+    all: true,
+    include: ['src/**/*.{js,ts,svelte}']
+  },
+  projects: [
+    {
+      extends: './vite.config.ts',
+      test: {
+        name: 'client',
+        environment: 'browser',
+        browser: {
+          enabled: true,
+          provider: 'playwright',
+          instances: [{ browser: 'chromium' }]
+        },
+        include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+        exclude: ['src/lib/server/**'],
+        setupFiles: ['./vitest-setup-client.ts']
+      }
+    },
+    {
+      extends: './vite.config.ts',
+      test: {
+        name: 'server',
+        environment: 'node',
+        include: ['src/**/*.{test,spec}.{js,ts}'],
+        exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+      }
+    }
+  ]
+}
+```
+
+This configuration includes both client-side (browser) and server-side (node) tests with separate coverage reports.
+
 ## Test Maintenance
 
 ### When to Update Tests
@@ -409,6 +478,6 @@ vi.spyOn(object, 'method').mockReturnValue('value');
 
 ---
 
-**Last Updated**: 2025-01-16
+**Last Updated**: 2025-10-16
 
 **Maintained By**: Development Team

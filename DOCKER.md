@@ -68,10 +68,23 @@ docker run -p 5173:5173 \
 ```yaml
 environment:
   - NODE_ENV=production
-  - VITE_GRAPHQL_ENDPOINT=http://backend:8000/graphql/
+  - VITE_GRAPHQL_ENDPOINT=http://backend:8000/graphql/  # Для production без proxy
   - VITE_APP_ENV=production
   - VITE_APP_URL=http://localhost:3000
   - VITE_DEBUG=false
+```
+
+**Примечание:** В development режиме можно использовать `VITE_GRAPHQL_ENDPOINT=/graphql/` при условии, что настроена Vite proxy конфигурация, как в `vite.config.ts`:
+
+```typescript
+server: {
+  proxy: {
+    '/graphql': {
+      target: 'http://127.0.0.1:8000',
+      changeOrigin: true,
+    }
+  }
+}
 ```
 
 ### Volumes (Development)

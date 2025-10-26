@@ -229,13 +229,13 @@ yarn test:e2e
 **Опции:**
 ```bash
 # В headed режиме (с браузером)
-yarn test:e2e --headed
+npx playwright test --headed
 
 # Конкретный браузер
-yarn test:e2e --project=chromium
+npx playwright test --project=chromium
 
 # Debug режим
-yarn test:e2e --debug
+npx playwright test --debug
 ```
 
 ---

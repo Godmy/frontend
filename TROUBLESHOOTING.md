@@ -179,8 +179,19 @@ Network error: Failed to fetch
    ```
 
 2. **Правильный endpoint в .env?**
-   ```env
-   VITE_GRAPHQL_ENDPOINT=http://127.0.0.1:8000/graphql/
+   - Для разработки с использованием proxy: `VITE_GRAPHQL_ENDPOINT=/graphql/`
+   - Без proxy: `VITE_GRAPHQL_ENDPOINT=http://127.0.0.1:8000/graphql/`
+   
+   Proxy настроен в `vite.config.ts`:
+   ```typescript
+   server: {
+     proxy: {
+       '/graphql': {
+         target: 'http://127.0.0.1:8000',
+         changeOrigin: true,
+       }
+     }
+   }
    ```
 
 3. **CORS настроен на backend?**
@@ -340,4 +351,4 @@ npm run preview           # Preview production build
 
 ---
 
-**Дата обновления:** 2025-01-14
+**Дата обновления:** 2025-10-14

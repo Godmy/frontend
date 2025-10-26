@@ -21,7 +21,7 @@ cp .env.example .env
 Отредактируйте `.env` под ваше окружение:
 
 ```env
-VITE_GRAPHQL_ENDPOINT=/graphql/
+VITE_GRAPHQL_ENDPOINT=http://127.0.0.1:8000/graphql/
 VITE_APP_ENV=development
 VITE_APP_URL=http://localhost:5173
 VITE_DEBUG=true
