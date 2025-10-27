@@ -22,6 +22,12 @@
 
 	// Helper для активной ссылки
 	function isActive(path: string): boolean {
+		if (path === '/visualizations') {
+			return currentPath.startsWith('/visualizations');
+		}
+		if (path === '/visualization') {
+			return currentPath.startsWith('/visualization') && !currentPath.startsWith('/visualizations');
+		}
 		return currentPath === path;
 	}
 </script>
@@ -62,6 +68,18 @@
 							class="{isActive('/dictionaries') ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'} px-3 py-2 text-sm font-medium border-b-2 transition-colors"
 						>
 							{t(trans, 'ui/nav/dictionaries', 'Dictionaries')}
+						</a>
+						<a
+							href="/visualization"
+							class="{isActive('/visualization') ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'} px-3 py-2 text-sm font-medium border-b-2 transition-colors"
+						>
+							{t(trans, 'ui/nav/visualization', 'Visualization')}
+						</a>
+						<a
+							href="/visualizations"
+							class="{isActive('/visualizations') ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'} px-3 py-2 text-sm font-medium border-b-2 transition-colors"
+						>
+							{t(trans, 'ui/nav/visualizations', 'Viz Gallery')}
 						</a>
 					</div>
 				{/if}

@@ -4,9 +4,16 @@
 	import { page } from '$app/stores';
 	import ConceptTree from '$lib/components/concepts/ConceptTree.svelte';
 	import ConceptForm from '$lib/components/concepts/ConceptForm.svelte';
+	import NetworkExplorer from '$lib/components/visualizations/NetworkExplorer.svelte';
+	import ConceptFlow from '$lib/components/visualizations/ConceptFlow.svelte';
+	import OntologyMap from '$lib/components/visualizations/OntologyMap.svelte';
+	import RadialHierarchy from '$lib/components/visualizations/RadialHierarchy.svelte';
+	import AdjacencyMatrix from '$lib/components/visualizations/AdjacencyMatrix.svelte';
+	import ThreeDeeGraph from '$lib/components/visualizations/ThreeDeeGraph.svelte';
 	import { errorHandler } from '$lib/errors';
 	import { notificationStore } from '$lib/notifications';
 	import { t } from '$lib/utils/i18n';
+	import { browser } from '$app/environment';
 	import type { ConceptInput } from '$lib/api/concepts';
 	import type { PageData } from './$types';
 
@@ -169,6 +176,39 @@
 							onDelete={handleDelete}
 							onMove={handleMove}
 						/>
+						{#if browser}
+							<div class="mt-8">
+								<h2 class="text-2xl font-bold leading-tight text-gray-900 mb-4">Network Visualization</h2>
+								<NetworkExplorer />
+							</div>
+							<div class="mt-8">
+								<h2 class="text-2xl font-bold leading-tight text-gray-900 mb-4">Concept Flow (Sankey)</h2>
+								<ConceptFlow />
+							</div>
+							<div class="mt-8">
+								<h2 class="text-2xl font-bold leading-tight text-gray-900 mb-4">Ontology Overview</h2>
+								<OntologyMap concepts={data.GetConcepts.concepts || []} />
+							</div>
+							<div class="mt-8">
+								<h2 class="text-2xl font-bold leading-tight text-gray-900 mb-4">Radial Hierarchy</h2>
+								<RadialHierarchy />
+							</div>
+							<div class="mt-8">
+								<h2 class="text-2xl font-bold leading-tight text-gray-900 mb-4">Adjacency Matrix</h2>
+								<AdjacencyMatrix />
+							</div>
+							<div class="mt-8">
+								<h2 class="text-2xl font-bold leading-tight text-gray-900 mb-4">3D Graph Visualization</h2>
+								<ThreeDeeGraph />
+							</div>
+						{/if}
+
+
+
+
+
+
+
 					{:else}
 						<div class="flex justify-center py-12">
 							<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
