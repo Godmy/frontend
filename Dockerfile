@@ -9,7 +9,7 @@ RUN apk add --no-cache yarn
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json yarn.lock ./
 
 # Install dependencies
 RUN yarn install --frozen-lockfile
@@ -38,13 +38,16 @@ RUN yarn build
 # Stage 2: Production
 FROM node:20-alpine
 
+# Устанавливаем yarn
+RUN apk add --no-cache yarn
+
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json yarn.lock ./
 
 # Install only production dependencies
-RUN npm ci --only=production
+RUN yarn install --production --frozen-lockfile
 
 # Copy built application from builder
 COPY --from=builder /app/build ./build

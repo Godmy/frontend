@@ -2,13 +2,18 @@ import { config, logger } from './config';
 
 const GRAPHQL_URL = config.graphqlEndpoint;
 
-export async function graphqlRequest<T = any>(query: string, variables?: any): Promise<T> {
+export async function graphqlRequest<T = any>(query: string, variables?: any, accessToken?: string): Promise<T> {
 	logger.log('GraphQL Request:', { query, variables });
 
 	try {
 		const headers: Record<string, string> = {
 			'Content-Type': 'application/json'
 		};
+
+		// Add authorization header if token is provided
+		if (accessToken) {
+			headers['Authorization'] = `Bearer ${accessToken}`;
+		}
 
 		// For SSR requests, add Origin header to satisfy CORS
 		if (typeof window === 'undefined') {
@@ -44,3 +49,13 @@ export async function graphqlRequest<T = any>(query: string, variables?: any): P
 		throw error;
 	}
 }
+
+// GraphQL client object with multiple method names for compatibility
+export const graphqlClient = {
+	// For domain-concepts.ts compatibility
+	request: graphqlRequest,
+
+	// For IGraphQLClient interface compatibility
+	query: graphqlRequest,
+	mutate: graphqlRequest
+};
