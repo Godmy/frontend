@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+  import { exportSvg, exportSvgToPng } from './exportUtils';
 
   // Define types
   export type Node = {
     id: string;
-    label: string;
+    label?: string;
     title?: string;
     color?: string;
     type?: 'concept' | 'entity' | 'relation' | 'attribute';
@@ -30,13 +31,23 @@
     edges: Edge[];
   };
 
-  // Props
+  // Props with Svelte 5 compatible interface
   export let data: GraphData = { nodes: [], edges: [] };
-  export let width: number = 800;
-  export let height: number = 600;
+  export let width: string | number = '100%';
+  export let height: string | number = 600;
   export let title: string = 'Graph Visualization';
   export let visualizationType: 'force' | 'sankey' | 'network' = 'force';
   export let options: any = {};
+  export let enableTooltips: boolean = true;
+  export let enableZoom: boolean = true;
+
+  // Create event dispatcher for component events
+  const dispatch = createEventDispatcher<{
+    nodeClick: { node: Node; event: MouseEvent };
+    edgeClick: { edge: Edge; event: MouseEvent };
+    nodeHover: { node: Node; event: MouseEvent };
+    edgeHover: { edge: Edge; event: MouseEvent };
+  }>();
 
   // Local variables
   let container: HTMLElement;
@@ -47,6 +58,7 @@
   let d3: any;
   let d3Sankey: any;
   let visNetwork: any;
+  let tooltip: any;
 
   const visColors = {
     concept: '#4682b4',
@@ -54,6 +66,33 @@
     relation: '#ff6347',
     attribute: '#9370db'
   };
+
+  // Helper function to convert width/height to pixels
+  function toPx(value: string | number): number {
+    if (typeof value === 'number') return value;
+    if (value.endsWith('px')) return parseInt(value);
+    if (value.endsWith('%') && container) {
+      return (parseInt(value) / 100) * container.clientWidth;
+    }
+    return parseInt(value) || 800;
+  }
+
+  // Expose export methods
+  export function exportToPNG(filename: string = 'graph-visualization.png') {
+    if (svg && svg.node()) {
+      exportSvgToPng(svg.node(), filename);
+    } else {
+      console.warn('No SVG available for export. Network visualization type may need alternative export method.');
+    }
+  }
+
+  export function exportToSVG(filename: string = 'graph-visualization.svg') {
+    if (svg && svg.node()) {
+      exportSvg(svg.node(), filename);
+    } else {
+      console.warn('No SVG available for export. Network visualization type may need alternative export method.');
+    }
+  }
 
   onMount(async () => {
     console.log('GraphVisualization mounted', { hasData: !!data, dataNodes: data?.nodes?.length, container: !!container });
@@ -104,12 +143,15 @@
   function createForceGraph() {
     if (!container) return;
 
+    const widthPx = toPx(width);
+    const heightPx = toPx(height);
+
     // Create SVG
     svg = d3.select(container)
       .append('svg')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', [0, 0, width, height].join(','))
+      .attr('width', widthPx)
+      .attr('height', heightPx)
+      .attr('viewBox', [0, 0, widthPx, heightPx].join(','))
       .attr('style', 'max-width: 100%; height: auto; font: 10px sans-serif;');
 
     // Create a group for zooming
@@ -118,33 +160,38 @@
     // Create nodes and links for simulation
     const nodes = data.nodes.map(node => ({
       ...node,
-      x: Math.random() * width,
-      y: Math.random() * height
+      x: Math.random() * widthPx,
+      y: Math.random() * heightPx
     }));
-    
+
     const links = data.edges.map(edge => ({
+      ...edge,
       source: edge.from,
       target: edge.to,
       value: edge.value || 1
     }));
 
-    // Create tooltip
-    const tooltip = d3.select('body')
-      .append('div')
-      .attr('class', 'graph-tooltip')
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('background', 'rgba(0, 0, 0, 0.8)')
-      .style('color', 'white')
-      .style('padding', '8px')
-      .style('border-radius', '4px')
-      .style('font-size', '12px');
+    // Create tooltip only if enableTooltips is true
+    if (enableTooltips) {
+      tooltip = d3.select('body')
+        .append('div')
+        .attr('class', 'graph-tooltip')
+        .style('position', 'absolute')
+        .style('visibility', 'hidden')
+        .style('background', 'rgba(0, 0, 0, 0.8)')
+        .style('color', 'white')
+        .style('padding', '8px')
+        .style('border-radius', '4px')
+        .style('font-size', '12px')
+        .style('pointer-events', 'none')
+        .style('z-index', '1000');
+    }
 
     // Create simulation
     simulation = d3.forceSimulation(nodes as any)
       .force('link', d3.forceLink(links).id((d: any) => d.id).distance(100))
       .force('charge', d3.forceManyBody().strength(-300))
-      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('center', d3.forceCenter(widthPx / 2, heightPx / 2))
       .force('collision', d3.forceCollide().radius(30));
 
     // Add links to the graph
@@ -154,7 +201,31 @@
       .selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke-width', (d: any) => Math.sqrt(d.value));
+      .attr('stroke-width', (d: any) => Math.sqrt(d.value))
+      .on('click', (event: MouseEvent, d: any) => {
+        dispatch('edgeClick', { edge: d, event });
+      })
+      .on('mouseover', (event: MouseEvent, d: any) => {
+        dispatch('edgeHover', { edge: d, event });
+        if (enableTooltips && tooltip) {
+          tooltip
+            .text(`${d.label || `${d.source.id} → ${d.target.id}`}`)
+            .style('visibility', 'visible');
+        }
+      })
+      .on('mousemove', (event: MouseEvent) => {
+        if (enableTooltips && tooltip) {
+          tooltip
+            .style('top', event.pageY - 10 + 'px')
+            .style('left', event.pageX + 10 + 'px');
+        }
+      })
+      .on('mouseout', () => {
+        if (enableTooltips && tooltip) {
+          tooltip.style('visibility', 'hidden');
+        }
+      })
+      .style('cursor', 'pointer');
 
     // Add nodes to the graph
     const node = g.append('g')
@@ -166,18 +237,28 @@
       .attr('r', 10)
       .attr('fill', d => visColors[d.type] || '#4682b4')
       .call(drag(simulation))
-      .on('mouseover', (event, d) => {
-        tooltip
-          .text(`${d.label || d.id}`)
-          .style('visibility', 'visible');
+      .on('click', (event: MouseEvent, d: Node) => {
+        dispatch('nodeClick', { node: d, event });
       })
-      .on('mousemove', (event) => {
-        tooltip
-          .style('top', event.pageY - 10 + 'px')
-          .style('left', event.pageX + 10 + 'px');
+      .on('mouseover', (event: MouseEvent, d: Node) => {
+        dispatch('nodeHover', { node: d, event });
+        if (enableTooltips && tooltip) {
+          tooltip
+            .text(`${d.label || d.id}`)
+            .style('visibility', 'visible');
+        }
+      })
+      .on('mousemove', (event: MouseEvent) => {
+        if (enableTooltips && tooltip) {
+          tooltip
+            .style('top', event.pageY - 10 + 'px')
+            .style('left', event.pageX + 10 + 'px');
+        }
       })
       .on('mouseout', () => {
-        tooltip.style('visibility', 'hidden');
+        if (enableTooltips && tooltip) {
+          tooltip.style('visibility', 'hidden');
+        }
       });
 
     // Add labels to nodes
@@ -210,39 +291,44 @@
         .attr('y', d => d.y);
     });
 
-    // Add zoom functionality
-    const zoom = d3.zoom()
-      .scaleExtent([0.1, 8])
-      .on('zoom', (event) => {
-        g.attr('transform', event.transform);
-      });
+    // Add zoom functionality if enabled
+    if (enableZoom) {
+      const zoom = d3.zoom()
+        .scaleExtent([0.1, 8])
+        .on('zoom', (event) => {
+          g.attr('transform', event.transform);
+        });
 
-    svg.call(zoom);
+      svg.call(zoom);
+    }
   }
 
   function createSankeyDiagram() {
     if (!container || data.nodes.length === 0 || data.edges.length === 0) return;
 
+    const widthPx = toPx(width);
+    const heightPx = toPx(height);
+
     // Create SVG
     svg = d3.select(container)
       .append('svg')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', [0, 0, width, height].join(','))
+      .attr('width', widthPx)
+      .attr('height', heightPx)
+      .attr('viewBox', [0, 0, widthPx, heightPx].join(','))
       .attr('style', 'max-width: 100%; height: auto; font: 10px sans-serif;');
 
     // Create the sankey generator
     const sankey = d3Sankey.sankey()
       .nodeWidth(15)
       .nodePadding(10)
-      .extent([[1, 1], [width - 1, height - 6]]);
+      .extent([[1, 1], [widthPx - 1, heightPx - 6]]);
 
     // Prepare data for sankey
     const sankeyNodes = data.nodes.map((node, index) => ({
       ...node,
       index
     }));
-    
+
     const sankeyLinks = data.edges.map((edge, index) => {
       const sourceIndex = data.nodes.findIndex(n => n.id === edge.from);
       const targetIndex = data.nodes.findIndex(n => n.id === edge.to);
@@ -261,17 +347,21 @@
       links: sankeyLinks
     });
 
-    // Create tooltip
-    const tooltip = d3.select('body')
-      .append('div')
-      .attr('class', 'sankey-tooltip')
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('background', 'rgba(0, 0, 0, 0.8)')
-      .style('color', 'white')
-      .style('padding', '8px')
-      .style('border-radius', '4px')
-      .style('font-size', '12px');
+    // Create tooltip only if enableTooltips is true
+    if (enableTooltips) {
+      tooltip = d3.select('body')
+        .append('div')
+        .attr('class', 'sankey-tooltip')
+        .style('position', 'absolute')
+        .style('visibility', 'hidden')
+        .style('background', 'rgba(0, 0, 0, 0.8)')
+        .style('color', 'white')
+        .style('padding', '8px')
+        .style('border-radius', '4px')
+        .style('font-size', '12px')
+        .style('pointer-events', 'none')
+        .style('z-index', '1000');
+    }
 
     // Add links
     const link = svg.append('g')
@@ -286,19 +376,32 @@
       .attr('stroke', (d: any) => visColors[data.nodes[d.source.index].type] || '#000')
       .attr('stroke-width', (d: any) => Math.max(1, d.width))
       .attr('id', (d: any) => `link-${d.index}`)
-      .on('mouseover', (event, d: any) => {
-        tooltip
-          .text(`Flow: ${data.nodes[d.source.index].label || data.nodes[d.source.index].id} → ${data.nodes[d.target.index].label || data.nodes[d.target.index].id}: ${d.value}`)
-          .style('visibility', 'visible');
+      .on('click', (event: MouseEvent, d: any) => {
+        const edge = data.edges[d.index];
+        dispatch('edgeClick', { edge, event });
       })
-      .on('mousemove', (event) => {
-        tooltip
-          .style('top', event.pageY - 10 + 'px')
-          .style('left', event.pageX + 10 + 'px');
+      .on('mouseover', (event: MouseEvent, d: any) => {
+        const edge = data.edges[d.index];
+        dispatch('edgeHover', { edge, event });
+        if (enableTooltips && tooltip) {
+          tooltip
+            .text(`Flow: ${data.nodes[d.source.index].label || data.nodes[d.source.index].id} → ${data.nodes[d.target.index].label || data.nodes[d.target.index].id}: ${d.value}`)
+            .style('visibility', 'visible');
+        }
+      })
+      .on('mousemove', (event: MouseEvent) => {
+        if (enableTooltips && tooltip) {
+          tooltip
+            .style('top', event.pageY - 10 + 'px')
+            .style('left', event.pageX + 10 + 'px');
+        }
       })
       .on('mouseout', () => {
-        tooltip.style('visibility', 'hidden');
-      });
+        if (enableTooltips && tooltip) {
+          tooltip.style('visibility', 'hidden');
+        }
+      })
+      .style('cursor', 'pointer');
 
     // Add nodes
     const node = svg.append('g')
@@ -312,19 +415,32 @@
       .attr('width', (d: any) => d.x1 - d.x0)
       .attr('fill', (d: any) => visColors[data.nodes[d.index].type] || '#4682b4')
       .attr('id', (d: any) => data.nodes[d.index].id)
-      .on('mouseover', (event, d: any) => {
-        tooltip
-          .text(`${data.nodes[d.index].label || data.nodes[d.index].id}: ${d.value || 0}`)
-          .style('visibility', 'visible');
+      .on('click', (event: MouseEvent, d: any) => {
+        const nodeData = data.nodes[d.index];
+        dispatch('nodeClick', { node: nodeData, event });
       })
-      .on('mousemove', (event) => {
-        tooltip
-          .style('top', event.pageY - 10 + 'px')
-          .style('left', event.pageX + 10 + 'px');
+      .on('mouseover', (event: MouseEvent, d: any) => {
+        const nodeData = data.nodes[d.index];
+        dispatch('nodeHover', { node: nodeData, event });
+        if (enableTooltips && tooltip) {
+          tooltip
+            .text(`${nodeData.label || nodeData.id}: ${d.value || 0}`)
+            .style('visibility', 'visible');
+        }
+      })
+      .on('mousemove', (event: MouseEvent) => {
+        if (enableTooltips && tooltip) {
+          tooltip
+            .style('top', event.pageY - 10 + 'px')
+            .style('left', event.pageX + 10 + 'px');
+        }
       })
       .on('mouseout', () => {
-        tooltip.style('visibility', 'hidden');
-      });
+        if (enableTooltips && tooltip) {
+          tooltip.style('visibility', 'hidden');
+        }
+      })
+      .style('cursor', 'pointer');
 
     // Add labels to sankey nodes
     svg.append('g')
@@ -402,18 +518,43 @@
     // Create network
     network = new Network(container, networkData, defaultOptions);
 
-    // Add event listeners
-    network.on('click', (params) => {
-      console.log('Node clicked:', params);
+    // Add event listeners for node clicks
+    network.on('click', (params: any) => {
+      if (params.nodes && params.nodes.length > 0) {
+        const nodeId = params.nodes[0];
+        const node = data.nodes.find(n => n.id === nodeId);
+        if (node) {
+          dispatch('nodeClick', { node, event: params.event as MouseEvent });
+        }
+      } else if (params.edges && params.edges.length > 0) {
+        const edgeId = params.edges[0];
+        const edge = data.edges.find(e => e.id === edgeId);
+        if (edge) {
+          dispatch('edgeClick', { edge, event: params.event as MouseEvent });
+        }
+      }
     });
 
-    network.on('doubleClick', (params) => {
-      console.log('Node double-clicked:', params);
+    // Add event listeners for node hover
+    network.on('hoverNode', (params: any) => {
+      const node = data.nodes.find(n => n.id === params.node);
+      if (node) {
+        dispatch('nodeHover', { node, event: params.event as MouseEvent });
+      }
     });
 
-    network.on('oncontext', (params) => {
-      console.log('Node right-clicked:', params);
+    // Add event listeners for edge hover
+    network.on('hoverEdge', (params: any) => {
+      const edge = data.edges.find(e => e.id === params.edge);
+      if (edge) {
+        dispatch('edgeHover', { edge, event: params.event as MouseEvent });
+      }
     });
+
+    // Disable physics if enableZoom is false
+    if (!enableZoom) {
+      network.setOptions({ physics: { enabled: false } });
+    }
   }
 
   function drag(simulation: any) {
@@ -450,6 +591,10 @@
     }
     if (svg) {
       svg.remove();
+    }
+    // Clean up tooltip
+    if (tooltip) {
+      tooltip.remove();
     }
   });
 </script>
@@ -496,5 +641,9 @@
 
 <div class="graph-visualization-container">
   <h3 class="graph-visualization-title">{title} - {visualizationType} View</h3>
-  <div bind:this={container} class="visualization-container" style="width: {width}px; height: {height}px;" />
+  <div
+    bind:this={container}
+    class="visualization-container"
+    style="width: {typeof width === 'number' ? `${width}px` : width}; height: {typeof height === 'number' ? `${height}px` : height}; min-height: 400px;"
+  />
 </div>
