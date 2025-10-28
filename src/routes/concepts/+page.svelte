@@ -2,8 +2,8 @@
 	import { graphql } from '$houdini';
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import ConceptTree from '$lib/components/concepts/ConceptTree.svelte';
-	import ConceptForm from '$lib/components/concepts/ConceptForm.svelte';
+	import { ConceptTree } from '$entities/concept';
+	import { ConceptForm } from '$features/concept-management';
 	import NetworkExplorer from '$lib/components/visualizations/NetworkExplorer.svelte';
 	import ConceptFlow from '$lib/components/visualizations/ConceptFlow.svelte';
 	import OntologyMap from '$lib/components/visualizations/OntologyMap.svelte';

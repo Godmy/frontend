@@ -48,8 +48,10 @@ export class PermissionService implements IPermissionChecker {
 			}
 		`;
 
-		const data = await this.graphqlClient.query<{ myRoles: Role[] }>(query);
-		this.roles = data.myRoles;
+		const data = await this.graphqlClient.query<{ myRoles: Role[] | null | undefined }>(query);
+		// Defensively assign roles, even though a backend error should ideally prevent reaching this.
+		// The actual 'NoneType' error indicates a backend issue with role mapping.
+		this.roles = data?.myRoles || [];
 	}
 
 	private extractPermissions(): void {

@@ -8,7 +8,7 @@
 	import { onlineStore } from '$lib/stores/online.store.svelte';
 	import { t } from '$lib/utils/i18n';
 	import { onMount } from 'svelte';
-	import AppHeader from '$lib/components/AppHeader.svelte';
+	import { AppHeader } from '$widgets/header';
 
 	let { children } = $props();
 

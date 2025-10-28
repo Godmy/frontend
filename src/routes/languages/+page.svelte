@@ -2,8 +2,7 @@
 	import { graphql } from '$houdini';
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import LanguageList from '$lib/components/languages/LanguageList.svelte';
-	import LanguageForm from '$lib/components/languages/LanguageForm.svelte';
+	import { LanguageList, LanguageForm } from '$features/language-management';
 	import { errorHandler } from '$lib/errors';
 	import { notificationStore } from '$lib/notifications';
 	import { t } from '$lib/utils/i18n';

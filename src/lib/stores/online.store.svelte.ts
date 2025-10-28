@@ -1,25 +1,22 @@
-/**
- * Online/Offline Store
- *
- * Tracks network connectivity status using the browser's online/offline events.
- * Updates reactive state when connection changes.
- */
+import { writable } from 'svelte/store';
 
-let isOnline = $state(typeof navigator !== 'undefined' ? navigator.onLine : true);
+function createOnlineStore() {
+  const { subscribe, set } = writable<boolean>(true); // Assume online initially
 
-// Setup event listeners for online/offline events
-if (typeof window !== 'undefined') {
-	window.addEventListener('online', () => {
-		isOnline = true;
-	});
+  if (typeof window !== 'undefined') {
+    const setOnlineStatus = () => set(navigator.onLine);
 
-	window.addEventListener('offline', () => {
-		isOnline = false;
-	});
+    window.addEventListener('online', setOnlineStatus);
+    window.addEventListener('offline', setOnlineStatus);
+
+    // Initial check
+    setOnlineStatus();
+  }
+
+  return {
+    subscribe,
+    // No explicit set/update needed as it's driven by browser events
+  };
 }
 
-export const onlineStore = {
-	get isOnline() {
-		return isOnline;
-	}
-};
+export const onlineStore = createOnlineStore();

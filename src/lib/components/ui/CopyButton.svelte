@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { copyToClipboard } from '$lib/utils/clipboard';
-	import { notificationStore } from '$lib/stores/notification.store';
+import { notificationStore } from "$lib/stores/notification.store.svelte";
 
 	type Props = {
 		text: string;

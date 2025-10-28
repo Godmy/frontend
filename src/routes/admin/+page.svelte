@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ProtectedRoute, RequireRole } from '$lib/auth';
+	import { ProtectedRoute, RequireRole } from '$features/auth';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

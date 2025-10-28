@@ -2,8 +2,7 @@
 	import { graphql } from '$houdini';
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import DictionaryList from '$lib/components/dictionaries/DictionaryList.svelte';
-	import DictionaryForm from '$lib/components/dictionaries/DictionaryForm.svelte';
+	import { DictionaryList, DictionaryForm } from '$features/dictionary-management';
 	import { errorHandler } from '$lib/errors';
 	import { notificationStore } from '$lib/notifications';
 	import { t } from '$lib/utils/i18n';

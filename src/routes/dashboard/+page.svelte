@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { ProtectedRoute, useAuth, usePermissions, RequirePermission, RequireRole } from '$lib/auth';
+	import { useAuth, usePermissions } from '$lib/auth';
+	import { ProtectedRoute, RequirePermission, RequireRole } from '$features/auth';
 	import { goto } from '$app/navigation';
 	import { t } from '$lib/utils/i18n';
 	import type { PageData } from './$types';

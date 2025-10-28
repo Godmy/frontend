@@ -4,11 +4,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install yarn 1.x (classic) to match local environment
+RUN apk add --no-cache yarn
+
 # Copy package files
-COPY package*.json ./
+COPY package.json yarn.lock ./
 
 # Install all dependencies (including dev dependencies)
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -17,4 +20,4 @@ COPY . .
 EXPOSE 5173
 
 # Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+CMD ["yarn", "dev", "--host", "0.0.0.0"]
