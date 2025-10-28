@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createFormStore } from '$lib/utils/form';
   import { z, type ZodSchema } from 'zod';
-  import { Input, Select, Textarea, Checkbox, Button } from '$lib/components/ui';
+  import { Input, Select, Textarea, Checkbox, Button } from '$shared/ui';
 
   // Типы для определения формы
   export type FieldDefinition<T = any> = {
