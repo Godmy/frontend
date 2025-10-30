@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { graphql } from '$houdini';
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -18,19 +18,19 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+	const conceptsStore = data.GetConcepts;
+	const concepts = $derived($conceptsStore?.data?.concepts ?? []);
 
 	// Get translations from layout
 	const trans = $derived($page.data.translations || {});
 
 	// Debug logging
 	$effect(() => {
-		console.log('Concepts page data:', data);
-		console.log('GetConcepts object:', data.GetConcepts);
-		console.log('GetConcepts.data:', data.GetConcepts?.data);
-		console.log('GetConcepts.concepts:', data.GetConcepts?.concepts);
-		if (data.GetConcepts) {
-			console.log('GetConcepts keys:', Object.keys(data.GetConcepts));
-			console.log('GetConcepts type:', typeof data.GetConcepts);
+		console.log('Concepts page store:', $conceptsStore);
+		console.log('Concepts list length:', concepts.length);
+		if ($conceptsStore?.data) {
+			console.log('GetConcepts keys:', Object.keys($conceptsStore.data));
+			console.log('GetConcepts type:', typeof $conceptsStore.data);
 		}
 	});
 
@@ -85,14 +85,14 @@
 
 	async function handleMove(conceptId: number, newParentId: number | null) {
 		try {
-			// Найти концепцию для обновления depth
-			const concept = data.GetConcepts?.concepts.find((c) => c.id === conceptId);
+			// РќР°Р№С‚Рё РєРѕРЅС†РµРїС†РёСЋ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ depth
+			const concept = concepts.find((c) => c.id === conceptId);
 			if (!concept) return;
 
-			// Вычислить новый depth
+			// Р’С‹С‡РёСЃР»РёС‚СЊ РЅРѕРІС‹Р№ depth
 			let newDepth = 0;
 			if (newParentId !== null) {
-				const parent = data.GetConcepts?.concepts.find((c) => c.id === newParentId);
+				const parent = concepts.find((c) => c.id === newParentId);
 				if (parent) {
 					newDepth = parent.depth + 1;
 				}
@@ -169,9 +169,9 @@
 		<main>
 			<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 				<div class="px-4 sm:px-0">
-					{#if data.GetConcepts}
+					{#if concepts.length > 0}
 						<ConceptTree
-							concepts={data.GetConcepts.concepts || []}
+							concepts={concepts}
 							onEdit={handleEdit}
 							onDelete={handleDelete}
 							onMove={handleMove}
@@ -187,7 +187,7 @@
 							</div>
 							<div class="mt-8">
 								<h2 class="text-2xl font-bold leading-tight text-gray-900 mb-4">Ontology Overview</h2>
-								<OntologyMap concepts={data.GetConcepts.concepts || []} />
+								<OntologyMap concepts={concepts} />
 							</div>
 							<div class="mt-8">
 								<h2 class="text-2xl font-bold leading-tight text-gray-900 mb-4">Radial Hierarchy</h2>
@@ -223,3 +223,4 @@
 {#if showForm}
 	<ConceptForm concept={editingConcept} onSubmit={handleSubmit} onCancel={handleCancel} />
 {/if}
+

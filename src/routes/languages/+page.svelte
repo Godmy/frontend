@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { graphql } from '$houdini';
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -10,15 +10,17 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+	const languagesStore = data.GetLanguages;
+	const languages = $derived($languagesStore?.data?.languages ?? []);
 
 	// Get translations from layout
 	const trans = $derived($page.data.translations || {});
 
 	// Debug logging
 	$effect(() => {
-		console.log('[Languages] Page data updated:', data);
-		console.log('[Languages] Languages count:', data.GetLanguages?.languages?.length || 0);
-		console.log('[Languages] Languages:', data.GetLanguages?.languages);
+		console.log('[Languages] Houdini snapshot:', $languagesStore);
+		console.log('[Languages] Languages count:', languages.length);
+		console.log('[Languages] Languages:', languages);
 	});
 
 	// Houdini Mutations
@@ -61,7 +63,7 @@
 			try {
 				await DeleteLanguage.mutate({ languageId: id });
 				notificationStore.success(t(trans, 'ui/languages/deleteSuccess', 'Language deleted successfully'));
-				// Перезагрузить данные после мутации
+				// РџРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ РґР°РЅРЅС‹Рµ РїРѕСЃР»Рµ РјСѓС‚Р°С†РёРё
 				await invalidate('app:languages');
 			} catch (error) {
 				errorHandler.handle(error);
@@ -91,7 +93,7 @@
 			}
 			showForm = false;
 			editingLanguage = undefined;
-			// Перезагрузить данные после мутации
+			// РџРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ РґР°РЅРЅС‹Рµ РїРѕСЃР»Рµ РјСѓС‚Р°С†РёРё
 			console.log('[Languages] Invalidating cache...');
 			await invalidate('app:languages');
 			console.log('[Languages] Cache invalidated, data should reload');
@@ -132,8 +134,8 @@
 		<main>
 			<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 				<div class="px-4 sm:px-0">
-					{#if data.GetLanguages}
-						<LanguageList languages={data.GetLanguages.languages} onEdit={handleEdit} onDelete={handleDelete} />
+					{#if languages.length > 0}
+						<LanguageList languages={languages} onEdit={handleEdit} onDelete={handleDelete} />
 					{:else}
 						<div class="flex justify-center py-12">
 							<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -148,3 +150,4 @@
 {#if showForm}
 	<LanguageForm language={editingLanguage} onSubmit={handleSubmit} onCancel={handleCancel} />
 {/if}
+

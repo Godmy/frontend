@@ -1,0 +1,8 @@
+query GetConceptHierarchy {
+  concepts {
+    id
+    path
+    depth
+    parentId
+  }
+}

@@ -1,34 +1,55 @@
 <script lang="ts">
 	import { ProtectedRoute, RequireRole } from '$features/auth';
 	import type { PageData } from './$types';
+	import {
+		Shield,
+		UserCheck,
+		UserMinus,
+		Users
+	} from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	// Reactive stats
-	let stats = $derived([
+	const adminStatsStore = data.GetAdminStats;
+	const adminData = $derived($adminStatsStore?.data ?? {});
+
+	const stats = $derived(() => [
 		{
 			name: 'Total Users',
-			value: data.GetAdminStats?.users?.length?.toString() || '0',
-			icon: '👥',
-			color: 'bg-blue-500'
+			value: String(
+				adminData.systemStats?.users?.total ?? adminData.allUsers?.total ?? 0
+			),
+			icon: Users,
+			iconBg: 'bg-blue-100',
+			iconColor: 'text-blue-600'
 		},
 		{
 			name: 'Total Roles',
-			value: data.GetAdminStats?.roles?.length?.toString() || '0',
-			icon: '🔐',
-			color: 'bg-purple-500'
+			value: String(
+				adminData.roles?.length ?? Object.keys(adminData.systemStats?.roles ?? {}).length ?? 0
+			),
+			icon: Shield,
+			iconBg: 'bg-purple-100',
+			iconColor: 'text-purple-600'
 		},
 		{
 			name: 'Active Users',
-			value: data.GetAdminStats?.users?.filter(u => u.isActive)?.length?.toString() || '0',
-			icon: '✅',
-			color: 'bg-green-500'
+			value: String(
+				adminData.systemStats?.users?.active ?? adminData.allUsers?.users?.filter(u => u.isActive)?.length ?? 0
+			),
+			icon: UserCheck,
+			iconBg: 'bg-green-100',
+			iconColor: 'text-green-600'
 		},
 		{
 			name: 'Inactive Users',
-			value: data.GetAdminStats?.users?.filter(u => !u.isActive)?.length?.toString() || '0',
-			icon: '⛔',
-			color: 'bg-red-500'
+			value: String(
+				(adminData.systemStats?.users?.total ?? adminData.allUsers?.total ?? 0) -
+				(adminData.systemStats?.users?.active ?? adminData.allUsers?.users?.filter(u => u.isActive)?.length ?? 0)
+			),
+			icon: UserMinus,
+			iconBg: 'bg-red-100',
+			iconColor: 'text-red-600'
 		}
 	]);
 </script>
@@ -46,7 +67,9 @@
 					<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 						<div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-xl p-8 text-white">
 							<div class="flex items-center space-x-4">
-								<div class="text-5xl">🔑</div>
+								<div class="flex h-14 w-14 items-center justify-center rounded-full bg-white/10">
+									<Shield class="h-8 w-8 text-white" />
+								</div>
 								<div>
 									<h1 class="text-4xl font-bold">Admin Panel</h1>
 									<p class="text-orange-100 mt-2">Manage users, roles, and permissions</p>
@@ -62,10 +85,10 @@
 						{#each stats as stat}
 							<div class="bg-white overflow-hidden shadow-lg rounded-xl hover:shadow-xl transition-shadow">
 								<div class="p-6">
-									<div class="flex items-center">
-										<div class="flex-shrink-0 p-3 rounded-lg {stat.color} text-white text-3xl">
-											{stat.icon}
-										</div>
+								<div class="flex items-center">
+									<div class="flex-shrink-0 p-3 rounded-lg {stat.iconBg}">
+										<svelte:component this={stat.icon} class={`h-6 w-6 ${stat.iconColor}`} />
+									</div>
 										<div class="ml-5 w-0 flex-1">
 											<dl>
 												<dt class="text-sm font-medium text-gray-500 truncate">
@@ -101,8 +124,8 @@
 							</div>
 
 							<div class="space-y-3 max-h-96 overflow-y-auto">
-								{#if data.GetAdminStats?.users && data.GetAdminStats.users.length > 0}
-									{#each data.GetAdminStats.users as user}
+								{#if adminData.allUsers?.users && adminData.allUsers?.users.length > 0}
+									{#each adminData.allUsers?.users as user}
 										<div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
 											<div class="flex items-center space-x-3">
 												<div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
@@ -148,8 +171,8 @@
 							</div>
 
 							<div class="space-y-3 max-h-96 overflow-y-auto">
-								{#if data.GetAdminStats?.roles && data.GetAdminStats.roles.length > 0}
-									{#each data.GetAdminStats.roles as role}
+								{#if adminData.roles && adminData.roles?.length > 0}
+									{#each adminData.roles as role}
 										<div class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
 											<div class="flex justify-between items-start mb-2">
 												<div>

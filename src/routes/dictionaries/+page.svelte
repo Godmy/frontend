@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { graphql } from '$houdini';
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -10,6 +10,8 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+	const dictionariesStore = data.GetDictionariesData;
+	const dictionariesData = $derived($dictionariesStore?.data ?? {});
 
 	// Get translations from layout
 	const trans = $derived($page.data.translations || {});
@@ -132,11 +134,11 @@
 		<main>
 			<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 				<div class="px-4 sm:px-0">
-					{#if data.GetDictionariesData}
+					{#if $dictionariesStore?.data}
 						<DictionaryList
-							dictionaries={data.GetDictionariesData.dictionaries}
-							languages={data.GetDictionariesData.languages}
-							concepts={data.GetDictionariesData.concepts}
+							dictionaries={$dictionariesData.dictionaries}
+							languages={$dictionariesData.languages}
+							concepts={$dictionariesData.concepts}
 							onEdit={handleEdit}
 							onDelete={handleDelete}
 						/>
@@ -154,9 +156,10 @@
 {#if showForm}
 	<DictionaryForm
 		dictionary={editingDictionary}
-		languages={data.GetDictionariesData?.languages || []}
-		concepts={data.GetDictionariesData?.concepts || []}
+		languages={$dictionariesStore?.data?.languages || []}
+		concepts={$dictionariesStore?.data?.concepts || []}
 		onSubmit={handleSubmit}
 		onCancel={handleCancel}
 	/>
 {/if}
+

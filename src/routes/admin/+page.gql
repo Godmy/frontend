@@ -21,4 +21,17 @@ query GetAdminStats {
 			scope
 		}
 	}
+	systemStats {
+		users {
+			total
+			active
+			verified
+			banned
+		}
+		content {
+			concepts
+			dictionaries
+			languages
+		}
+	}
 }

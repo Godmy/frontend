@@ -14,16 +14,25 @@
 
 	// Получить переводы из layout data
 	const trans = $derived($page.data.translations || {});
+	let isOnline = $state(true);
 
 	// Initialize on mount
 	onMount(() => {
 		// Initialize error notifications
 		const unsubscribe = initializeErrorNotifications();
 
+		// Track online status from store
+		const unsubscribeOnline = onlineStore.subscribe(value => {
+			isOnline = value;
+		});
+
 		// Initialize language store from localStorage
 		languageStore.init();
 
-		return unsubscribe;
+		return () => {
+			unsubscribe?.();
+			unsubscribeOnline();
+		};
 	});
 
 	// Реактивно отслеживать изменение языка и показывать в консоли
@@ -41,7 +50,7 @@
 <AppHeader />
 
 <!-- Offline Banner -->
-{#if !onlineStore.isOnline}
+{#if !isOnline}
 	<div class="bg-yellow-500 text-white px-4 py-2 text-center text-sm font-medium sticky top-16 z-40 shadow-md">
 		<div class="flex items-center justify-center space-x-2">
 			<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

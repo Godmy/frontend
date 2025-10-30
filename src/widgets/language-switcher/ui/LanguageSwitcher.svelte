@@ -32,6 +32,9 @@
 		}
 	`);
 
+	// Языки с доступными переводами UI (hardcoded для производительности)
+	const LANGUAGES_WITH_UI = [1, 2]; // Russian (1), English (2)
+
 	let languages = $state<Array<{ id: number; name: string; code: string }>>([]);
 	let isLoading = $state(true);
 	let isSwitching = $state(false);
@@ -39,7 +42,8 @@
 	onMount(async () => {
 		const result = await GetLanguagesForSwitcher.fetch();
 		if (result.data?.languages) {
-			languages = result.data.languages;
+			// Фильтровать только языки с UI переводами
+			languages = result.data.languages.filter((lang: any) => LANGUAGES_WITH_UI.includes(lang.id));
 		}
 		isLoading = false;
 	});

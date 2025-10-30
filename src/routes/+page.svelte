@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { t } from '$lib/utils/i18n';
 	import { onMount } from 'svelte';
+	import { BookOpen, Languages as LanguagesIcon, NotebookPen } from 'lucide-svelte';
 
 	const auth = useAuth();
 
@@ -164,8 +165,8 @@
 		<!-- Features Grid -->
 		<div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
 			<div class="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-shadow">
-				<div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center text-3xl mb-4">
-					📚
+				<div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+					<BookOpen class="h-7 w-7 text-indigo-600" />
 				</div>
 				<h3 class="text-xl font-bold text-gray-900 mb-2">
 					{t(trans, 'ui/home/feature/concepts/title', 'Concept Management')}
@@ -176,8 +177,8 @@
 			</div>
 
 			<div class="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-shadow">
-				<div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-3xl mb-4">
-					🌍
+				<div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+					<LanguagesIcon class="h-7 w-7 text-purple-600" />
 				</div>
 				<h3 class="text-xl font-bold text-gray-900 mb-2">
 					{t(trans, 'ui/home/feature/multilang/title', 'Multi-Language Support')}
@@ -188,18 +189,17 @@
 			</div>
 
 			<div class="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-shadow">
-				<div class="w-14 h-14 bg-pink-100 rounded-xl flex items-center justify-center text-3xl mb-4">
-					🔐
+				<div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+					<NotebookPen class="h-7 w-7 text-blue-600" />
 				</div>
 				<h3 class="text-xl font-bold text-gray-900 mb-2">
-					{t(trans, 'ui/home/feature/roles/title', 'Role-Based Access')}
+					{t(trans, 'ui/home/feature/workflows/title', 'Collaborative Workflows')}
 				</h3>
 				<p class="text-gray-600">
-					{t(trans, 'ui/home/feature/roles/description', 'Control access with fine-grained permissions and role-based authorization.')}
+					{t(trans, 'ui/home/feature/workflows/description', 'Coordinate teams with modern diagrams and intuitive editor tools.')}
 				</p>
 			</div>
 		</div>
-
 		<!-- CTA Section -->
 		<div class="mt-24 text-center bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-2xl p-12 text-white">
 			<h2 class="text-3xl font-bold mb-4">

@@ -43,7 +43,7 @@ class LanguageStore {
 			// Это вызовет +layout.ts, который подхватит переводы из кэша
 			try {
 				const { invalidate } = await import('$app/navigation');
-				// Используем специфичный ключ зависимости вместо invalidateAll
+				// Use the language dependency key instead of global invalidateAll
 				await invalidate('app:language');
 				console.log(`[LanguageStore.setLanguage] Invalidated app:language, new languageId=${languageId}`);
 			} catch (error) {
@@ -61,8 +61,13 @@ class LanguageStore {
 			const saved = localStorage.getItem(STORAGE_KEY);
 			if (saved) {
 				const parsed = parseInt(saved, 10);
-				if (!isNaN(parsed)) {
+				if (!isNaN(parsed) && parsed !== this._currentLanguageId) {
 					this._currentLanguageId = parsed;
+
+					// Defer language application to next tick to avoid interfering with initial navigation lifecycle
+					setTimeout(() => {
+						void this.setLanguage(parsed);
+					}, 0);
 				}
 			}
 		}

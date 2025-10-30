@@ -28,7 +28,7 @@ export const load: LayoutLoad = async (event) => {
 
 	// Проверить кэш
 	const cached = translationsCache.get(languageId);
-	if (cached) {
+	if (cached && Object.keys(cached).length > 0) {
 		console.log(`[i18n] Using cached translations for language ${languageId}, keys:`, Object.keys(cached).length);
 		return {
 			translations: cached,
@@ -50,6 +50,40 @@ export const load: LayoutLoad = async (event) => {
 	// Преобразовать массив Dictionary в Map объект
 	const translationsArray = result.data?.dictionaries || [];
 	const translations = dictionariesToMap(translationsArray);
+
+	// Если переводов нет, загрузить fallback (English = 2)
+	if (Object.keys(translations).length === 0 && languageId !== 2) {
+		console.log(`[i18n] No translations found for language ${languageId}, loading English fallback...`);
+
+		const fallbackCached = translationsCache.get(2);
+		if (fallbackCached && Object.keys(fallbackCached).length > 0) {
+			console.log(`[i18n] Using cached English fallback, keys:`, Object.keys(fallbackCached).length);
+			return {
+				translations: fallbackCached,
+				languageId,
+				fallbackLanguageId: 2
+			};
+		}
+
+		const fallbackResult = await store.fetch({
+			event,
+			variables: {
+				languageId: 2
+			}
+		});
+
+		const fallbackArray = fallbackResult.data?.dictionaries || [];
+		const fallbackTranslations = dictionariesToMap(fallbackArray);
+
+		translationsCache.set(2, fallbackTranslations);
+		console.log(`[i18n] Loaded English fallback with ${Object.keys(fallbackTranslations).length} translations`);
+
+		return {
+			translations: fallbackTranslations,
+			languageId,
+			fallbackLanguageId: 2
+		};
+	}
 
 	// Сохранить в кэш
 	translationsCache.set(languageId, translations);

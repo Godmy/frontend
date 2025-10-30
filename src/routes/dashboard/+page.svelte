@@ -1,58 +1,66 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { page } from '$app/stores';
-	import { useAuth, usePermissions } from '$lib/auth';
+	import { useAuth } from '$lib/auth';
 	import { ProtectedRoute, RequirePermission, RequireRole } from '$features/auth';
-	import { goto } from '$app/navigation';
 	import { t } from '$lib/utils/i18n';
 	import type { PageData } from './$types';
+	import {
+		ArrowRight,
+		BookOpen,
+		Globe2,
+		Key,
+		Languages as LanguagesIcon,
+		Library,
+		NotebookPen,
+		Plus,
+		Shield
+	} from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	const auth = useAuth();
-	const permissions = usePermissions();
 
-	// Получить переводы из layout
 	const trans = $derived($page.data.translations || {});
-
-	async function handleLogout() {
-		await auth.logout();
-		goto('/login');
-	}
-
-	// Debug: Логирование загруженных данных
-	$effect(() => {
-		console.log('[Dashboard] Data loaded:', {
-			GetDashboardStats: data.GetDashboardStats,
-			concepts: data.GetDashboardStats?.concepts,
-			conceptsLength: data.GetDashboardStats?.concepts?.length,
-			languages: data.GetDashboardStats?.languages,
-			languagesLength: data.GetDashboardStats?.languages?.length,
-			dictionaries: data.GetDashboardStats?.dictionaries,
-			dictionariesLength: data.GetDashboardStats?.dictionaries?.length
-		});
+	const dashboardStatsStore = data.GetDashboardStats;
+	const welcomeMessage = $derived(() => {
+		const raw = t(trans, 'ui/dashboard/welcome', 'Welcome back').trim();
+		const base = raw.replace(/[\s!.,]+$/u, '');
+		const userName = auth.user?.profile?.firstName || auth.user?.username;
+		return userName ? `${base}, ${userName}!` : `${base}!`;
 	});
 
-	// Реактивная статистика на основе загруженных данных
-	let stats = $derived([
+	$effect(() => {
+		console.log('[Dashboard] Houdini snapshot:', $dashboardStatsStore);
+	});
+
+	const stats = $derived(() => [
 		{
 			name: t(trans, 'ui/dashboard/stats/concepts', 'Total Concepts'),
-			value: data.GetDashboardStats?.concepts?.length?.toString() || '0',
-			icon: '📚'
+			value: String($dashboardStatsStore?.data?.counts?.concepts ?? 0),
+			icon: BookOpen,
+			iconBg: 'bg-indigo-100',
+			iconColor: 'text-indigo-600'
 		},
 		{
 			name: t(trans, 'ui/dashboard/stats/languages', 'Supported Languages'),
-			value: data.GetDashboardStats?.languages?.length?.toString() || '0',
-			icon: '🌍'
+			value: String($dashboardStatsStore?.data?.counts?.languages ?? 0),
+			icon: LanguagesIcon,
+			iconBg: 'bg-emerald-100',
+			iconColor: 'text-emerald-600'
 		},
 		{
 			name: t(trans, 'ui/dictionaries/title', 'Dictionaries'),
-			value: data.GetDashboardStats?.dictionaries?.length?.toString() || '0',
-			icon: '📖'
+			value: String($dashboardStatsStore?.data?.counts?.dictionaries ?? 0),
+			icon: Library,
+			iconBg: 'bg-purple-100',
+			iconColor: 'text-purple-600'
 		},
 		{
 			name: 'Your Role',
 			value: auth.roles.length > 0 ? auth.roles[0].name : 'User',
-			icon: '👤'
+			icon: Shield,
+			iconBg: 'bg-orange-100',
+			iconColor: 'text-orange-600'
 		}
 	]);
 </script>
@@ -68,9 +76,7 @@
 			<!-- Welcome Section -->
 			<div class="px-4 py-6 sm:px-0">
 				<div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white mb-8">
-					<h2 class="text-3xl font-bold mb-2">
-						{t(trans, 'ui/dashboard/welcome', 'Welcome back')}, {auth.user?.profile?.firstName || auth.user?.username}! 👋
-					</h2>
+					<h2 class="text-3xl font-bold mb-2">{welcomeMessage}</h2>
 					<p class="text-indigo-100">
 						Here's what's happening with your content today.
 					</p>
@@ -82,8 +88,8 @@
 						<div class="bg-white overflow-hidden shadow-lg rounded-xl hover:shadow-xl transition-shadow">
 							<div class="p-6">
 								<div class="flex items-center">
-									<div class="flex-shrink-0 text-3xl">
-										{stat.icon}
+									<div class="flex-shrink-0 p-3 rounded-lg {stat.iconBg}">
+										<svelte:component this={stat.icon} class={`h-6 w-6 ${stat.iconColor}`} />
 									</div>
 									<div class="ml-5 w-0 flex-1">
 										<dl>
@@ -110,8 +116,8 @@
 								href="/concepts/new"
 								class="flex items-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
 							>
-								<div class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white text-xl">
-									📚
+								<div class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+									<Plus class="h-5 w-5" />
 								</div>
 								<div class="ml-4">
 									<p class="text-sm font-medium text-gray-900">Create Concept</p>
@@ -125,8 +131,8 @@
 								href="/languages/new"
 								class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
 							>
-								<div class="flex-shrink-0 w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white text-xl">
-									🌍
+								<div class="flex-shrink-0 w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white">
+									<Globe2 class="h-5 w-5" />
 								</div>
 								<div class="ml-4">
 									<p class="text-sm font-medium text-gray-900">Add Language</p>
@@ -140,8 +146,8 @@
 								href="/dictionaries/new"
 								class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
 							>
-								<div class="flex-shrink-0 w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center text-white text-xl">
-									📖
+								<div class="flex-shrink-0 w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center text-white">
+									<NotebookPen class="h-5 w-5" />
 								</div>
 								<div class="ml-4">
 									<p class="text-sm font-medium text-gray-900">New Dictionary</p>
@@ -151,7 +157,6 @@
 						</RequirePermission>
 					</div>
 				</div>
-
 				<!-- Roles & Permissions -->
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					<!-- Your Roles -->
@@ -209,16 +214,19 @@
 				<!-- Admin Panel (Only for Admins) -->
 				<RequireRole role="admin">
 					<div class="mt-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-xl p-8 text-white">
-						<h3 class="text-2xl font-bold mb-2">🔑 Admin Panel</h3>
-						<p class="mb-4 text-yellow-50">You have administrative access to manage the system.</p>
+						<div class="flex items-center space-x-4 mb-4">
+							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
+								<Key class="h-7 w-7 text-white" />
+							</div>
+							<h3 class="text-2xl font-bold">Admin Panel</h3>
+						</div>
+						<p class="mb-6 text-yellow-50">You have administrative access to manage the system.</p>
 						<a
 							href="/admin"
 							class="inline-flex items-center px-6 py-3 bg-white text-orange-600 rounded-lg font-medium hover:bg-yellow-50 transition-colors"
 						>
-							Go to Admin Panel
-							<svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-							</svg>
+							<span>Go to Admin Panel</span>
+							<ArrowRight class="ml-2 w-5 h-5" />
 						</a>
 					</div>
 				</RequireRole>
@@ -226,3 +234,13 @@
 		</main>
 	</div>
 </ProtectedRoute>
+
+
+
+
+
+
+
+
+
+
