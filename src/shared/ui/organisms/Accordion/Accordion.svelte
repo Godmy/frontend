@@ -1,6 +1,6 @@
 <script lang="ts">
   import { setContext } from 'svelte';
-  import type { HTMLDivAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   type Props = {
     multiple?: boolean; // Разрешить открытие нескольких панелей одновременно
@@ -8,7 +8,7 @@
     value?: string[]; // Управляемое значение
     onValueChange?: (value: string[]) => void;
     class?: string;
-  } & HTMLDivAttributes;
+  } & HTMLAttributes<HTMLDivElement>;
 
   let props: Props = $props();
 
@@ -56,3 +56,4 @@
 <div {...props} class="w-full space-y-2 {props.class || ''}">
   <slot />
 </div>
+

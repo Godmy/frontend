@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createFormStore } from '$lib/utils/form';
-  import { z, type ZodSchema } from 'zod';
+  import { z, type ZodSchema, type ZodTypeAny } from 'zod';
   import { Input, Select, Textarea, Checkbox, Button } from '$shared/ui';
 
   // Типы для определения формы
@@ -22,9 +22,11 @@
     className?: string;
   };
 
-  type Props<T = Record<string, any>> = {
-    definition: FormDefinition<T>;
-    initialData?: Partial<T>;
+  type FormValues = Record<string, any>;
+
+  type Props = {
+    definition: FormDefinition<any>;
+    initialData?: Partial<FormValues>;
   };
 
   let { definition, initialData = {} }: Props = $props();
@@ -38,43 +40,52 @@
         field.defaultValue ??
         (field.type === 'checkbox' ? false : '');
     });
-    return values as T;
+    return values as FormValues;
   });
 
   // Создаем схему валидации на основе определения полей
   let schema = $derived.by(() => {
     const shape: Record<string, ZodSchema<any>> = {};
     definition.fields.forEach(field => {
-      let fieldSchema: ZodSchema<any> = z.any();
+      let fieldSchema: ZodTypeAny = z.any();
 
       switch (field.type) {
         case 'text':
         case 'email':
-        case 'password':
-          fieldSchema = z.string();
+        case 'password': {
+          let stringSchema = z.string();
           if (field.required) {
-            fieldSchema = fieldSchema.min(1, field.label + ' обязательно');
+            stringSchema = stringSchema.min(1, field.label + ' ???????????');
           }
           if (field.type === 'email') {
-            fieldSchema = fieldSchema.email('Некорректный email');
+            stringSchema = stringSchema.email('???????????? email');
           }
+          fieldSchema = stringSchema;
           break;
-        case 'number':
-          fieldSchema = field.required
-            ? z.number({ required_error: field.label + ' обязательно' })
-            : z.number().optional();
+        }
+        case 'number': {
+          const numberSchema = z.number();
+          fieldSchema = field.required ? numberSchema : numberSchema.optional();
           break;
-        case 'select':
-          fieldSchema = field.required
-            ? z.string({ required_error: field.label + ' обязательно' })
-            : z.string().optional();
-          break;
-        case 'textarea':
-          fieldSchema = z.string();
+        }
+        case 'select': {
+          let selectSchema = z.string();
           if (field.required) {
-            fieldSchema = fieldSchema.min(1, field.label + ' обязательно');
+            selectSchema = selectSchema.min(1, field.label + ' ???????????');
+            fieldSchema = selectSchema;
+          } else {
+            fieldSchema = selectSchema.optional();
           }
           break;
+        }
+        case 'textarea': {
+          let textareaSchema = z.string();
+          if (field.required) {
+            textareaSchema = textareaSchema.min(1, field.label + ' ???????????');
+          }
+          fieldSchema = textareaSchema;
+          break;
+        }
         case 'checkbox':
           fieldSchema = z.boolean();
           break;
@@ -92,7 +103,7 @@
   });
 
   // Создаем store формы
-  let form = $derived(createFormStore(schema, initialValues));
+  let form = $derived(createFormStore(schema as ZodSchema<FormValues>, initialValues));
 
   async function handleSubmit(e: Event) {
     e.preventDefault();
@@ -106,8 +117,8 @@
   }
 </script>
 
-<form 
-  on:submit={handleSubmit} 
+<form
+  onsubmit={handleSubmit}
   class="space-y-4 {definition.className || ''}"
 >
   {#each definition.fields as field (field.name)}
@@ -118,7 +129,7 @@
         label={field.label}
         type={field.type}
         bind:value={form.data[field.name]}
-        onchange={(value) => form.setField(field.name, value)}
+        onchange={(event: Event & { currentTarget: HTMLInputElement }) => form.setField(field.name, event.currentTarget.value)}
         onblur={() => form.touchField(field.name)}
         errors={form.errors[field.name]}
         required={field.required}
@@ -133,7 +144,7 @@
         label={field.label}
         bind:value={form.data[field.name]}
         options={field.options}
-        onchange={(value) => form.setField(field.name, value)}
+        onchange={(event: Event & { currentTarget: HTMLSelectElement }) => form.setField(field.name, event.currentTarget.value)}
         onblur={() => form.touchField(field.name)}
         errors={form.errors[field.name]}
         required={field.required}
@@ -160,7 +171,7 @@
         id={String(field.name)}
         name={String(field.name)}
         bind:checked={form.data[field.name]}
-        onchange={(checked) => form.setField(field.name, checked)}
+        onchange={(event: Event & { currentTarget: HTMLInputElement }) => form.setField(field.name, event.currentTarget.checked)}
         onblur={() => form.touchField(field.name)}
         errors={form.errors[field.name]}
         label={field.label}

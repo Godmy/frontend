@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HTMLSelectElementAttributes } from 'svelte/elements';
+  import type { HTMLSelectAttributes } from 'svelte/elements';
 
   type Option = {
     value: string;
@@ -15,7 +15,7 @@
     required?: boolean;
     disabled?: boolean;
     placeholder?: string;
-  } & HTMLSelectElementAttributes;
+  } & HTMLSelectAttributes;
 
   let {
     id,

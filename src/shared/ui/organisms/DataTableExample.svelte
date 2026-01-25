@@ -1,5 +1,7 @@
 <script lang="ts">
   // Пример использования DataTable.svelte
+  import ColumnManager, { type ColumnConfig } from './ColumnManager.svelte';
+  import DataTable from './DataTable.svelte';
   
   // Тип данных для примера
   type User = {
@@ -28,7 +30,9 @@
   ];
 
   // Определение колонок
-  let columns = [
+  type ColumnBase = Omit<ColumnConfig, 'visible'>;
+
+  let columns: ColumnBase[] = [
     { key: 'id', header: 'ID', sortable: true, filterable: true },
     { key: 'name', header: 'Имя', sortable: true, filterable: true },
     { key: 'email', header: 'Email', sortable: true, filterable: true },
@@ -38,13 +42,13 @@
   ];
 
   // Состояние для конфигурации колонок
-  let columnConfigs = $state(columns.map(col => ({
+  let columnConfigs = $state<ColumnConfig[]>(columns.map(col => ({
     ...col,
     visible: true
   })));
 
   // Обработчик изменения конфигурации колонок
-  function handleColumnsChange(newConfigs) {
+  function handleColumnsChange(newConfigs: ColumnConfig[]) {
     columnConfigs = newConfigs;
   }
 </script>
@@ -56,13 +60,13 @@
   <div class="mb-6">
     <ColumnManager 
       columns={columnConfigs} 
-      on:columnsChange={handleColumnsChange} 
+      onColumnsChange={handleColumnsChange} 
     />
   </div>
 
   <!-- Таблица -->
   <DataTable 
-    {data} 
+    data={users} 
     columns={columnConfigs.filter(col => col.visible)} 
     caption="Список пользователей"
     enableFiltering={true}

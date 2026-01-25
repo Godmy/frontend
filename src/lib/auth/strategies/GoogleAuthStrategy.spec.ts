@@ -1,8 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GoogleAuthStrategy } from './GoogleAuthStrategy';
 import type { IGraphQLClient } from '../interfaces';
-import type { GoogleAuthData, User } from '../types';
+import type { GoogleAuthData, User, AuthResult } from '../types';
 import { AUTH_STRATEGIES } from '../constants';
+
+function assertSuccess<T>(result: AuthResult<T>): asserts result is { success: true; data: T } {
+	if (!result.success) {
+		throw new Error(`Expected success, got error: ${result.error}`);
+	}
+}
+
+function assertFailure<T>(result: AuthResult<T>): asserts result is { success: false; error: string } {
+	if (result.success) {
+		throw new Error('Expected failure, got success');
+	}
+}
 
 describe('GoogleAuthStrategy', () => {
 	let strategy: GoogleAuthStrategy;
@@ -62,6 +74,7 @@ describe('GoogleAuthStrategy', () => {
 			const result = await strategy.authenticate(validGoogleData);
 
 			expect(result.success).toBe(true);
+			assertSuccess(result);
 			expect(result.data).toEqual({
 				user: mockUser,
 				tokens: mockTokens
@@ -90,6 +103,7 @@ describe('GoogleAuthStrategy', () => {
 			const result = await strategy.authenticate(validGoogleData);
 
 			expect(result.success).toBe(false);
+			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 
@@ -104,6 +118,7 @@ describe('GoogleAuthStrategy', () => {
 			const result = await strategy.authenticate(validGoogleData);
 
 			expect(result.success).toBe(false);
+			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 
@@ -113,6 +128,7 @@ describe('GoogleAuthStrategy', () => {
 			const result = await strategy.authenticate(validGoogleData);
 
 			expect(result.success).toBe(false);
+			assertFailure(result);
 			expect(result.error).toBe('Google authentication failed');
 		});
 
@@ -160,7 +176,8 @@ describe('GoogleAuthStrategy', () => {
 			const result = await strategy.authenticate(validGoogleData);
 
 			expect(result.success).toBe(true);
-			expect(result.data?.user.profile?.avatar).toBe('https://lh3.googleusercontent.com/avatar.jpg');
+			assertSuccess(result);
+			expect(result.data.user.profile?.avatar).toBe('https://lh3.googleusercontent.com/avatar.jpg');
 		});
 
 		it('should handle expired Google token', async () => {
@@ -170,6 +187,7 @@ describe('GoogleAuthStrategy', () => {
 			const result = await strategy.authenticate(validGoogleData);
 
 			expect(result.success).toBe(false);
+			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 	});

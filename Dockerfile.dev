@@ -4,14 +4,19 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install yarn 1.x (classic) to match local environment
-RUN apk add --no-cache yarn
+# Enable Corepack and use Yarn 4 (Berry)
+RUN corepack enable && corepack prepare yarn@4.11.0 --activate
+
+# Reduce flaky registry timeouts inside Docker
+RUN yarn config set -H npmRegistryServer "https://registry.npmjs.org" \
+ && yarn config set -H httpTimeout 600000 \
+ && yarn config set -H httpRetry 5
 
 # Copy package files
 COPY package.json yarn.lock ./
 
 # Install all dependencies (including dev dependencies)
-RUN yarn install --frozen-lockfile
+RUN yarn install --immutable
 
 # Copy source code
 COPY . .

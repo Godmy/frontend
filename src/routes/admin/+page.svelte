@@ -11,13 +11,13 @@
 	let { data }: { data: PageData } = $props();
 
 	const adminStatsStore = data.GetAdminStats;
-	const adminData = $derived($adminStatsStore?.data ?? {});
+	const adminData = $derived($adminStatsStore?.data ?? null);
 
-	const stats = $derived(() => [
+	const stats = $derived.by(() => [
 		{
 			name: 'Total Users',
 			value: String(
-				adminData.systemStats?.users?.total ?? adminData.allUsers?.total ?? 0
+				adminData?.systemStats?.users?.total ?? adminData?.allUsers?.total ?? 0
 			),
 			icon: Users,
 			iconBg: 'bg-blue-100',
@@ -26,7 +26,7 @@
 		{
 			name: 'Total Roles',
 			value: String(
-				adminData.roles?.length ?? Object.keys(adminData.systemStats?.roles ?? {}).length ?? 0
+				adminData?.roles?.length ?? Object.keys(adminData?.systemStats?.roles ?? {}).length ?? 0
 			),
 			icon: Shield,
 			iconBg: 'bg-purple-100',
@@ -35,7 +35,7 @@
 		{
 			name: 'Active Users',
 			value: String(
-				adminData.systemStats?.users?.active ?? adminData.allUsers?.users?.filter(u => u.isActive)?.length ?? 0
+				adminData?.systemStats?.users?.active ?? adminData?.allUsers?.users?.filter(u => u.isActive)?.length ?? 0
 			),
 			icon: UserCheck,
 			iconBg: 'bg-green-100',
@@ -44,8 +44,8 @@
 		{
 			name: 'Inactive Users',
 			value: String(
-				(adminData.systemStats?.users?.total ?? adminData.allUsers?.total ?? 0) -
-				(adminData.systemStats?.users?.active ?? adminData.allUsers?.users?.filter(u => u.isActive)?.length ?? 0)
+				(adminData?.systemStats?.users?.total ?? adminData?.allUsers?.total ?? 0) -
+				(adminData?.systemStats?.users?.active ?? adminData?.allUsers?.users?.filter(u => u.isActive)?.length ?? 0)
 			),
 			icon: UserMinus,
 			iconBg: 'bg-red-100',
@@ -83,11 +83,12 @@
 				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
 					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 						{#each stats as stat}
+							{@const Icon = stat.icon}
 							<div class="bg-white overflow-hidden shadow-lg rounded-xl hover:shadow-xl transition-shadow">
 								<div class="p-6">
 								<div class="flex items-center">
 									<div class="flex-shrink-0 p-3 rounded-lg {stat.iconBg}">
-										<svelte:component this={stat.icon} class={`h-6 w-6 ${stat.iconColor}`} />
+										<Icon class={`h-6 w-6 ${stat.iconColor}`} />
 									</div>
 										<div class="ml-5 w-0 flex-1">
 											<dl>
@@ -124,8 +125,8 @@
 							</div>
 
 							<div class="space-y-3 max-h-96 overflow-y-auto">
-								{#if adminData.allUsers?.users && adminData.allUsers?.users.length > 0}
-									{#each adminData.allUsers?.users as user}
+								{#if adminData?.allUsers?.users && adminData?.allUsers?.users.length > 0}
+									{#each adminData?.allUsers?.users as user}
 										<div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
 											<div class="flex items-center space-x-3">
 												<div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
@@ -140,7 +141,11 @@
 												<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
 													{user.isActive ? 'Active' : 'Inactive'}
 												</span>
-												<button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+												<button
+													type="button"
+													aria-label={`Edit ${user.username}`}
+													class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+												>
 													<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
 													</svg>
@@ -171,8 +176,8 @@
 							</div>
 
 							<div class="space-y-3 max-h-96 overflow-y-auto">
-								{#if adminData.roles && adminData.roles?.length > 0}
-									{#each adminData.roles as role}
+								{#if adminData?.roles && adminData?.roles?.length > 0}
+									{#each adminData?.roles as role}
 										<div class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
 											<div class="flex justify-between items-start mb-2">
 												<div>
@@ -181,7 +186,11 @@
 														<p class="text-sm text-gray-500 mt-1">{role.description}</p>
 													{/if}
 												</div>
-												<button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+												<button
+													type="button"
+													aria-label={`Edit ${role.name}`}
+													class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+												>
 													<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
 													</svg>

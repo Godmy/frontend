@@ -1,12 +1,12 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import type { HTMLDivAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   type Props = {
     id: string;
     class?: string;
     children?: any;
-  } & HTMLDivAttributes;
+  } & HTMLAttributes<HTMLDivElement>;
 
   let { children, ...props }: Props = $props();
 
@@ -36,3 +36,4 @@
     {@render children()}
   {/if}
 </div>
+

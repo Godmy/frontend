@@ -4,10 +4,13 @@
   import type { Concept } from '$entities/concept';
   import { Modal } from '$shared/ui';
 
+  type LanguageOption = Pick<Language, 'id' | 'name'>;
+  type ConceptOption = Pick<Concept, 'id' | 'path'>;
+
   type Props = {
     dictionary?: Dictionary;
-    languages: Language[];
-    concepts: Concept[];
+    languages: LanguageOption[];
+    concepts: ConceptOption[];
     onSubmit: (data: DictionaryInput) => void;
     onCancel: () => void;
     isOpen: boolean;

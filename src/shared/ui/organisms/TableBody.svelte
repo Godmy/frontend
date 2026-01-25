@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { HTMLTableSectionAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
-  type Props = HTMLTableSectionAttributes;
+  type Props = HTMLAttributes<HTMLTableSectionElement>;
 
   let { class: className = '', ...restProps }: Props = $props();
 </script>

@@ -148,6 +148,11 @@
 </div>
 
 {#if showForm}
-	<LanguageForm language={editingLanguage} onSubmit={handleSubmit} onCancel={handleCancel} />
+	<LanguageForm
+		language={editingLanguage}
+		isOpen={showForm}
+		onSubmit={handleSubmit}
+		onCancel={handleCancel}
+	/>
 {/if}
 

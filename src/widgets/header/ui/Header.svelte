@@ -1,6 +1,6 @@
 <script lang="ts">
   // Компонент шапки приложения на уровне widgets
-  import { authStore } from '$lib/auth/stores/authStore';
+  import { authStoreWritable as authStore } from '$lib/auth/stores/authStore';
   import { Avatar } from '$shared/ui';
   
   function handleLogout() {
@@ -23,12 +23,12 @@
         </nav>
       </div>
       <div class="flex items-center">
-        {#if authStore.isAuthenticated && authStore.user}
+        {#if $authStore.isAuthenticated && $authStore.user}
           <div class="flex items-center space-x-4">
-            <span class="text-gray-700">Привет, {authStore.user.name}</span>
-            <Avatar size="sm" alt={authStore.user.name} />
-            <button 
-              on:click={handleLogout}
+            <span class="text-gray-700">Привет, {$authStore.user.name}</span>
+            <Avatar size="sm" alt={$authStore.user.name} />
+            <button
+              onclick={handleLogout}
               class="ml-4 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
             >
               Выйти

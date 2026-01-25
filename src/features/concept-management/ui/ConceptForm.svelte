@@ -23,7 +23,10 @@
   async function handleSubmit(e: Event) {
     e.preventDefault();
     const success = await form.handleSubmit((data) => {
-      onSubmit(data);
+      onSubmit({
+        ...data,
+        parentId: data.parentId ?? null
+      });
     });
     if (success) {
       form.reset();
@@ -38,7 +41,8 @@
       label="Path"
       type="text"
       bind:value={form.data.path}
-      onchange={(value) => form.setField('path', value)}
+      onchange={(event: Event & { currentTarget: HTMLInputElement }) =>
+        form.setField('path', event.currentTarget.value)}
       onblur={() => form.touchField('path')}
       errors={form.errors.path}
       required
@@ -50,7 +54,10 @@
       label="Depth"
       type="number"
       bind:value={form.data.depth}
-      onchange={(value) => form.setField('depth', value)}
+      onchange={(event: Event & { currentTarget: HTMLInputElement }) => {
+        const parsed = Number(event.currentTarget.value);
+        form.setField('depth', Number.isNaN(parsed) ? 0 : parsed);
+      }}
       onblur={() => form.touchField('depth')}
       errors={form.errors.depth}
       required
@@ -63,7 +70,11 @@
       label="Parent ID"
       type="number"
       bind:value={form.data.parentId}
-      onchange={(value) => form.setField('parentId', value)}
+      onchange={(event: Event & { currentTarget: HTMLInputElement }) => {
+        const raw = event.currentTarget.value;
+        const parsed = raw === '' ? null : Number(raw);
+        form.setField('parentId', Number.isNaN(parsed as number) ? null : parsed);
+      }}
       onblur={() => form.touchField('parentId')}
       errors={form.errors.parentId}
       placeholder="Optional parent concept ID"

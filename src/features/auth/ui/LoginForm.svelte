@@ -1,6 +1,7 @@
 <script lang="ts">
   // Компонент формы входа на уровне features
   import { FormFactory } from '$shared/ui';
+  import type { FormDefinition } from '$shared/ui/molecules/FormFactory.svelte';
   import { notificationStore } from '$lib/notifications';
   import { authStoreWritable as authStore } from '$lib/auth/stores/authStore';
   
@@ -10,7 +11,7 @@
     rememberMe?: boolean;
   };
 
-  const loginFormDefinition = {
+  const loginFormDefinition: FormDefinition<LoginFormData> = {
     fields: [
       {
         name: 'email',

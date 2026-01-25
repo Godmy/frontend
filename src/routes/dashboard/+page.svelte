@@ -33,7 +33,7 @@
 		console.log('[Dashboard] Houdini snapshot:', $dashboardStatsStore);
 	});
 
-	const stats = $derived(() => [
+	const stats = $derived.by(() => [
 		{
 			name: t(trans, 'ui/dashboard/stats/concepts', 'Total Concepts'),
 			value: String($dashboardStatsStore?.data?.counts?.concepts ?? 0),
@@ -85,11 +85,12 @@
 				<!-- Stats Grid -->
 				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
 					{#each stats as stat}
+						{@const Icon = stat.icon}
 						<div class="bg-white overflow-hidden shadow-lg rounded-xl hover:shadow-xl transition-shadow">
 							<div class="p-6">
 								<div class="flex items-center">
 									<div class="flex-shrink-0 p-3 rounded-lg {stat.iconBg}">
-										<svelte:component this={stat.icon} class={`h-6 w-6 ${stat.iconColor}`} />
+										<Icon class={`h-6 w-6 ${stat.iconColor}`} />
 									</div>
 									<div class="ml-5 w-0 flex-1">
 										<dl>

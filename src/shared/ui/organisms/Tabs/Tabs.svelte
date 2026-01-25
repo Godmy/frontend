@@ -1,12 +1,12 @@
 <script lang="ts">
   import { setContext } from 'svelte';
-  import type { HTMLDivAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   type Props = {
     selectedId?: string;
     onTabChange?: (id: string) => void;
     class?: string;
-  } & HTMLDivAttributes;
+  } & HTMLAttributes<HTMLDivElement>;
 
   let props: Props = $props();
 
@@ -56,3 +56,4 @@
 <div {...props} class="w-full {props.class || ''}">
   <slot />
 </div>
+

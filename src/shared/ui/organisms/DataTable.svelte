@@ -26,18 +26,33 @@
     enablePagination?: boolean;
   } & HTMLTableAttributes;
 
-  let props: Props<any> = $props();
+  type Row = Record<string, any>;
+
+  let {
+    data,
+    columns,
+    caption,
+    striped = false,
+    bordered = false,
+    hoverable = false,
+    pageSize = 10,
+    enableFiltering = false,
+    enableSorting = false,
+    enablePagination = false,
+    class: className = '',
+    ...restProps
+  }: Props<Row> = $props();
 
   // Состояния
   let currentPage = $state(1);
   let sortKey = $state<string | null>(null);
   let sortDirection = $state<'asc' | 'desc'>('asc');
   let filters = $state<Record<string, string>>({});
-  let filteredData = $derived(() => {
-    let result = [...props.data];
+  let filteredData = $derived.by(() => {
+    let result = [...data];
 
     // Фильтрация
-    if (props.enableFiltering) {
+    if (enableFiltering) {
       for (const [key, value] of Object.entries(filters)) {
         if (value) {
           result = result.filter(item => {
@@ -49,10 +64,12 @@
     }
 
     // Сортировка
-    if (props.enableSorting && sortKey) {
-      result.sort((a, b) => {
-        const aValue = getNestedValue(a, sortKey);
-        const bValue = getNestedValue(b, sortKey);
+    if (enableSorting) {
+      const activeSortKey = sortKey;
+      if (activeSortKey !== null) {
+        result.sort((a, b) => {
+          const aValue = getNestedValue(a, activeSortKey);
+          const bValue = getNestedValue(b, activeSortKey);
         
         // Для строковых значений
         if (typeof aValue === 'string' && typeof bValue === 'string') {
@@ -64,13 +81,14 @@
           const comparison = (aValue || 0) - (bValue || 0);
           return sortDirection === 'asc' ? comparison : -comparison;
         }
-      });
+        });
+      }
     }
 
     // Пагинация
-    if (props.enablePagination) {
-      const start = (currentPage - 1) * (props.pageSize || 10);
-      const end = start + (props.pageSize || 10);
+    if (enablePagination) {
+      const start = (currentPage - 1) * (pageSize || 10);
+      const end = start + (pageSize || 10);
       result = result.slice(start, end);
     }
 
@@ -78,10 +96,10 @@
   });
 
   // Общее количество страниц
-  let totalPages = $derived(() => {
-    if (!props.enablePagination) return 1;
-    const totalItems = props.enableFiltering 
-      ? props.data.filter(item => {
+  let totalPages = $derived.by(() => {
+    if (!enablePagination) return 1;
+    const totalItems = enableFiltering 
+      ? data.filter(item => {
           for (const [key, value] of Object.entries(filters)) {
             if (value) {
               const itemValue = String(getNestedValue(item, key)).toLowerCase();
@@ -92,14 +110,14 @@
           }
           return true;
         }).length
-      : props.data.length;
+      : data.length;
     
-    return Math.ceil(totalItems / (props.pageSize || 10));
+    return Math.ceil(totalItems / (pageSize || 10));
   });
 
   // Обработчики событий
   function handleSort(key: string) {
-    if (!props.enableSorting) return;
+    if (!enableSorting) return;
     
     if (sortKey === key) {
       sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -110,14 +128,14 @@
   }
 
   function handleFilterChange(key: string, value: string) {
-    if (!props.enableFiltering) return;
+    if (!enableFiltering) return;
     
     filters = { ...filters, [key]: value };
     currentPage = 1; // Сброс на первую страницу при фильтрации
   }
 
   function handlePageChange(page: number) {
-    if (!props.enablePagination) return;
+    if (!enablePagination) return;
     if (page >= 1 && page <= totalPages) {
       currentPage = page;
     }
@@ -128,7 +146,7 @@
   }
 
   // Навигация по страницам
-  let pageNumbers = $derived(() => {
+  let pageNumbers = $derived.by(() => {
     const delta = 2;
     const range = [];
     const rangeWithDots = [];
@@ -156,15 +174,15 @@
 
   // Классы для таблицы
   let tableClasses = $derived(`min-w-full divide-y divide-gray-200 ${
-    props.striped ? 'divide-gray-100' : ''
-  } ${props.class || ''}`);
+    striped ? 'divide-gray-100' : ''
+  } ${className || ''}`);
 </script>
 
 <div class="overflow-x-auto">
   <!-- Фильтры -->
-  {#if props.enableFiltering}
+  {#if enableFiltering}
     <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-      {#each props.columns as column}
+      {#each columns as column}
         {#if column.filterable}
           <div>
             <label for="filter-{column.key}" class="block text-sm font-medium text-gray-700 mb-1">
@@ -176,7 +194,7 @@
               placeholder="Фильтр {column.header}"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               bind:value={filters[column.key]}
-              on:input={() => handleFilterChange(column.key, filters[column.key])}
+              oninput={() => handleFilterChange(column.key, filters[column.key])}
             />
           </div>
         {/if}
@@ -185,13 +203,13 @@
   {/if}
 
   <!-- Таблица -->
-  <table class={tableClasses} {...$restProps}>
+  <table class={tableClasses} {...restProps}>
     <caption class="py-3 px-6 text-left text-sm font-medium text-gray-900 bg-gray-50">
-      {props.caption}
+      {caption}
     </caption>
     <thead class="bg-gray-50">
       <tr>
-        {#each props.columns as column}
+        {#each columns as column}
           <th
             scope="col"
             class="
@@ -200,11 +218,11 @@
               {column.sortable ? 'cursor-pointer hover:text-gray-700' : ''}
             "
             class:selected={sortKey === column.key}
-            on:click={() => handleSort(column.key)}
+            onclick={() => handleSort(column.key)}
           >
             <div class="flex items-center">
               {column.header}
-              {#if props.enableSorting && column.sortable}
+              {#if enableSorting && column.sortable}
                 {#if sortKey === column.key}
                   {sortDirection === 'asc' 
                     ? ' ↑' 
@@ -221,9 +239,9 @@
       </tr>
     </thead>
     <tbody class="bg-white divide-y divide-gray-200">
-      {#each filteredData as item (item.id || item[props.columns[0]?.key])}
-        <tr class={props.striped && current_index % 2 ? 'bg-gray-50' : ''}>
-          {#each props.columns as column}
+      {#each filteredData as item, index (item.id || item[columns[0]?.key])}
+        <tr class={striped && index % 2 ? 'bg-gray-50' : ''}>
+          {#each columns as column}
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {#if column.render}
                 {@html column.render(item)}
@@ -238,20 +256,20 @@
   </table>
 
   <!-- Пагинация -->
-  {#if props.enablePagination}
+  {#if enablePagination}
     <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4">
       <div class="flex flex-1 justify-between sm:hidden">
         <button
           class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           disabled={currentPage <= 1}
-          on:click={() => handlePageChange(currentPage - 1)}
+          onclick={() => handlePageChange(currentPage - 1)}
         >
           Назад
         </button>
         <button
           class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           disabled={currentPage >= totalPages}
-          on:click={() => handlePageChange(currentPage + 1)}
+          onclick={() => handlePageChange(currentPage + 1)}
         >
           Вперед
         </button>
@@ -267,7 +285,7 @@
             <button
               class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
               disabled={currentPage <= 1}
-              on:click={() => handlePageChange(currentPage - 1)}
+              onclick={() => handlePageChange(currentPage - 1)}
             >
               <span>предыдущая</span>
             </button>
@@ -281,7 +299,7 @@
                   {currentPage === page 
                     ? 'z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600' 
                     : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50'}"
-                  on:click={() => handlePageChange(page as number)}
+                  onclick={() => handlePageChange(page as number)}
                 >
                   {page}
                 </button>
@@ -291,7 +309,7 @@
             <button
               class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
               disabled={currentPage >= totalPages}
-              on:click={() => handlePageChange(currentPage + 1)}
+              onclick={() => handlePageChange(currentPage + 1)}
             >
               <span>следующая</span>
             </button>

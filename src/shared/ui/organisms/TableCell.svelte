@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { HTMLTableCellAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   type Props = {
     variant?: 'header' | 'data';
     align?: 'left' | 'center' | 'right';
-  } & HTMLTableCellAttributes;
+  } & HTMLAttributes<HTMLTableCellElement>;
 
   let { variant = 'data', align = 'left', class: className = '', ...restProps }: Props = $props();
 

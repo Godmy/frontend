@@ -1,8 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EmailPasswordStrategy } from './EmailPasswordStrategy';
 import type { IGraphQLClient } from '../interfaces';
-import type { LoginCredentials, User, AuthTokens } from '../types';
+import type { LoginCredentials, User, AuthTokens, AuthResult } from '../types';
 import { AUTH_STRATEGIES } from '../constants';
+
+function assertSuccess<T>(result: AuthResult<T>): asserts result is { success: true; data: T } {
+	if (!result.success) {
+		throw new Error(`Expected success, got error: ${result.error}`);
+	}
+}
+
+function assertFailure<T>(result: AuthResult<T>): asserts result is { success: false; error: string } {
+	if (result.success) {
+		throw new Error('Expected failure, got success');
+	}
+}
 
 describe('EmailPasswordStrategy', () => {
 	let strategy: EmailPasswordStrategy;
@@ -24,7 +36,7 @@ describe('EmailPasswordStrategy', () => {
 			id: 1,
 			firstName: 'Test',
 			lastName: 'User',
-			avatar: null,
+			avatar: undefined,
 			language: 'en',
 			timezone: 'UTC'
 		}
@@ -63,6 +75,7 @@ describe('EmailPasswordStrategy', () => {
 			const result = await strategy.authenticate(validCredentials);
 
 			expect(result.success).toBe(true);
+			assertSuccess(result);
 			expect(result.data).toEqual({
 				user: mockUser,
 				tokens: mockTokens
@@ -92,6 +105,7 @@ describe('EmailPasswordStrategy', () => {
 			const result = await strategy.authenticate(validCredentials);
 
 			expect(result.success).toBe(false);
+			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 
@@ -106,6 +120,7 @@ describe('EmailPasswordStrategy', () => {
 			const result = await strategy.authenticate(validCredentials);
 
 			expect(result.success).toBe(false);
+			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 
@@ -115,6 +130,7 @@ describe('EmailPasswordStrategy', () => {
 			const result = await strategy.authenticate(validCredentials);
 
 			expect(result.success).toBe(false);
+			assertFailure(result);
 			expect(result.error).toBe('Authentication failed');
 		});
 
@@ -135,6 +151,7 @@ describe('EmailPasswordStrategy', () => {
 			const result = await strategy.authenticate(emailCredentials);
 
 			expect(result.success).toBe(true);
+			assertSuccess(result);
 			expect(mockGraphQLClient.mutate).toHaveBeenCalledWith(
 				expect.any(String),
 				{
@@ -173,7 +190,7 @@ describe('EmailPasswordStrategy', () => {
 		it('should handle user without profile', async () => {
 			const userWithoutProfile = {
 				...mockUser,
-				profile: null
+				profile: undefined
 			};
 
 			vi.spyOn(mockGraphQLClient, 'mutate').mockResolvedValue({
@@ -187,7 +204,8 @@ describe('EmailPasswordStrategy', () => {
 			const result = await strategy.authenticate(validCredentials);
 
 			expect(result.success).toBe(true);
-			expect(result.data?.user.profile).toBeNull();
+			assertSuccess(result);
+			expect(result.data.user.profile).toBeUndefined();
 		});
 	});
 });

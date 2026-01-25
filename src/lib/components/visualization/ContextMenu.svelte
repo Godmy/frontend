@@ -103,7 +103,7 @@
     </div>
     <ul class="context-menu-items">
       {#each items as item}
-        <li class="context-menu-item" on:click={() => handleItemClick(item)}>
+        <li class="context-menu-item" onclick={() => handleItemClick(item)}>
           {#if item.icon}
             <span class="context-menu-item-icon">{item.icon}</span>
           {/if}

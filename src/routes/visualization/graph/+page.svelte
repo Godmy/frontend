@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { GraphVisualization } from '$lib/components/visualization';
+  import type { GraphData } from '$lib/components/visualization/GraphVisualization.svelte';
   
   // Sample data for demonstration
-  let sampleData = {
+  let sampleData: GraphData = {
     nodes: [
       { id: '1', label: 'Root Concept', type: 'concept', color: '#4682b4' },
       { id: '2', label: 'Child A', type: 'entity', color: '#32cd32' },
@@ -41,19 +42,19 @@
   <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
     <button 
       class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-      on:click={() => document.querySelector('.graph-visualization-container')?.scrollIntoView()}
+      onclick={() => document.querySelector('.graph-visualization-container')?.scrollIntoView()}
     >
       Force Directed
     </button>
     <button 
       class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-      on:click={() => document.querySelector('.graph-visualization-container')?.scrollIntoView()}
+      onclick={() => document.querySelector('.graph-visualization-container')?.scrollIntoView()}
     >
       Network View
     </button>
     <button 
       class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-      on:click={() => document.querySelector('.graph-visualization-container')?.scrollIntoView()}
+      onclick={() => document.querySelector('.graph-visualization-container')?.scrollIntoView()}
     >
       Sankey Diagram
     </button>

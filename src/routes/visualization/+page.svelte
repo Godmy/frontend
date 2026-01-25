@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { t } from '$lib/utils/i18n';
 
@@ -74,9 +72,6 @@
     }
   ];
 
-  function navigateToVisualization(route: string) {
-    goto(route);
-  }
 </script>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -91,9 +86,9 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {#each visualizationOptions as option (option.id)}
-      <div 
-        class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
-        on:click={() => navigateToVisualization(option.route)}
+      <a
+        href={option.route}
+        class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 block"
       >
         <div class="flex items-start">
           <span class="text-3xl mr-4">{option.icon}</span>
@@ -107,11 +102,11 @@
           </div>
         </div>
         <div class="mt-4">
-          <button class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+          <span class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
             {t(trans, 'ui/button/explore', 'Explore →')}
-          </button>
+          </span>
         </div>
-      </div>
+      </a>
     {/each}
   </div>
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HTMLDivAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   // Типы для колонок
   export type ColumnConfig = {
@@ -15,23 +15,23 @@
   type Props = {
     columns: ColumnConfig[];
     onColumnsChange?: (columns: ColumnConfig[]) => void;
-  } & HTMLDivAttributes;
+  } & HTMLAttributes<HTMLDivElement>;
 
-  let props: Props = $props();
+  let { columns, onColumnsChange, class: className = '', ...restProps }: Props = $props();
 
   // Локальное состояние колонок
   let localColumns = $state<ColumnConfig[]>([]);
 
   // Инициализация локального состояния
   $effect(() => {
-    localColumns = [...props.columns];
+    localColumns = [...columns];
   });
 
   // Обработчики
   function toggleColumnVisibility(index: number) {
     localColumns[index] = { ...localColumns[index], visible: !localColumns[index].visible };
-    if (props.onColumnsChange) {
-      props.onColumnsChange(localColumns);
+    if (onColumnsChange) {
+      onColumnsChange(localColumns);
     }
   }
 
@@ -40,30 +40,30 @@
     const [movedItem] = newColumns.splice(fromIndex, 1);
     newColumns.splice(toIndex, 0, movedItem);
     localColumns = newColumns;
-    if (props.onColumnsChange) {
-      props.onColumnsChange(localColumns);
+    if (onColumnsChange) {
+      onColumnsChange(localColumns);
     }
   }
 
   function resetToDefault() {
     // Восстанавливаем видимость по умолчанию
-    const resetColumns = props.columns.map(col => ({
+    const resetColumns = columns.map((col: ColumnConfig) => ({
       ...col,
       visible: true // Устанавливаем все колонки как видимые по умолчанию
     }));
     localColumns = resetColumns;
-    if (props.onColumnsChange) {
-      props.onColumnsChange(resetColumns);
+    if (onColumnsChange) {
+      onColumnsChange(resetColumns);
     }
   }
 </script>
 
-<div class="column-manager bg-white rounded-lg shadow p-4 {props.class || ''}" {...$restProps}>
+<div class="column-manager bg-white rounded-lg shadow p-4 {className}" {...restProps}>
   <div class="flex justify-between items-center mb-4">
     <h3 class="text-lg font-medium text-gray-900">Настройка колонок</h3>
     <button
       class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      on:click={resetToDefault}
+      onclick={resetToDefault}
     >
       Сбросить
     </button>
@@ -88,7 +88,7 @@
             id="column-{index}"
             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             bind:group={localColumns[index].visible}
-            on:change={() => toggleColumnVisibility(index)}
+            onchange={() => toggleColumnVisibility(index)}
           />
           <label for="column-{index}" class="ml-2 block text-sm text-gray-900">
             {column.header}
@@ -99,7 +99,7 @@
           <button
             class="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
             disabled={index === 0}
-            on:click={() => moveColumn(index, index - 1)}
+            onclick={() => moveColumn(index, index - 1)}
             title="Переместить вверх"
             aria-label="Переместить колонку вверх"
           >
@@ -110,7 +110,7 @@
           <button
             class="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
             disabled={index === localColumns.length - 1}
-            on:click={() => moveColumn(index, index + 1)}
+            onclick={() => moveColumn(index, index + 1)}
             title="Переместить вниз"
             aria-label="Переместить колонку вниз"
           >

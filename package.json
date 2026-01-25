@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite dev",
-        "build": "vite build",
+        "build": "svelte-kit sync && houdini generate && vite build",
         "preview": "vite preview",
         "prepare": "svelte-kit sync && houdini generate || echo ''",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -18,8 +18,7 @@
         "generate": "houdini generate",
         "generate:watch": "houdini generate --watch",
         "generate:pull": "houdini generate --pull-schema",
-        "houdini": "houdini",
-        "prebuild": "houdini generate"
+        "houdini": "houdini"
     },
     "devDependencies": {
         "@eslint/compat": "^1.4.0",

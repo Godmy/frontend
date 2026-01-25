@@ -65,7 +65,7 @@ class SearchStore {
       
       // Возвращаем фиктивные результаты поиска
       // В реальном приложении здесь будет GraphQL запрос
-      this._results = [
+      const results: SearchResult[] = [
         {
           id: '1',
           type: 'concept',
@@ -90,7 +90,9 @@ class SearchStore {
           path: '/languages/1',
           url: '/languages/1'
         }
-      ].filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
+      ];
+
+      this._results = results.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
     } catch (error) {
       console.error('Search error:', error);
       this._results = [];

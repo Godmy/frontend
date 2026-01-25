@@ -86,9 +86,9 @@
     <div class="legend-item">
       <div class="legend-color" style="background-color: {item.color}"></div>
       <div class="legend-label">{item.label}</div>
-      <div 
-        class="legend-toggle" 
-        on:click={() => toggleVisibility(item)}
+      <div
+        class="legend-toggle"
+        onclick={() => toggleVisibility(item)}
         title={item.visible ? "Hide" : "Show"}
       >
         {#if item.visible}

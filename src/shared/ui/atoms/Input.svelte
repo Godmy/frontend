@@ -5,7 +5,7 @@
     id: string;
     label: string;
     type?: string;
-    value?: string;
+    value?: string | number | null;
     errors?: string[];
     required?: boolean;
     disabled?: boolean;

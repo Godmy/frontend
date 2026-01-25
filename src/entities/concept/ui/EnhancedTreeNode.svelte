@@ -177,7 +177,7 @@
         <!-- Expand/Collapse button -->
         {#if hasChildren || lazyLoadedChildren[concept.id]}
           <button
-            on:click={() => dispatch('toggleNode', concept.id)}
+            onclick={() => dispatch('toggleNode', concept.id)}
             class="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700 focus:outline-none"
             aria-label={isExpanded ? 'Collapse' : 'Expand'}
           >
@@ -239,14 +239,14 @@
       <!-- Actions -->
       <div class="flex gap-2 ml-4 flex-shrink-0">
         <button
-          on:click={() => onEdit(concept)}
+          onclick={() => onEdit(concept)}
           class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           aria-label="Edit concept"
         >
           Edit
         </button>
         <button
-          on:click={() => onDelete(concept.id)}
+          onclick={() => onDelete(concept.id)}
           class="px-3 py-1 text-xs font-medium text-white bg-red-600 border border-transparent rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
           aria-label="Delete concept"
         >
@@ -285,7 +285,7 @@
     style="left: {contextMenuX}px; top: {contextMenuY}px"
   >
     <button
-      on:click={() => {
+      onclick={() => {
         onEdit(concept);
         closeContextMenu();
       }}
@@ -294,7 +294,7 @@
       Edit
     </button>
     <button
-      on:click={() => {
+      onclick={() => {
         onDelete(concept.id);
         closeContextMenu();
       }}
@@ -304,7 +304,7 @@
     </button>
     {#if hasChildren}
       <button
-        on:click={() => {
+        onclick={() => {
           dispatch('toggleNode', concept.id);
           closeContextMenu();
         }}

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { HTMLTableRowAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   type Props = {
     striped?: boolean;
     active?: boolean;
-  } & HTMLTableRowAttributes;
+  } & HTMLAttributes<HTMLTableRowElement>;
 
   let { striped, active, class: className = '', ...restProps }: Props = $props();
 

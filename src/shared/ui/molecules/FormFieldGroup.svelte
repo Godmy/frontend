@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HTMLDivAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   // Типы для пропсов
   type Props = {
@@ -11,22 +11,33 @@
     disabled?: boolean;
     orientation?: 'horizontal' | 'vertical';
     class?: string;
-  } & HTMLDivAttributes;
+  } & HTMLAttributes<HTMLDivElement>;
 
-  let props: Props = $props();
+  let {
+    label,
+    description,
+    required,
+    error,
+    hint,
+    disabled,
+    orientation = 'vertical',
+    class: className = '',
+    ...restProps
+  }: Props = $props();
+
 
   // Вычисляемые классы
-  let containerClasses = $derived(`field-group ${props.orientation === 'horizontal' ? 'flex items-start gap-3' : 'flex flex-col gap-2'} ${props.disabled ? 'opacity-70 cursor-not-allowed' : ''} ${props.class || ''}`);
+  let containerClasses = $derived(`field-group ${orientation === 'horizontal' ? 'flex items-start gap-3' : 'flex flex-col gap-2'} ${disabled ? 'opacity-70 cursor-not-allowed' : ''} ${className}`);
   
   // Определяем, есть ли ошибка
-  let hasError = $derived(!!props.error);
+  let hasError = $derived(!!error);
 </script>
 
-<div class={containerClasses} {...$restProps}>
-  {#if props.label}
+<div class={containerClasses} {...restProps}>
+  {#if label}
     <label class="field-label text-sm font-medium text-gray-700 flex items-center gap-1">
-      {props.label}
-      {#if props.required}
+      {label}
+      {#if required}
         <span class="text-red-500" aria-label="обязательное поле">*</span>
       {/if}
     </label>
@@ -35,21 +46,21 @@
   <div class="field-content flex-1">
     <slot />
     
-    {#if props.description}
+    {#if description}
       <p class="mt-1 text-sm text-gray-500">
-        {props.description}
+        {description}
       </p>
     {/if}
     
     {#if hasError}
       <p class="mt-1 text-sm text-red-600" aria-live="polite">
-        {props.error}
+        {error}
       </p>
     {/if}
     
-    {#if props.hint && !hasError}
+    {#if hint && !hasError}
       <p class="mt-1 text-sm text-gray-500">
-        {props.hint}
+        {hint}
       </p>
     {/if}
   </div>
@@ -76,3 +87,4 @@
     @apply pb-1;
   }
 </style>
+

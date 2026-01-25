@@ -1,9 +1,12 @@
 <script lang="ts">
   import type { Language } from '$entities/language';
 
+  type LanguageItem = Pick<Language, 'id' | 'name' | 'code'> &
+    Partial<Pick<Language, 'nativeName'>>;
+
   type Props = {
-    languages: Language[];
-    onEdit: (language: Language) => void;
+    languages: LanguageItem[];
+    onEdit: (language: LanguageItem) => void;
     onDelete: (id: number) => void;
   };
 
@@ -19,7 +22,7 @@
             <div>
               <h3 class="text-lg font-medium text-gray-900">{language.name}</h3>
               <div class="mt-1 text-sm text-gray-500">
-                Code: {language.code} | Native: {language.nativeName}
+                Code: {language.code} | Native: {language.nativeName ?? '—'}
               </div>
             </div>
             <div class="flex space-x-2">

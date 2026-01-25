@@ -1,12 +1,12 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import type { HTMLDivAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   type Props = {
     value: string;
     class?: string;
     children?: any;
-  } & HTMLDivAttributes;
+  } & HTMLAttributes<HTMLDivElement>;
 
   let { children, ...props }: Props = $props();
 
@@ -24,3 +24,4 @@
 <div {...props} id={uniqueId} class="border border-gray-200 rounded-lg overflow-hidden {props.class || ''}">
   {@render children()}
 </div>
+

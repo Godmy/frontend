@@ -4,8 +4,8 @@
 
   let { data }: { data: PageData } = $props();
 
-  // Extract concepts from the loaded data
-  const concepts = $derived(data.GetConceptHierarchy?.concepts || []);
+  const hierarchyStore = data.GetConceptHierarchy;
+  const concepts = $derived($hierarchyStore?.data?.concepts ?? []);
 </script>
 
 <div class="container mx-auto px-4 py-8">

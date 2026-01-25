@@ -3,17 +3,18 @@
   import { Input } from '../atoms';
 
   type Props = {
-    label?: string;
+    id: string;
+    label: string;
     error?: string;
     required?: boolean;
   } & HTMLInputAttributes;
 
-  let { label, error, required, ...rest } = $props();
+  let { id, label, error, required, class: className = '', ...rest } = $props();
 </script>
 
 <div class="mb-4">
   {#if label}
-    <label for={rest.id} class="block text-sm font-medium text-gray-700 mb-1">
+    <label for={id} class="block text-sm font-medium text-gray-700 mb-1">
       {label}
       {#if required}
         <span class="text-red-500">*</span>
@@ -22,8 +23,10 @@
   {/if}
 
   <Input
+    id={id}
+    label={label}
     {...rest}
-    class={`w-full {error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'} ${(rest.class as string) || ''}`}
+    class={`w-full {error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'} ${className}`}
   />
 
   {#if error}

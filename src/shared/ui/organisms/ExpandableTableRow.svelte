@@ -1,43 +1,55 @@
 <script lang="ts">
-  import type { HTMLTableAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   type Props = {
     expanded?: boolean;
     expandable?: boolean;
     expandIcon?: string;
     collapseIcon?: string;
-  } & HTMLTableAttributes;
+    colspan?: number;
+    colSpan?: number;
+  } & HTMLAttributes<HTMLTableRowElement>;
 
-  let props: Props = $props();
-  let isExpanded = $state(props.expanded || false);
+  let {
+    expanded,
+    expandable = true,
+    expandIcon,
+    collapseIcon,
+    colspan,
+    colSpan,
+    class: className = '',
+    ...restProps
+  }: Props = $props();
+
+  let isExpanded = $state(expanded || false);
 
   function toggle() {
-    if (props.expandable !== false) {
+    if (expandable !== false) {
       isExpanded = !isExpanded;
     }
   }
 
   // Обновляем локальное состояние при изменении пропса
   $effect(() => {
-    isExpanded = props.expanded || false;
+    isExpanded = expanded || false;
   });
 </script>
 
 <!-- Родительская строка таблицы -->
-<tr {...$restProps} class="parent-row {props.class || ''}">
+<tr {...restProps} class="parent-row {className}">
   <!-- Ячейка для иконки расширения -->
-  {#if props.expandable !== false}
+  {#if expandable !== false}
     <td class="expand-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500 w-12">
       <button
         class="expand-toggle focus:outline-none"
-        on:click={toggle}
+        onclick={toggle}
         aria-expanded={isExpanded}
         aria-label={isExpanded ? 'Свернуть' : 'Развернуть'}
       >
         {#if isExpanded}
-          {@html props.collapseIcon || '<svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>'}
+          {@html collapseIcon || '<svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>'}
         {:else}
-          {@html props.expandIcon || '<svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>'}
+          {@html expandIcon || '<svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>'}
         {/if}
       </button>
     </td>
@@ -52,9 +64,9 @@
   <tr class="expanded-row">
     <td
       colspan={
-        props.expandable !== false
-          ? (props.colspan ?? props.colSpan ?? 2)
-          : (props.colspan ?? props.colSpan ?? 1)
+        expandable !== false
+          ? (colspan ?? colSpan ?? 2)
+          : (colspan ?? colSpan ?? 1)
       }
       class="expanded-cell px-6 py-4 bg-gray-50 text-sm text-gray-700"
     >

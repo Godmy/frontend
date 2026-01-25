@@ -11,7 +11,7 @@
 
 	let { data }: { data: PageData } = $props();
 	const dictionariesStore = data.GetDictionariesData;
-	const dictionariesData = $derived($dictionariesStore?.data ?? {});
+	const dictionariesData = $derived($dictionariesStore?.data ?? null);
 
 	// Get translations from layout
 	const trans = $derived($page.data.translations || {});
@@ -136,9 +136,7 @@
 				<div class="px-4 sm:px-0">
 					{#if $dictionariesStore?.data}
 						<DictionaryList
-							dictionaries={$dictionariesData.dictionaries}
-							languages={$dictionariesData.languages}
-							concepts={$dictionariesData.concepts}
+							dictionaries={dictionariesData?.dictionaries || []}
 							onEdit={handleEdit}
 							onDelete={handleDelete}
 						/>
@@ -158,6 +156,7 @@
 		dictionary={editingDictionary}
 		languages={$dictionariesStore?.data?.languages || []}
 		concepts={$dictionariesStore?.data?.concepts || []}
+		isOpen={showForm}
 		onSubmit={handleSubmit}
 		onCancel={handleCancel}
 	/>

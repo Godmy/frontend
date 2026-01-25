@@ -8,8 +8,8 @@ export * from './utils/keyboard';
 export * from './stores/themeStore.svelte';
 export * from './stores/searchStore.svelte';
 export * from './stores/languageStore.svelte';
-export * from './stores/notification.store';
-export * from './stores/online.store';
+export * from './stores/notification.store.svelte';
+export * from './stores/online.store.svelte';
 
 // Config
 export * from './config';
@@ -17,5 +17,3 @@ export * from './config';
 // Errors
 export * from './errors';
 
-// Components
-export * from './components/ui';

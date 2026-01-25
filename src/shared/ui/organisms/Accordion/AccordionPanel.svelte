@@ -1,11 +1,11 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import type { HTMLDivAttributes } from 'svelte/elements';
+  import type { HTMLAttributes } from 'svelte/elements';
 
   type Props = {
     value: string;
     class?: string;
-  } & HTMLDivAttributes;
+  } & HTMLAttributes<HTMLDivElement>;
 
   let props: Props = $props();
 
@@ -32,3 +32,4 @@
     <slot />
   </div>
 </div>
+

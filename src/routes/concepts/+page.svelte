@@ -221,6 +221,11 @@
 </div>
 
 {#if showForm}
-	<ConceptForm concept={editingConcept} onSubmit={handleSubmit} onCancel={handleCancel} />
+	<ConceptForm
+		concept={editingConcept}
+		isOpen={showForm}
+		onSubmit={handleSubmit}
+		onCancel={handleCancel}
+	/>
 {/if}
 
