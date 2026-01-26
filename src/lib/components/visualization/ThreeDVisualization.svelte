@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  export type Node3D = {
+  type Node3D = {
     id: string;
     name: string;
     position: { x: number; y: number; z: number };
@@ -10,14 +10,14 @@
     size?: number;
   };
 
-  export type Edge3D = {
+  type Edge3D = {
     id: string;
     from: string;
     to: string;
     color?: string;
   };
 
-  export type ThreeDData = {
+  type ThreeDData = {
     nodes: Node3D[];
     edges: Edge3D[];
   };
@@ -208,7 +208,7 @@
     nodes.forEach(node => {
       if (node.material) {
         if (Array.isArray(node.material)) {
-          node.material.forEach(mat => {
+          node.material.forEach((mat: any) => {
             if (mat.color && node.userData) {
               mat.color.set(node.userData.color || 0x4682b4);
             }
@@ -222,7 +222,7 @@
     if (intersects.length > 0) {
       const object = intersects[0].object;
       if (Array.isArray(object.material)) {
-        object.material.forEach(mat => {
+        object.material.forEach((mat: any) => {
           if (mat.color) {
             mat.color.set(0xff0000);
           }
@@ -262,11 +262,11 @@
 
     if (scene) {
       // Dispose of geometries and materials
-      scene.traverse((object) => {
+      scene.traverse((object: any) => {
         if (object.isMesh) {
           object.geometry.dispose();
           if (Array.isArray(object.material)) {
-            object.material.forEach(material => {
+            object.material.forEach((material: any) => {
               if (material.dispose) {
                 material.dispose();
               }

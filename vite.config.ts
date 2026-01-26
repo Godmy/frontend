@@ -10,7 +10,7 @@ export default defineConfig({
 		},
 		proxy: {
 			'/graphql': {
-				target: 'http://127.0.0.1:8000',
+				target: process.env.BACKEND_URL ?? 'http://127.0.0.1:8000',
 				changeOrigin: true,
 				rewrite: (path) => path.replace(/^\/graphql$/, '/graphql/')
 			}

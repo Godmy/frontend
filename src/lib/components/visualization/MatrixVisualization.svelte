@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  export type MatrixData = {
+  type MatrixData = {
     nodes: string[];
     matrix: number[][];
   };
@@ -54,7 +54,7 @@
       .attr('style', 'max-width: 100%; height: auto; font: 10px sans-serif;');
 
     // Create a group for the visualization
-    const g = svg.append('g').attr('transform', 'translate(50,50)');
+    const g: any = svg.append('g').attr('transform', 'translate(50,50)');
 
     // Create tooltip
     const tooltip = d3.select('body')
@@ -78,17 +78,17 @@
       .data(data.matrix)
       .enter().append('g')
       .attr('class', 'row')
-      .attr('transform', (d, i) => `translate(0,${i * cellSize})`);
+      .attr('transform', (d: any, i: any) => `translate(0,${i * cellSize})`);
 
     const cell = row.selectAll('.cell')
-      .data((d, i) => d.map((cellValue, j) => ({ row: i, col: j, value: cellValue })))
+      .data((d: any, i: any) => d.map((cellValue: any, j: any) => ({ row: i, col: j, value: cellValue })))
       .enter().append('rect')
       .attr('class', 'cell')
-      .attr('x', (d) => d.col * cellSize)
+      .attr('x', (d: any) => d.col * cellSize)
       .attr('width', cellSize)
       .attr('height', cellSize)
-      .style('fill', (d) => colorScale(d.value))
-      .on('mouseover', (event, d) => {
+      .style('fill', (d: any) => colorScale(d.value))
+      .on('mouseover', (event: any, d: any) => {
         tooltip
           .html(`
             <div><strong>${data.nodes[d.row]}</strong> → <strong>${data.nodes[d.col]}</strong></div>
@@ -96,7 +96,7 @@
           `)
           .style('visibility', 'visible');
       })
-      .on('mousemove', (event) => {
+      .on('mousemove', (event: any) => {
         tooltip
           .style('top', event.pageY - 10 + 'px')
           .style('left', event.pageX + 10 + 'px');
@@ -112,10 +112,10 @@
       .data(data.nodes)
       .enter().append('text')
       .attr('x', -6)
-      .attr('y', (d, i) => i * cellSize + cellSize / 2)
+      .attr('y', (d: any, i: any) => i * cellSize + cellSize / 2)
       .attr('dy', '.32em')
       .attr('text-anchor', 'end')
-      .text(d => d)
+      .text((d: any) => d)
       .style('font-size', '10px');
 
     // Add column labels
@@ -124,31 +124,31 @@
       .selectAll('text')
       .data(data.nodes)
       .enter().append('text')
-      .attr('x', (d, i) => i * cellSize + cellSize / 2)
+      .attr('x', (d: any, i: any) => i * cellSize + cellSize / 2)
       .attr('y', -6)
       .attr('text-anchor', 'middle')
-      .text(d => d)
+      .text((d: any) => d)
       .style('font-size', '10px');
 
     // Add diagonal labels if there are many nodes
     if (data.nodes.length <= 20) {
       const diagonalLabels = g.selectAll('.diagonal-label')
-        .data(data.matrix.map((row, i) => ({ i, value: row[i] })))
+        .data(data.matrix.map((row: any, i: any) => ({ i, value: row[i] })))
         .enter().append('text')
         .attr('class', 'diagonal-label')
-        .attr('x', (d) => d.i * cellSize + cellSize / 2)
-        .attr('y', (d) => d.i * cellSize + cellSize / 2)
+        .attr('x', (d: any) => d.i * cellSize + cellSize / 2)
+        .attr('y', (d: any) => d.i * cellSize + cellSize / 2)
         .attr('dy', '.32em')
         .attr('text-anchor', 'middle')
         .attr('fill', 'white')
         .style('font-size', '8px')
-        .text(d => d.value);
+        .text((d: any) => d.value);
     }
 
     // Add zoom functionality
     const zoom = d3.zoom()
       .scaleExtent([0.1, 8])
-      .on('zoom', (event) => {
+      .on('zoom', (event: any) => {
         g.attr('transform', event.transform);
       });
 

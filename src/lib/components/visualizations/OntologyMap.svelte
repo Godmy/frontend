@@ -76,24 +76,27 @@
     );
 
     simulation.nodes(filteredNodes);
-    simulation.force('link').links(filteredLinks);
+    const linkForce = simulation.force('link') as d3.ForceLink<any, any> | null;
+    if (linkForce) {
+      linkForce.links(filteredLinks as any);
+    }
 
     node = node.data(filteredNodes, (d: any) => d.id)
       .join(
-        enter => enter.append('circle')
+        (enter: any) => enter.append('circle')
           .attr('r', 8)
           .attr('fill', (d: any) => d3.schemeCategory10[d.group % 10])
           .call(drag(simulation))
-          .call(node => node.append('title').text((d:any) => d.label)),
-        update => update,
-        exit => exit.remove()
+          .call((node: any) => node.append('title').text((d:any) => d.label)),
+        (update: any) => update,
+        (exit: any) => exit.remove()
       );
 
     link = link.data(filteredLinks, (d: any) => `${d.source.id}-${d.target.id}`)
       .join(
-        enter => enter.append('line').attr('stroke-width', 1.5),
-        update => update,
-        exit => exit.remove()
+        (enter: any) => enter.append('line').attr('stroke-width', 1.5),
+        (update: any) => update,
+        (exit: any) => exit.remove()
       );
 
     simulation.on('tick', () => {

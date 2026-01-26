@@ -35,12 +35,12 @@
       .attr('viewBox', `0 0 ${width} ${height}`)
       .attr('style', 'max-width: 100%; height: auto;');
 
-    const sankeyLayout = sankey()
+    const sankeyLayout = sankey<any, any>()
       .nodeWidth(15)
       .nodePadding(10)
       .extent([[1, 1], [width - 1, height - 6]]);
 
-    const { nodes, links } = sankeyLayout(data);
+    const { nodes, links } = sankeyLayout(data as any);
 
     // Draw links
     svg.append('g')
@@ -65,7 +65,7 @@
         .attr('width', d => (d.x1 || 0) - (d.x0 || 0))
         .attr('fill', '#a0aec0')
       .append('title')
-        .text(d => `${d.name}\n${d.value}`);
+        .text((d: any) => `${d.name}\n${d.value}`);
 
     // Add labels
     svg.append('g')
@@ -77,8 +77,8 @@
         .attr('x', d => (d.x0 || 0) < width / 2 ? (d.x1 || 0) + 6 : (d.x0 || 0) - 6)
         .attr('y', d => ((d.y1 || 0) + (d.y0 || 0)) / 2)
         .attr('dy', '0.35em')
-        .attr('text-anchor', d => (d.x0 || 0) < width / 2 ? 'start' : 'end')
-        .text(d => d.name);
+        .attr('text-anchor', (d: any) => (d.x0 || 0) < width / 2 ? 'start' : 'end')
+        .text((d: any) => d.name);
   });
 </script>
 

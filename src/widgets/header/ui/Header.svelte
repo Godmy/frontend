@@ -24,9 +24,10 @@
       </div>
       <div class="flex items-center">
         {#if $authStore.isAuthenticated && $authStore.user}
+          {@const displayName = $authStore.user.profile?.firstName || $authStore.user.username}
           <div class="flex items-center space-x-4">
-            <span class="text-gray-700">Привет, {$authStore.user.name}</span>
-            <Avatar size="sm" alt={$authStore.user.name} />
+            <span class="text-gray-700">Привет, {displayName}</span>
+            <Avatar size="sm" alt={displayName} />
             <button
               onclick={handleLogout}
               class="ml-4 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"

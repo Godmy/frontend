@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  export type TreeNode = {
+  type TreeNode = {
     id: string;
     name: string;
     children?: TreeNode[];
@@ -64,7 +64,7 @@
     // Create tree layout
     treeLayout = d3.tree()
       .size([height, width - 160])
-      .separation((a, b) => (a.parent === b.parent ? 1 : 1) / a.depth);
+      .separation((a: any, b: any) => (a.parent === b.parent ? 1 : 1) / a.depth);
 
     // Compute the tree layout
     treeLayout(root);
@@ -72,20 +72,20 @@
     // Update node positions
     let i = 0;
     const duration = 750;
-    const node: d3.Selection<SVGGElement, HierarchyNode<any>, SVGGElement, any> = g
+    const node: d3.Selection<SVGGElement, any, SVGGElement, any> = g
       .selectAll('g')
       .data(root.descendants())
       .join(
-        enter => {
+        (enter: any) => {
           const nodeEnter = enter.append('g')
-            .attr('transform', d => `translate(${d.y},${d.x})`)
+            .attr('transform', (d: any) => `translate(${d.y},${d.x})`)
             .attr('class', 'node');
 
           // Add circles for nodes
           nodeEnter.append('circle')
             .attr('r', 5)
-            .attr('fill', d => d.children ? '#4682b4' : '#e34f26')
-            .on('click', (event, d) => {
+            .attr('fill', (d: any) => d.children ? '#4682b4' : '#e34f26')
+            .on('click', (event: any, d: any) => {
               if (collapsible) {
                 clickHandler(d);
               }
@@ -94,12 +94,12 @@
           // Add labels for nodes
           nodeEnter.append('text')
             .attr('dy', '0.31em')
-            .attr('x', d => d.children || d._children ? -10 : 10)
-            .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
-            .text(d => d.data.name)
+            .attr('x', (d: any) => d.children || d._children ? -10 : 10)
+            .attr('text-anchor', (d: any) => d.children || d._children ? 'end' : 'start')
+            .text((d: any) => d.data.name)
             .style('fill-opacity', 1)
             .style('cursor', 'pointer')
-            .on('click', (event, d) => {
+            .on('click', (event: any, d: any) => {
               if (collapsible) {
                 clickHandler(d);
               }
@@ -107,35 +107,35 @@
 
           return nodeEnter;
         },
-        update => update
-          .attr('transform', d => `translate(${d.y},${d.x})`),
-        exit => exit.remove()
+        (update: any) => update
+          .attr('transform', (d: any) => `translate(${d.y},${d.x})`),
+        (exit: any) => exit.remove()
       );
 
     // Create links between nodes
-    const link: d3.Selection<SVGPathElement, HierarchyNode<any>, SVGGElement, any> = g
+    const link: d3.Selection<SVGPathElement, any, SVGGElement, any> = g
       .selectAll('path')
       .data(root.links())
       .join(
-        enter => {
+        (enter: any) => {
           return enter.append('path')
             .attr('class', 'link')
             .attr('d', d3.linkHorizontal()
-              .x(d => d.y)
-              .y(d => d.x))
+              .x((d: any) => d.y)
+              .y((d: any) => d.x))
             .attr('fill', 'none')
             .attr('stroke', '#ccc')
             .attr('stroke-width', 1);
         },
-        update => update
+        (update: any) => update
           .attr('d', d3.linkHorizontal()
-            .x(d => d.y)
-            .y(d => d.x)),
-        exit => exit.remove()
+            .x((d: any) => d.y)
+            .y((d: any) => d.x)),
+        (exit: any) => exit.remove()
       );
   }
 
-  function clickHandler(d: HierarchyNode<any>) {
+  function clickHandler(d: any) {
     if (d.children) {
       d._children = d.children;
       d.children = null;
@@ -143,7 +143,7 @@
       d.children = d._children;
       d._children = null;
     }
-    
+
     createTree();
   }
 

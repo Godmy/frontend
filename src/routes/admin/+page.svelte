@@ -25,9 +25,7 @@
 		},
 		{
 			name: 'Total Roles',
-			value: String(
-				adminData?.roles?.length ?? Object.keys(adminData?.systemStats?.roles ?? {}).length ?? 0
-			),
+			value: String(adminData?.roles?.length ?? 0),
 			icon: Shield,
 			iconBg: 'bg-purple-100',
 			iconColor: 'text-purple-600'

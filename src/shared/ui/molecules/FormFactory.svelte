@@ -5,7 +5,7 @@
 
   // Типы для определения формы
   export type FieldDefinition<T = any> = {
-    name: keyof T;
+    name: Extract<keyof T, string>;
     label: string;
     type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea' | 'checkbox';
     options?: { value: string; label: string }[]; // Для select

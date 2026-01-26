@@ -1,7 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { GraphVisualization } from '$lib/components/visualization';
-  import type { GraphData } from '$lib/components/visualization/GraphVisualization.svelte';
+
+  type GraphNodeType = 'concept' | 'entity' | 'relation' | 'attribute';
+  type GraphData = {
+    nodes: { id: string; label: string; type: GraphNodeType; color?: string }[];
+    edges: { id: string; from: string; to: string; value: number }[];
+  };
   
   // Sample data for demonstration
   let sampleData: GraphData = {

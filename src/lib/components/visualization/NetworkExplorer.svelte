@@ -102,34 +102,34 @@
     network = new Network(container, networkData, options);
 
     // Add event listeners
-    network.on('click', (params) => {
+    network.on('click', (params: any) => {
       console.log('Node clicked:', params);
     });
 
-    network.on('doubleClick', (params) => {
+    network.on('doubleClick', (params: any) => {
       console.log('Node double-clicked:', params);
     });
 
-    network.on('oncontext', (params) => {
+    network.on('oncontext', (params: any) => {
       console.log('Node right-clicked:', params);
     });
 
-    network.on('hoverNode', (params) => {
+    network.on('hoverNode', (params: any) => {
       console.log('Node hovered:', params);
     });
 
-    network.on('blurNode', (params) => {
+    network.on('blurNode', (params: any) => {
       console.log('Node unhovered:', params);
     });
-    
+
     // Context menu for nodes
-    network.on('oncontext', (params) => {
+    network.on('oncontext', (params: any) => {
       params.event.preventDefault();
-      
+
       if (params.nodes.length > 0) {
         const nodeId = params.nodes[0];
         const node = originalNodes.find(n => n.id === nodeId);
-        
+
         if (node) {
           contextNodeId = nodeId;
           contextNode = node;

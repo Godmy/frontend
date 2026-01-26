@@ -2,19 +2,19 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  export type Node = {
+  type Node = {
     id: string;
     name: string;
     value?: number;
   };
 
-  export type Link = {
+  type Link = {
     source: string;
     target: string;
     value: number;
   };
 
-  export type SankeyData = {
+  type SankeyData = {
     nodes: Node[];
     links: Link[];
   };
