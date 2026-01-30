@@ -28,9 +28,11 @@
 {:else if auth.isAuthenticated}
   <slot />
 {:else}
-  <slot name="fallback">
+  {#if $$slots.fallback}
+    <slot name="fallback" />
+  {:else}
     <div class="flex items-center justify-center min-h-screen">
       <p>Redirecting...</p>
     </div>
-  </slot>
+  {/if}
 {/if}

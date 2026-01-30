@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 
-  export type ContextMenuItem = {
+  // Define the type inside script context module to avoid conflicts
+  type ContextMenuItem = {
     label: string;
     action: (nodeId?: string) => void;
     icon?: string;
@@ -31,7 +32,7 @@
 
   function handleItemClick(item: ContextMenuItem) {
     if (item.action) {
-      item.action(nodeId);
+      item.action(nodeId || undefined);
     }
     hideMenu();
   }
@@ -103,7 +104,18 @@
     </div>
     <ul class="context-menu-items">
       {#each items as item}
-        <li class="context-menu-item" onclick={() => handleItemClick(item)}>
+        <li
+          class="context-menu-item"
+          onclick={() => handleItemClick(item)}
+          onkeydown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleItemClick(item);
+            }
+          }}
+          tabindex="0"
+          role="button"
+        >
           {#if item.icon}
             <span class="context-menu-item-icon">{item.icon}</span>
           {/if}

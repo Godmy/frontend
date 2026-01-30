@@ -183,16 +183,6 @@
     flex-grow: 1;
   }
 
-  .cell {
-    stroke: #fff;
-    stroke-width: 1px;
-  }
-
-  .matrix-tooltip {
-    pointer-events: none;
-    z-index: 1000;
-  }
-
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
@@ -202,5 +192,5 @@
 
 <div class="matrix-visualization-container">
   <h3 class="matrix-visualization-title">{title}</h3>
-  <div bind:this={container} class="matrix-container" />
+  <div bind:this={container} class="matrix-container"></div>
 </div>

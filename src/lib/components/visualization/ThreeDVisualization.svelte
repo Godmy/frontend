@@ -309,15 +309,9 @@
     overflow: hidden;
     flex-grow: 1;
   }
-
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
 </style>
 
 <div class="three-d-visualization-container">
   <h3 class="three-d-visualization-title">{title}</h3>
-  <div bind:this={container} class="visualization-container" />
+  <div bind:this={container} class="visualization-container"></div>
 </div>

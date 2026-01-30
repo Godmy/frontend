@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Concept, TreeConcept } from '../model/types';
+  import Self from './EnhancedTreeNode.svelte';
 
   type Props = {
     concept: TreeConcept;
@@ -44,7 +45,7 @@
   let isExpanded = $derived(expandedNodes.has(concept.id));
   let isLoading = $derived(loadingNodes.has(concept.id));
   let hasChildren = $derived(
-    (concept.children && concept.children.length > 0) || 
+    (concept.children && concept.children.length > 0) ||
     (lazyLoadedChildren[concept.id] && lazyLoadedChildren[concept.id].length > 0)
   );
   let childCount = $derived(getChildCount(concept.id));
@@ -135,7 +136,7 @@
   ];
 
   let depthColor = $derived(depthColors[level % depthColors.length]);
-  
+
   // Определение всех дочерних элементов (включая lazy-загруженные)
   let allChildren = $derived([
     ...(concept.children || []),
@@ -159,13 +160,13 @@
     class="node-content px-6 py-3 hover:bg-gray-50 cursor-pointer border-l-4 {depthColor}"
     style="padding-left: {level * 24 + 24}px"
     draggable={true}
-    on:dragstart={handleDragStart}
-    on:dragend={handleDragEnd}
-    on:dragover={(e) => handleDragOver(e, 'inside')}
-    on:dragleave={handleDragLeave}
-    on:drop={handleDrop}
-    on:contextmenu={handleContextMenu}
-    on:keydown={handleKeyDown}
+    ondragstart={handleDragStart}
+    ondragend={handleDragEnd}
+    ondragover={(e: any) => handleDragOver(e, 'inside')}
+    ondragleave={handleDragLeave}
+    ondrop={handleDrop}
+    oncontextmenu={handleContextMenu}
+    onkeydown={handleKeyDown}
     role="treeitem"
     tabindex="0"
     aria-expanded={hasChildren ? isExpanded : undefined}
@@ -260,7 +261,7 @@
   {#if (isExpanded || concept.id in lazyLoadedChildren) && allChildren.length > 0}
     <ul class="children" role="group">
       {#each allChildren as child}
-        <svelte:self
+        <Self
           concept={child}
           {expandedNodes}
           {loadingNodes}

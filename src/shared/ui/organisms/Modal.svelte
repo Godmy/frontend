@@ -8,6 +8,8 @@
     size?: 'sm' | 'md' | 'lg' | 'xl';
     closeOnEscape?: boolean;
     closeOnClickOutside?: boolean;
+    children?: any;
+    footer?: any;
   };
 
   let {

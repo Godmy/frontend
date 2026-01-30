@@ -21,5 +21,9 @@
 {#if hasAccess}
   <slot />
 {:else}
-  <slot name="fallback" />
+  {#if $$slots.fallback}
+    <slot name="fallback" />
+  {:else}
+    <slot name="fallback" />
+  {/if}
 {/if}

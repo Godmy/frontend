@@ -71,7 +71,9 @@
       class="expanded-cell px-6 py-4 bg-gray-50 text-sm text-gray-700"
     >
       <div class="details-content p-4">
-        <slot name="details" />
+        {#if $$slots.details}
+          <slot name="details" />
+        {/if}
       </div>
     </td>
   </tr>

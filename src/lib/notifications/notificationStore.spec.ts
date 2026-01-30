@@ -189,7 +189,7 @@ describe('NotificationStore', () => {
 		it('should support notification actions', () => {
 			const action = {
 				label: 'Undo',
-				onClick: vi.fn()
+				callback: vi.fn()
 			};
 
 			const id = notificationStore.success('Action notification', { action });

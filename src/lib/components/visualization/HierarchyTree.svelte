@@ -175,23 +175,6 @@
     flex-grow: 1;
   }
 
-  circle {
-    cursor: pointer;
-    stroke: #333;
-    stroke-width: 1px;
-  }
-
-  text {
-    font-size: 12px;
-    cursor: pointer;
-  }
-
-  .link {
-    fill: none;
-    stroke: #9ecae1;
-    stroke-width: 1.5px;
-  }
-
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
@@ -201,5 +184,5 @@
 
 <div class="hierarchy-tree-container">
   <h3 class="hierarchy-tree-title">{title}</h3>
-  <div bind:this={container} class="tree-container" />
+  <div bind:this={container} class="tree-container"></div>
 </div>

@@ -184,19 +184,6 @@
     flex-grow: 1;
   }
 
-  .radial-tree-tooltip {
-    pointer-events: none;
-    z-index: 1000;
-  }
-
-  circle {
-    cursor: pointer;
-  }
-
-  text {
-    cursor: pointer;
-  }
-
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
@@ -206,5 +193,5 @@
 
 <div class="radial-tree-container">
   <h3 class="radial-tree-title">{title}</h3>
-  <div bind:this={container} class="radial-tree-visualization-container" />
+  <div bind:this={container} class="radial-tree-visualization-container"></div>
 </div>

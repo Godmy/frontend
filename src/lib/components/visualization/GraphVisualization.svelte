@@ -359,26 +359,32 @@
 
     // Prepare network data
     const visNodes = new DataSet(
-      data.nodes.map(node => ({
-        id: node.id,
-        label: node.label,
-        title: node.title,
-        color: node.color || visColors[node.type] || '#4682b4',
-        ...node
-      }))
+      data.nodes.map(node => {
+        const { id, label, title, color, type, ...rest } = node;
+        return {
+          id,
+          label,
+          title,
+          color: color || visColors[type as keyof typeof visColors] || '#4682b4',
+          ...rest
+        };
+      })
     );
 
     const visEdges = new DataSet(
-      data.edges.map(edge => ({
-        id: edge.id,
-        from: edge.from,
-        to: edge.to,
-        label: edge.label,
-        title: edge.title,
-        color: edge.color,
-        value: edge.value,
-        ...edge
-      }))
+      data.edges.map(edge => {
+        const { id, from, to, label, title, color, value, ...rest } = edge;
+        return {
+          id,
+          from,
+          to,
+          label,
+          title,
+          color,
+          value,
+          ...rest
+        };
+      })
     );
 
     const networkData = { nodes: visNodes, edges: visEdges };
@@ -486,27 +492,14 @@
     flex-grow: 1;
   }
 
-  circle {
-    cursor: pointer;
-  }
-
-  circle:hover {
-    opacity: 0.8;
-  }
-
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
     overflow: visible;
   }
-
-  .graph-tooltip {
-    pointer-events: none;
-    z-index: 1000;
-  }
 </style>
 
 <div class="graph-visualization-container">
   <h3 class="graph-visualization-title">{title} - {visualizationType} View</h3>
-  <div bind:this={container} class="visualization-container" style="width: {width}px; height: {height}px;" />
+  <div bind:this={container} class="visualization-container" style="width: {width}px; height: {height}px;"></div>
 </div>

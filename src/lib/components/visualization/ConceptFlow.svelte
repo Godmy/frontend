@@ -101,12 +101,12 @@
         return d.color || '#4682b4';
       })
       .attr('id', (d: any) => d.id)
-      .on('mouseover', (event, d: any) => {
+      .on('mouseover', (event: any, d: any) => {
         tooltip
           .text(`${d.name}: ${d.value || 0}`)
           .style('visibility', 'visible');
       })
-      .on('mousemove', (event) => {
+      .on('mousemove', (event: any) => {
         tooltip
           .style('top', event.pageY - 10 + 'px')
           .style('left', event.pageX + 10 + 'px');
@@ -128,12 +128,12 @@
       .attr('stroke', (d: any) => d.color || '#000')
       .attr('stroke-width', (d: any) => Math.max(1, d.width))
       .attr('id', (d: any) => `link-${d.index}`)
-      .on('mouseover', (event, d: any) => {
+      .on('mouseover', (event: any, d: any) => {
         tooltip
           .text(`Flow: ${d.source.name} → ${d.target.name}: ${d.value}`)
           .style('visibility', 'visible');
       })
-      .on('mousemove', (event) => {
+      .on('mousemove', (event: any) => {
         tooltip
           .style('top', event.pageY - 10 + 'px')
           .style('left', event.pageX + 10 + 'px');
@@ -170,23 +170,10 @@
 </script>
 
 <style>
-  .sankey-tooltip {
-    pointer-events: none;
-    z-index: 1000;
-  }
-
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
     overflow: visible;
-  }
-
-  rect {
-    cursor: pointer;
-  }
-
-  rect:hover {
-    opacity: 0.8;
   }
 </style>
 

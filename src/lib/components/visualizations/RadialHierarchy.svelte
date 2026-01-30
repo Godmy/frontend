@@ -15,7 +15,7 @@
     children?: ConceptHierarchy[];
   }
 
-  let svgElement: SVGElement;
+  let svgElement: SVGElement = null as any;
   const width = 800;
   const height = 800;
   const cx = width * 0.5;

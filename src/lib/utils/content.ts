@@ -19,10 +19,8 @@ export type ContentMap = Map<string, Dictionary>;
  */
 export function buildContentMap(dictionaries: Dictionary[]): ContentMap {
 	return new Map(
-		dictionaries
-			.filter((d) => d.concept?.path) // Filter out entries without concept path
-			.map((d) => [d.concept.path, d])
-	);
+		dictionaries.map(dict => [dict.id.toString(), dict])
+	) as ContentMap;
 }
 
 /**

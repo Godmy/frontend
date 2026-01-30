@@ -1,17 +1,31 @@
 <script lang="ts">
   import type { Concept, TreeConcept } from '../model/types';
   import type { Writable } from 'svelte/store';
+  import Self from './TreeNode.svelte';
 
   type Props = {
     concept: TreeConcept;
-    expandedNodes: Writable<Set<number>>;
+    expandedNodes: Set<number>;
     onEdit: (concept: Concept) => void;
     onDelete: (id: number) => void;
     onMove?: (conceptId: number, newParentId: number | null) => Promise<void>;
-    toggleNode: (id: number) => void;
+    toggleNode?: (id: number) => void;
+    onToggleNode?: (id: number) => void;
     getChildCount: (id: number) => number;
     validateParent: (conceptId: number, newParentId: number | null) => boolean;
     level?: number;
+    // Additional props for EnhancedConceptTree
+    loadingNodes?: Set<number>;
+    lazyLoadedChildren?: Record<number, Concept[]>;
+    dragState?: {
+      draggedNode: number | null;
+      dropTarget: number | null;
+      dropPosition: 'before' | 'after' | 'inside' | null;
+    };
+    onDragStart?: (id: number) => void;
+    onDragOver?: (event: any) => void;
+    onDragEnd?: () => void;
+    onDrop?: (id: number) => void;
   };
 
   let {
@@ -21,12 +35,20 @@
     onDelete,
     onMove,
     toggleNode,
+    onToggleNode,
     getChildCount,
     validateParent,
-    level = 0
+    level = 0,
+    loadingNodes,
+    lazyLoadedChildren,
+    dragState,
+    onDragStart,
+    onDragOver,
+    onDragEnd,
+    onDrop
   }: Props = $props();
 
-  let isExpanded = $derived($expandedNodes.has(concept.id));
+  let isExpanded = $derived(expandedNodes.has(concept.id));
   let hasChildren = $derived(concept.children && concept.children.length > 0);
   let childCount = $derived(getChildCount(concept.id));
 
@@ -108,12 +130,12 @@
     switch (e.key) {
       case 'ArrowRight':
         if (hasChildren && !isExpanded) {
-          toggleNode(concept.id);
+          onToggleNode ? onToggleNode(concept.id) : toggleNode?.(concept.id);
         }
         break;
       case 'ArrowLeft':
         if (isExpanded) {
-          toggleNode(concept.id);
+          onToggleNode ? onToggleNode(concept.id) : toggleNode?.(concept.id);
         }
         break;
       case 'Enter':
@@ -169,7 +191,7 @@
         <!-- Expand/Collapse button -->
         {#if hasChildren}
           <button
-            onclick={() => toggleNode(concept.id)}
+            onclick={() => onToggleNode ? onToggleNode(concept.id) : toggleNode?.(concept.id)}
             class="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700 focus:outline-none"
             aria-label={isExpanded ? 'Collapse' : 'Expand'}
           >
@@ -245,7 +267,7 @@
   {#if hasChildren && isExpanded}
     <ul class="children" role="group">
       {#each concept.children as child}
-        <svelte:self
+        <Self
           concept={child}
           {expandedNodes}
           {onEdit}
@@ -288,7 +310,7 @@
     {#if hasChildren}
       <button
         onclick={() => {
-          toggleNode(concept.id);
+          onToggleNode ? onToggleNode(concept.id) : toggleNode?.(concept.id);
           closeContextMenu();
         }}
         class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"

@@ -3,7 +3,7 @@
   import ContextMenu from './ContextMenu.svelte';
 
   // Define types
-  export type Node = {
+  type Node = {
     id: string;
     label: string;
     title?: string;
@@ -15,7 +15,7 @@
     [key: string]: any; // Allow additional properties
   };
 
-  export type Edge = {
+  type Edge = {
     id: string;
     from: string;
     to: string;
@@ -25,7 +25,7 @@
     [key: string]: any; // Allow additional properties
   };
 
-  export type NetworkData = {
+  type NetworkData = {
     nodes: Node[];
     edges: Edge[];
   };
@@ -369,25 +369,6 @@
     border-radius: 0.375rem;
     overflow: hidden;
     flex-grow: 1;
-  }
-
-  .vis-network {
-    width: 100%;
-    height: 100%;
-  }
-
-  .vis-tooltip {
-    position: absolute;
-    visibility: hidden;
-    padding: 5px;
-    white-space: nowrap;
-    font-family: verdana;
-    font-size: 14px;
-    color: #000000;
-    background-color: #f5f4ed;
-    border: 1px solid #808074;
-    border-radius: 3px;
-    opacity: 0.8;
   }
 </style>
 

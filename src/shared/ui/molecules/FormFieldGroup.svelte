@@ -34,30 +34,32 @@
 </script>
 
 <div class={containerClasses} {...restProps}>
-  {#if label}
-    <label class="field-label text-sm font-medium text-gray-700 flex items-center gap-1">
-      {label}
-      {#if required}
-        <span class="text-red-500" aria-label="обязательное поле">*</span>
-      {/if}
-    </label>
-  {/if}
-  
-  <div class="field-content flex-1">
-    <slot />
-    
+  <div class="field-wrapper">
+    {#if label}
+      <label class="field-label text-sm font-medium text-gray-700 flex items-center gap-1">
+        {label}
+        {#if required}
+          <span class="text-red-500" aria-label="обязательное поле">*</span>
+        {/if}
+      </label>
+    {/if}
+
+    <div class="field-content flex-1">
+      <slot />
+    </div>
+
     {#if description}
       <p class="mt-1 text-sm text-gray-500">
         {description}
       </p>
     {/if}
-    
+
     {#if hasError}
       <p class="mt-1 text-sm text-red-600" aria-live="polite">
         {error}
       </p>
     {/if}
-    
+
     {#if hint && !hasError}
       <p class="mt-1 text-sm text-gray-500">
         {hint}

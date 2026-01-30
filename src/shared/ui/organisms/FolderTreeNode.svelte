@@ -49,11 +49,19 @@
   }
 </script>
 
-<li role="treeitem" aria-expanded={hasChildren ? isExpanded : undefined} class="relative">
+<li role="treeitem" aria-expanded={hasChildren ? isExpanded : undefined} aria-selected="false" class="relative">
   <div
     class="flex items-center py-2 px-3 rounded-md hover:bg-gray-100 cursor-pointer text-sm transition-colors"
     class:opacity-50={node.disabled}
     onclick={handleNodeClick}
+    onkeydown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleNodeClick();
+      }
+    }}
+    tabindex="0"
+    role="button"
   >
     {#if hasChildren}
       <button

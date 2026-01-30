@@ -12,7 +12,7 @@ import { ErrorSeverity, ErrorType, type AppError } from './types';
 export function initializeErrorNotifications(): () => void {
 	return errorHandler.onError((error: AppError) => {
 		// Get user-friendly message
-		const message = error.getUserMessage();
+		const message = 'error' in error && typeof (error as any).getUserMessage === 'function' ? (error as any).getUserMessage() : error.message;
 
 		// Determine notification type based on error severity
 		switch (error.severity) {

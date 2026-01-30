@@ -49,7 +49,7 @@ export const load: LayoutLoad = async (event) => {
 
 	// Преобразовать массив Dictionary в Map объект
 	const translationsArray = result.data?.dictionaries || [];
-	const translations = dictionariesToMap(translationsArray);
+	const translations = dictionariesToMap(translationsArray as any[]);
 
 	// Если переводов нет, загрузить fallback (English = 2)
 	if (Object.keys(translations).length === 0 && languageId !== 2) {
@@ -73,7 +73,7 @@ export const load: LayoutLoad = async (event) => {
 		});
 
 		const fallbackArray = fallbackResult.data?.dictionaries || [];
-		const fallbackTranslations = dictionariesToMap(fallbackArray);
+		const fallbackTranslations = dictionariesToMap(fallbackArray as any[]);
 
 		translationsCache.set(2, fallbackTranslations);
 		console.log(`[i18n] Loaded English fallback with ${Object.keys(fallbackTranslations).length} translations`);

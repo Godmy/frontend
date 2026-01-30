@@ -157,7 +157,7 @@
         {#each tree as node}
           <TreeNode
             concept={node}
-            {expandedNodes}
+            expandedNodes={$expandedNodes}
             {onEdit}
             {onDelete}
             {onMove}

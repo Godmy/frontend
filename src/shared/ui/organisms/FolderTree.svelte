@@ -126,15 +126,4 @@
   .folder-tree {
     font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   }
-
-  li[role="treeitem"] {
-    list-style: none;
-  }
-
-  ul[role="tree"],
-  ul[role="group"] {
-    padding-left: 0;
-    margin: 0;
-    list-style: none;
-  }
 </style>

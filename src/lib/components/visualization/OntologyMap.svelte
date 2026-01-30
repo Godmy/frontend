@@ -150,7 +150,10 @@
       .data(nodes)
       .join('circle')
       .attr('r', 10)
-      .attr('fill', (d: any) => visColors[d.type] || '#4682b4')
+      .attr('fill', (d: any) => {
+        const nodeType = d.type;
+        return visColors[nodeType as keyof typeof visColors] || '#4682b4';
+      })
       .call(drag(simulation))
       .on('mouseover', (event: any, d: any) => {
         // Show tooltip or highlight
@@ -330,14 +333,6 @@
     flex-grow: 1;
   }
 
-  circle {
-    cursor: pointer;
-  }
-
-  circle:hover {
-    opacity: 0.8;
-  }
-
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
@@ -347,5 +342,5 @@
 
 <div class="ontology-map-container">
   <h3 class="ontology-map-title">{title} - {visualizationType} View</h3>
-  <div bind:this={container} class="visualization-container" />
+  <div bind:this={container} class="visualization-container"></div>
 </div>
