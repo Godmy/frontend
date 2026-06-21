@@ -1,3 +1,8 @@
+input AddTagToConceptInput {
+  conceptId: Int!
+  tagId: Int!
+}
+
 """Detailed user information for admin purposes."""
 type AdminUser {
   createdAt: String!
@@ -124,8 +129,29 @@ type BulkOperationResult {
   success: Boolean!
 }
 
+"""Information about a table column."""
+type ColumnInfo {
+  """Default value of the column."""
+  default: String
+
+  """Name of the column."""
+  name: String!
+
+  """Whether the column can be NULL."""
+  nullable: Boolean!
+
+  """Whether the column is a primary key."""
+  primaryKey: Boolean!
+
+  """Data type of the column."""
+  type: String!
+}
+
 "Represents a concept in the ontology's hierarchy.\n\nConcepts use a materialized path pattern (e.g., 'science.physics.relativity') to represent their position.\n"
 type Concept {
+  """Direct children of this concept (one level deep)."""
+  children: [Concept!]!
+
   """The depth in the hierarchy (0 for root concepts)."""
   depth: Int!
 
@@ -208,6 +234,11 @@ type ContentStats {
 
   """Total number of languages."""
   languages: Int!
+}
+
+input CreateTagInput {
+  color: String = null
+  name: String!
 }
 
 """Aggregated counters for dashboard widgets."""
@@ -470,6 +501,9 @@ type Language {
   """The language code (e.g., 'en', 'ru'). Must be unique."""
   code: String!
 
+  """URL of the language flag (emoji or image URL)."""
+  flagUrl: String
+
   """Unique identifier for the language."""
   id: Int!
 
@@ -482,7 +516,10 @@ input LanguageInput {
   """The language code (e.g., 'fr')."""
   code: String!
 
-  """The full name of the language (e.g., 'Français')."""
+  """URL of the language flag (emoji or image URL)."""
+  flagUrl: String = null
+
+  """The full name of the language (e.g., 'Francais')."""
   name: String!
 }
 
@@ -490,6 +527,9 @@ input LanguageInput {
 input LanguageUpdateInput {
   """The new language code."""
   code: String = null
+
+  """URL of the language flag."""
+  flagUrl: String = null
 
   """The new full name."""
   name: String = null
@@ -507,6 +547,7 @@ type MessageResponse {
 type Mutation {
   "Add a permission to a role.\n\n**Required permissions:** `admin:update:roles`\n"
   addPermissionToRole(input: PermissionInput!, roleId: Int!): Role!
+  addTagToConcept(input: AddTagToConceptInput!): TagMutationResult!
 
   "Assign a role to a user.\n\n**Required permissions:** `admin:update:users`\n"
   assignRoleToUser(roleName: String!, userId: Int!): Boolean!
@@ -538,6 +579,10 @@ type Mutation {
   "Create a new role.\n\n**Required permissions:** `admin:create:roles`\n"
   createRole(input: RoleInput!): Role!
 
+  "Create a new record in a database table.\n\n**Required permissions:** `admin:create:tables`\n\nExample:\n```graphql\nmutation CreateTableRecord {\n  createTableRecord(\n    tableName: \"users\"\n    data: {username: \"newuser\", email: \"new@example.com\", passwordHash: \"...\"}\n  )\n}\n```\n"
+  createTableRecord(data: JSON!, tableName: String!): JSON!
+  createTag(input: CreateTagInput!): TagMutationResult!
+
   "Soft-delete the current user's account.\n\nThis is a reversible action. The account can be restored by an administrator.\n\n**Requires authentication.**\n\nExample:\n```graphql\nmutation DeleteMyAccount {\n  deleteAccount(password: \"MyCurrentPassword123!\") {\n    success\n    message\n  }\n}\n```\n"
   deleteAccount(password: String!): SuccessResponse!
 
@@ -552,6 +597,10 @@ type Mutation {
 
   "Soft delete a language. This is a reversible action.\n\nA language cannot be deleted if it is currently associated with any translations.\n\nExample:\n```graphql\nmutation DeleteLanguage {\n  deleteLanguage(languageId: 10)\n}\n```\n"
   deleteLanguage(languageId: Int!): Boolean!
+
+  "Delete a record from a database table.\n\n**Required permissions:** `admin:delete:tables`\n\nPerforms soft delete if table has deleted_at column, otherwise hard delete.\n\nExample:\n```graphql\nmutation DeleteTableRecord {\n  deleteTableRecord(tableName: \"users\", recordId: 123)\n}\n```\n"
+  deleteTableRecord(recordId: Int!, tableName: String!): Boolean!
+  deleteTag(tagId: Int!): TagMutationResult!
 
   "Permanently deletes a user from the database. This action is irreversible.\n\n**Required permissions:** `admin:delete:users`\n\n**WARNING:** This is a hard delete and cannot be undone. Prefer banning or soft-deleting.\n\nExample:\n```graphql\nmutation DeleteUserPermanently {\n  deleteUserPermanently(userId: 123)\n}\n```\n"
   deleteUserPermanently(userId: Int!): Boolean!
@@ -582,6 +631,7 @@ type Mutation {
 
   "Remove a role from a user.\n\n**Required permissions:** `admin:update:users`\n"
   removeRoleFromUser(roleName: String!, userId: Int!): Boolean!
+  removeTagFromConcept(input: RemoveTagFromConceptInput!): TagMutationResult!
 
   "Initiate an email address change for the current user.\n\nSends a verification link to the new email address.\n\n**Requires authentication.**\n\nExample:\n```graphql\nmutation StartEmailChange {\n  requestEmailChange(\n    newEmail: \"john.doe@new-email.com\"\n    currentPassword: \"MyCurrentPassword123!\"\n  ) {\n    success\n    message\n  }\n}\n```\n"
   requestEmailChange(currentPassword: String!, newEmail: String!): SuccessResponse!
@@ -615,6 +665,9 @@ type Mutation {
 
   "Update an existing role's name or description.\n\n**Required permissions:** `admin:update:roles`\n"
   updateRole(input: RoleUpdateInput!, roleId: Int!): Role!
+
+  "Update an existing record in a database table.\n\n**Required permissions:** `admin:update:tables`\n\nExample:\n```graphql\nmutation UpdateTableRecord {\n  updateTableRecord(\n    tableName: \"users\"\n    recordId: 123\n    data: {email: \"updated@example.com\"}\n  )\n}\n```\n"
+  updateTableRecord(data: JSON!, recordId: Int!, tableName: String!): JSON!
 
   "Upload a user avatar. The file is automatically associated with the current user's profile.\n\nThis mutation requires a multipart form-data request.\n\nExample (using a GraphQL client):\n```graphql\nmutation UploadAvatar($file: Upload!) {\n  uploadAvatar(file: $file) {\n    id\n    url\n    thumbnailUrl\n  }\n}\n```\nVariables:\n`{ \"file\": null }` (and then attach the file via the client's upload mechanism)\n"
   uploadAvatar(file: Upload!): FileType!
@@ -670,6 +723,10 @@ input PermissionInput {
 }
 
 type Query {
+  "Get a list of all database tables with metadata.\n\n**Required permissions:** `admin:read:tables`\n\nExample:\n```graphql\nquery GetAllTables {\n  allTables {\n    name\n    rowCount\n    hasSoftDelete\n  }\n}\n```\n"
+  allTables: [TableInfo!]!
+  allTags: [Tag!]!
+
   "Get a paginated list of all users with advanced filtering.\n\n**Required permissions:** `admin:read:users`\n\nExample:\n```graphql\nquery GetAllUsers {\n  allUsers(limit: 20, filters: { isActive: true, roleName: \"editor\", search: \"john\" }) {\n    users {\n      id\n      username\n      email\n      isActive\n      roles\n    }\n    total\n    hasMore\n  }\n}\n```\n"
   allUsers(filters: UserFilters = null, limit: Int! = 50, offset: Int! = 0): AllUsersResponse!
 
@@ -678,6 +735,10 @@ type Query {
 
   "Get a single concept by its unique ID, including its translations.\n\nExample:\n```graphql\nquery GetConceptDetails {\n  concept(conceptId: 1) {\n    id\n    path\n    dictionaries {\n      name\n      description\n      language {\n        code\n      }\n    }\n  }\n}\n```\n"
   concept(conceptId: Int!): Concept
+
+  "Get a single concept by its path (e.g., 'site/pages/home').\n\nExample:\n```graphql\nquery GetSiteMap {\n  conceptByPath(path: \"site/pages\") {\n    id\n    path\n    children {\n      id\n      path\n      dictionaries {\n        name\n        description\n      }\n      children {\n        id\n        path\n        dictionaries {\n          name\n          description\n        }\n      }\n    }\n  }\n}\n```\n"
+  conceptByPath(path: String!): Concept
+  conceptTags(conceptId: Int!): [Tag!]!
 
   "Get a list of concepts. Can be filtered by parent or depth.\n\n- Providing `parentId` fetches direct children of a concept.\n- Providing `depth: 0` fetches only root concepts.\n- Providing no arguments fetches all concepts.\n\nExample (get children of concept 1):\n```graphql\nquery GetChildConcepts {\n  concepts(parentId: 1) {\n    id\n    path\n    depth\n  }\n}\n```\n"
   concepts(depth: Int = null, parentId: Int = null): [Concept!]!
@@ -739,6 +800,13 @@ type Query {
   "Get a comprehensive dashboard of system statistics.\n\n**Required permissions:** `admin:read:system`\n\nExample:\n```graphql\nquery GetSystemStats {\n  systemStats {\n    users { total active verified newLast30Days banned }\n    content { concepts dictionaries languages }\n    files { total totalSizeBytes totalSizeMb }\n    audit { totalLogs logsLast30Days }\n    roles\n  }\n}\n```\n"
   systemStats: SystemStats!
 
+  "Get paginated data from a specific table.\n\n**Required permissions:** `admin:read:tables`\n\nExample:\n```graphql\nquery GetTableData {\n  tableData(tableName: \"users\", limit: 20, offset: 0) {\n    tableName\n    columns\n    rows\n    total\n    hasMore\n  }\n}\n```\n"
+  tableData(limit: Int! = 50, offset: Int! = 0, tableName: String!): TableDataResponse!
+
+  "Get schema information for a specific table.\n\n**Required permissions:** `admin:read:tables`\n\nExample:\n```graphql\nquery GetTableSchema {\n  tableSchema(tableName: \"users\") {\n    tableName\n    columns {\n      name\n      type\n      nullable\n      primaryKey\n      default\n    }\n  }\n}\n```\n"
+  tableSchema(tableName: String!): TableSchema!
+  tagsByName(name: String!): [Tag!]!
+
   "Get activity statistics for a specific user, grouped by action type.\n\nIf `userId` is not provided, returns stats for the current user. Requires admin privileges to view other users' stats.\n\n**Required permissions (for other users):** `admin:read:users`\n\nExample:\n```graphql\nquery GetUserActivity {\n  userActivity(userId: 123, days: 30) {\n    action\n    count\n  }\n}\n```\n"
   userActivity(days: Int! = 30, userId: Int = null): [UserActivityType!]!
 }
@@ -747,6 +815,11 @@ type Query {
 input RefreshTokenInput {
   """The refresh token received during login."""
   refreshToken: String!
+}
+
+input RemoveTagFromConceptInput {
+  conceptId: Int!
+  tagId: Int!
 }
 
 """Represents a user role and its associated permissions."""
@@ -875,6 +948,57 @@ type SystemStats {
   users: UserStats!
 }
 
+"""Paginated data from a database table."""
+type TableDataResponse {
+  """List of column names."""
+  columns: [String!]!
+
+  """Whether more rows are available for pagination."""
+  hasMore: Boolean!
+
+  """List of rows as JSON objects."""
+  rows: [JSON!]!
+
+  """Name of the table."""
+  tableName: String!
+
+  """Total number of rows matching the query."""
+  total: Int!
+}
+
+"""Information about a database table."""
+type TableInfo {
+  """Whether the table supports soft delete (has deleted_at column)."""
+  hasSoftDelete: Boolean!
+
+  """Name of the table."""
+  name: String!
+
+  """Total number of rows in the table."""
+  rowCount: Int!
+}
+
+"""Schema information for a database table."""
+type TableSchema {
+  """List of columns in the table."""
+  columns: [ColumnInfo!]!
+
+  """Name of the table."""
+  tableName: String!
+}
+
+type Tag {
+  color: String
+  id: Int!
+  name: String!
+}
+
+type TagMutationResult {
+  message: String!
+  success: Boolean!
+  tag: Tag
+}
+
 """Input for Telegram OAuth authentication."""
 input TelegramAuthInput {
   """Authentication date from Telegram."""
@@ -899,6 +1023,7 @@ input TelegramAuthInput {
   username: String = null
 }
 
+"""Represents a file upload."""
 scalar Upload
 
 """Input for uploading a generic file."""

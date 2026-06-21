@@ -1,4 +1,4 @@
-version: '3.8'
+name: vibe-management-pro-frontend
 
 services:
   frontend:
@@ -17,7 +17,13 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/', (r) => r.statusCode && r.statusCode < 500 ? process.exit(0) : process.exit(1))"
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -30,12 +36,16 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "5173:5173"
+      - "24678:24678"
     environment:
       - NODE_ENV=development
       - VITE_GRAPHQL_ENDPOINT=${VITE_GRAPHQL_ENDPOINT:-http://localhost:8000/graphql/}
       - VITE_APP_ENV=development
       - VITE_APP_URL=http://localhost:5173
       - VITE_DEBUG=true
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_HMR_PORT=24678
+      - WATCHPACK_POLLING=true
     volumes:
       - .:/app
       - /app/node_modules

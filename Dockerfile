@@ -3,19 +3,19 @@
 # Stage 1: Build
 FROM node:20-alpine AS builder
 
-# Устанавливаем yarn
-RUN apk add --no-cache yarn
+# Устанавливаем yarn 4.x (berry)
+RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json yarn.lock ./
+# Copy package files from frontend subdirectory
+COPY frontend/package.json frontend/yarn.lock ./
 
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Copy source code
-COPY . .
+# Copy source code from frontend subdirectory
+COPY frontend/. .
 
 # Генерируем SvelteKit конфигурацию
 RUN npx svelte-kit sync
@@ -38,13 +38,13 @@ RUN yarn build
 # Stage 2: Production
 FROM node:20-alpine
 
-# Устанавливаем yarn
-RUN apk add --no-cache yarn
+# Устанавливаем yarn 4.x (berry)
+RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json yarn.lock ./
+# Copy package files from frontend subdirectory
+COPY frontend/package.json frontend/yarn.lock ./
 
 # Install only production dependencies
 RUN yarn install --production --frozen-lockfile

@@ -1,16 +1,20 @@
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
 import { sveltekit } from '@sveltejs/kit/vite';
+import houdini from 'houdini/vite';
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
+	plugins: [tailwindcss(), houdini(), sveltekit()],
+	css: {
+		postcss: {},
+	},
 	server: {
 		fs: {
 			allow: ['.', '.houdini', 'src', 'node_modules', '.svelte-kit']
 		},
 		proxy: {
 			'/graphql': {
-				target: process.env.BACKEND_URL ?? 'http://127.0.0.1:8000',
+				target: 'http://127.0.0.1:8000',
 				changeOrigin: true,
 				rewrite: (path) => path.replace(/^\/graphql$/, '/graphql/')
 			}
