@@ -249,18 +249,18 @@
         {#each tree as node}
           <TreeNode
             concept={node}
-            expandedNodes={expandedNodes}
-            loadingNodes={loadingNodes}
-            lazyLoadedChildren={lazyLoadedChildren}
-            dragState={dragState}
+            {expandedNodes}
+            {loadingNodes}
+            {lazyLoadedChildren}
+            {dragState}
             {onEdit}
             {onDelete}
             {onMove}
-            onToggleNode={() => toggleNode(node.id)}
-            onDragStart={() => handleDragStart(node.id)}
-            onDragOver={(e: any) => handleDragOver(node.id, e.detail?.position)}
-            onDragEnd={handleDragEnd}
-            onDrop={() => handleDrop(node.id)}
+            on:toggleNode={() => toggleNode(node.id)}
+            on:dragStart={() => handleDragStart(node.id)}
+            on:dragOver={(e) => handleDragOver(node.id, e.detail.position)}
+            on:dragEnd={handleDragEnd}
+            on:drop={() => handleDrop(node.id)}
             {getChildCount}
             {validateParent}
             level={0}
@@ -286,5 +286,32 @@
 <style>
   .concept-tree {
     width: 100%;
+  }
+  
+  .drop-target-before::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #3b82f6;
+    z-index: 10;
+  }
+  
+  .drop-target-after::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #3b82f6;
+    z-index: 10;
+  }
+  
+  .drop-target-inside {
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 1px dashed #3b82f6;
   }
 </style>

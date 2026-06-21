@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  type Node = {
+  export type Node = {
     id: string;
     label: string;
     title?: string;
@@ -14,7 +14,7 @@
     [key: string]: any; // Allow additional properties
   };
 
-  type Edge = {
+  export type Edge = {
     id: string;
     from: string;
     to: string;
@@ -25,7 +25,7 @@
     [key: string]: any; // Allow additional properties
   };
 
-  type GraphData = {
+  export type GraphData = {
     nodes: Node[];
     edges: Edge[];
   };
@@ -113,7 +113,7 @@
       .attr('style', 'max-width: 100%; height: auto; font: 10px sans-serif;');
 
     // Create a group for zooming
-    const g: any = svg.append('g');
+    const g = svg.append('g');
 
     // Create nodes and links for simulation
     const nodes = data.nodes.map(node => ({
@@ -121,7 +121,7 @@
       x: Math.random() * width,
       y: Math.random() * height
     }));
-
+    
     const links = data.edges.map(edge => ({
       source: edge.from,
       target: edge.to,
@@ -164,17 +164,14 @@
       .data(nodes)
       .join('circle')
       .attr('r', 10)
-      .attr('fill', (d: any) => {
-        const nodeType = d.type;
-        return visColors[nodeType as keyof typeof visColors] || '#4682b4';
-      })
+      .attr('fill', d => visColors[d.type] || '#4682b4')
       .call(drag(simulation))
-      .on('mouseover', (event: any, d: any) => {
+      .on('mouseover', (event, d) => {
         tooltip
           .text(`${d.label || d.id}`)
           .style('visibility', 'visible');
       })
-      .on('mousemove', (event: any) => {
+      .on('mousemove', (event) => {
         tooltip
           .style('top', event.pageY - 10 + 'px')
           .style('left', event.pageX + 10 + 'px');
@@ -191,32 +188,32 @@
       .selectAll('text')
       .data(nodes)
       .join('text')
-      .text((d: any) => d.label)
+      .text(d => d.label)
       .attr('dy', '20px')
-      .attr('x', (d: any) => d.x)
-      .attr('y', (d: any) => d.y);
+      .attr('x', d => d.x)
+      .attr('y', d => d.y);
 
     // Update positions on each tick
     simulation.on('tick', () => {
       link
-        .attr('x1', (d: any) => (d.source as any).x)
-        .attr('y1', (d: any) => (d.source as any).y)
-        .attr('x2', (d: any) => (d.target as any).x)
-        .attr('y2', (d: any) => (d.target as any).y);
+        .attr('x1', d => (d.source as any).x)
+        .attr('y1', d => (d.source as any).y)
+        .attr('x2', d => (d.target as any).x)
+        .attr('y2', d => (d.target as any).y);
 
       node
-        .attr('cx', (d: any) => d.x)
-        .attr('cy', (d: any) => d.y);
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
 
       label
-        .attr('x', (d: any) => d.x)
-        .attr('y', (d: any) => d.y);
+        .attr('x', d => d.x)
+        .attr('y', d => d.y);
     });
 
     // Add zoom functionality
     const zoom = d3.zoom()
       .scaleExtent([0.1, 8])
-      .on('zoom', (event: any) => {
+      .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
 
@@ -245,7 +242,7 @@
       ...node,
       index
     }));
-
+    
     const sankeyLinks = data.edges.map((edge, index) => {
       const sourceIndex = data.nodes.findIndex(n => n.id === edge.from);
       const targetIndex = data.nodes.findIndex(n => n.id === edge.to);
@@ -286,20 +283,15 @@
 
     link.append('path')
       .attr('d', d3Sankey.sankeyLinkHorizontal())
-      .attr('stroke', (d: any) => {
-        const nodeType = data.nodes[d.source.index]?.type;
-        return visColors[nodeType as keyof typeof visColors] || '#000';
-      })
+      .attr('stroke', (d: any) => visColors[data.nodes[d.source.index].type] || '#000')
       .attr('stroke-width', (d: any) => Math.max(1, d.width))
       .attr('id', (d: any) => `link-${d.index}`)
-      .on('mouseover', (event: any, d: any) => {
-        const sourceNode = data.nodes[d.source.index];
-        const targetNode = data.nodes[d.target.index];
+      .on('mouseover', (event, d: any) => {
         tooltip
-          .text(`Flow: ${sourceNode.label || sourceNode.id} → ${targetNode.label || targetNode.id}: ${d.value}`)
+          .text(`Flow: ${data.nodes[d.source.index].label || data.nodes[d.source.index].id} → ${data.nodes[d.target.index].label || data.nodes[d.target.index].id}: ${d.value}`)
           .style('visibility', 'visible');
       })
-      .on('mousemove', (event: any) => {
+      .on('mousemove', (event) => {
         tooltip
           .style('top', event.pageY - 10 + 'px')
           .style('left', event.pageX + 10 + 'px');
@@ -318,18 +310,14 @@
       .attr('y', (d: any) => d.y0)
       .attr('height', (d: any) => d.y1 - d.y0)
       .attr('width', (d: any) => d.x1 - d.x0)
-      .attr('fill', (d: any) => {
-        const nodeType = data.nodes[d.index]?.type;
-        return visColors[nodeType as keyof typeof visColors] || '#4682b4';
-      })
+      .attr('fill', (d: any) => visColors[data.nodes[d.index].type] || '#4682b4')
       .attr('id', (d: any) => data.nodes[d.index].id)
-      .on('mouseover', (event: any, d: any) => {
-        const nodeData = data.nodes[d.index];
+      .on('mouseover', (event, d: any) => {
         tooltip
-          .text(`${nodeData.label || nodeData.id}: ${d.value || 0}`)
+          .text(`${data.nodes[d.index].label || data.nodes[d.index].id}: ${d.value || 0}`)
           .style('visibility', 'visible');
       })
-      .on('mousemove', (event: any) => {
+      .on('mousemove', (event) => {
         tooltip
           .style('top', event.pageY - 10 + 'px')
           .style('left', event.pageX + 10 + 'px');
@@ -359,32 +347,26 @@
 
     // Prepare network data
     const visNodes = new DataSet(
-      data.nodes.map(node => {
-        const { id, label, title, color, type, ...rest } = node;
-        return {
-          id,
-          label,
-          title,
-          color: color || visColors[type as keyof typeof visColors] || '#4682b4',
-          ...rest
-        };
-      })
+      data.nodes.map(node => ({
+        id: node.id,
+        label: node.label,
+        title: node.title,
+        color: node.color || visColors[node.type] || '#4682b4',
+        ...node
+      }))
     );
 
     const visEdges = new DataSet(
-      data.edges.map(edge => {
-        const { id, from, to, label, title, color, value, ...rest } = edge;
-        return {
-          id,
-          from,
-          to,
-          label,
-          title,
-          color,
-          value,
-          ...rest
-        };
-      })
+      data.edges.map(edge => ({
+        id: edge.id,
+        from: edge.from,
+        to: edge.to,
+        label: edge.label,
+        title: edge.title,
+        color: edge.color,
+        value: edge.value,
+        ...edge
+      }))
     );
 
     const networkData = { nodes: visNodes, edges: visEdges };
@@ -421,15 +403,15 @@
     network = new Network(container, networkData, defaultOptions);
 
     // Add event listeners
-    network.on('click', (params: any) => {
+    network.on('click', (params) => {
       console.log('Node clicked:', params);
     });
 
-    network.on('doubleClick', (params: any) => {
+    network.on('doubleClick', (params) => {
       console.log('Node double-clicked:', params);
     });
 
-    network.on('oncontext', (params: any) => {
+    network.on('oncontext', (params) => {
       console.log('Node right-clicked:', params);
     });
   }
@@ -492,14 +474,27 @@
     flex-grow: 1;
   }
 
+  circle {
+    cursor: pointer;
+  }
+
+  circle:hover {
+    opacity: 0.8;
+  }
+
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
     overflow: visible;
   }
+
+  .graph-tooltip {
+    pointer-events: none;
+    z-index: 1000;
+  }
 </style>
 
 <div class="graph-visualization-container">
   <h3 class="graph-visualization-title">{title} - {visualizationType} View</h3>
-  <div bind:this={container} class="visualization-container" style="width: {width}px; height: {height}px;"></div>
+  <div bind:this={container} class="visualization-container" style="width: {width}px; height: {height}px;" />
 </div>

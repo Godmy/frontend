@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  type Node = {
+  export type Node = {
     id: string;
     label: string;
     title?: string;
@@ -13,7 +13,7 @@
     value?: number;
   };
 
-  type Edge = {
+  export type Edge = {
     id: string;
     from: string;
     to: string;
@@ -23,7 +23,7 @@
     value?: number;
   };
 
-  type OntologyData = {
+  export type OntologyData = {
     nodes: Node[];
     edges: Edge[];
   };
@@ -111,7 +111,7 @@
       .attr('style', 'max-width: 100%; height: auto; font: 10px sans-serif;');
 
     // Create a group for zooming
-    const g: any = svg.append('g');
+    const g = svg.append('g');
 
     // Create nodes and links for simulation
     const nodes = data.nodes.map(node => ({
@@ -119,7 +119,7 @@
       x: Math.random() * width,
       y: Math.random() * height
     }));
-
+    
     const links = data.edges.map(edge => ({
       source: edge.from,
       target: edge.to,
@@ -150,12 +150,9 @@
       .data(nodes)
       .join('circle')
       .attr('r', 10)
-      .attr('fill', (d: any) => {
-        const nodeType = d.type;
-        return visColors[nodeType as keyof typeof visColors] || '#4682b4';
-      })
+      .attr('fill', d => visColors[(d as any).type] || '#4682b4')
       .call(drag(simulation))
-      .on('mouseover', (event: any, d: any) => {
+      .on('mouseover', (event, d) => {
         // Show tooltip or highlight
         console.log('Node hovered:', d);
       });
@@ -168,32 +165,32 @@
       .selectAll('text')
       .data(nodes)
       .join('text')
-      .text((d: any) => d.label)
+      .text(d => d.label)
       .attr('dy', '20px')
-      .attr('x', (d: any) => d.x)
-      .attr('y', (d: any) => d.y);
+      .attr('x', d => d.x)
+      .attr('y', d => d.y);
 
     // Update positions on each tick
     simulation.on('tick', () => {
       link
-        .attr('x1', (d: any) => (d.source as any).x)
-        .attr('y1', (d: any) => (d.source as any).y)
-        .attr('x2', (d: any) => (d.target as any).x)
-        .attr('y2', (d: any) => (d.target as any).y);
+        .attr('x1', d => (d.source as any).x)
+        .attr('y1', d => (d.source as any).y)
+        .attr('x2', d => (d.target as any).x)
+        .attr('y2', d => (d.target as any).y);
 
       node
-        .attr('cx', (d: any) => d.x)
-        .attr('cy', (d: any) => d.y);
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
 
       label
-        .attr('x', (d: any) => d.x)
-        .attr('y', (d: any) => d.y);
+        .attr('x', d => d.x)
+        .attr('y', d => d.y);
     });
 
     // Add zoom functionality
     const zoom = d3.zoom()
       .scaleExtent([0.1, 8])
-      .on('zoom', (event: any) => {
+      .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
 
@@ -222,7 +219,7 @@
       ...node,
       index
     }));
-
+    
     const sankeyLinks = data.edges.map((edge, index) => {
       const sourceIndex = data.nodes.findIndex(n => n.id === edge.from);
       const targetIndex = data.nodes.findIndex(n => n.id === edge.to);
@@ -251,10 +248,7 @@
 
     link.append('path')
       .attr('d', d3Sankey.sankeyLinkHorizontal())
-      .attr('stroke', (d: any) => {
-        const nodeType = data.nodes[d.source.index]?.type;
-        return visColors[nodeType] || '#000';
-      })
+      .attr('stroke', (d: any) => visColors[data.nodes[d.source.index].type] || '#000')
       .attr('stroke-width', (d: any) => Math.max(1, d.width))
       .attr('id', (d: any) => `link-${d.index}`);
 
@@ -268,26 +262,23 @@
       .attr('y', (d: any) => d.y0)
       .attr('height', (d: any) => d.y1 - d.y0)
       .attr('width', (d: any) => d.x1 - d.x0)
-      .attr('fill', (d: any) => {
-        const nodeType = data.nodes[d.index]?.type;
-        return visColors[nodeType] || '#4682b4';
-      })
+      .attr('fill', (d: any) => visColors[data.nodes[d.index].type] || '#4682b4')
       .attr('id', (d: any) => data.nodes[d.index].id);
   }
 
-  function drag(simulation: any) {
-    function dragstarted(event: any) {
+  function drag(simulation: d3.Simulation<any, any>) {
+    function dragstarted(event: d3.D3DragEvent<SVGCircleElement, any, any>) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
       event.subject.fx = event.subject.x;
       event.subject.fy = event.subject.y;
     }
 
-    function dragged(event: any) {
+    function dragged(event: d3.D3DragEvent<SVGCircleElement, any, any>) {
       event.subject.fx = event.x;
       event.subject.fy = event.y;
     }
 
-    function dragended(event: any) {
+    function dragended(event: d3.D3DragEvent<SVGCircleElement, any, any>) {
       if (!event.active) simulation.alphaTarget(0);
       event.subject.fx = null;
       event.subject.fy = null;
@@ -333,6 +324,14 @@
     flex-grow: 1;
   }
 
+  circle {
+    cursor: pointer;
+  }
+
+  circle:hover {
+    opacity: 0.8;
+  }
+
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
@@ -342,5 +341,5 @@
 
 <div class="ontology-map-container">
   <h3 class="ontology-map-title">{title} - {visualizationType} View</h3>
-  <div bind:this={container} class="visualization-container"></div>
+  <div bind:this={container} class="visualization-container" />
 </div>

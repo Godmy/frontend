@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  type TreeNode = {
+  export type TreeNode = {
     id: string;
     name: string;
     children?: TreeNode[];
@@ -64,7 +64,7 @@
     // Create tree layout
     treeLayout = d3.tree()
       .size([height, width - 160])
-      .separation((a: any, b: any) => (a.parent === b.parent ? 1 : 1) / a.depth);
+      .separation((a, b) => (a.parent === b.parent ? 1 : 1) / a.depth);
 
     // Compute the tree layout
     treeLayout(root);
@@ -72,20 +72,20 @@
     // Update node positions
     let i = 0;
     const duration = 750;
-    const node: d3.Selection<SVGGElement, any, SVGGElement, any> = g
+    const node: d3.Selection<SVGGElement, HierarchyNode<any>, SVGGElement, any> = g
       .selectAll('g')
       .data(root.descendants())
       .join(
-        (enter: any) => {
+        enter => {
           const nodeEnter = enter.append('g')
-            .attr('transform', (d: any) => `translate(${d.y},${d.x})`)
+            .attr('transform', d => `translate(${d.y},${d.x})`)
             .attr('class', 'node');
 
           // Add circles for nodes
           nodeEnter.append('circle')
             .attr('r', 5)
-            .attr('fill', (d: any) => d.children ? '#4682b4' : '#e34f26')
-            .on('click', (event: any, d: any) => {
+            .attr('fill', d => d.children ? '#4682b4' : '#e34f26')
+            .on('click', (event, d) => {
               if (collapsible) {
                 clickHandler(d);
               }
@@ -94,12 +94,12 @@
           // Add labels for nodes
           nodeEnter.append('text')
             .attr('dy', '0.31em')
-            .attr('x', (d: any) => d.children || d._children ? -10 : 10)
-            .attr('text-anchor', (d: any) => d.children || d._children ? 'end' : 'start')
-            .text((d: any) => d.data.name)
+            .attr('x', d => d.children || d._children ? -10 : 10)
+            .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
+            .text(d => d.data.name)
             .style('fill-opacity', 1)
             .style('cursor', 'pointer')
-            .on('click', (event: any, d: any) => {
+            .on('click', (event, d) => {
               if (collapsible) {
                 clickHandler(d);
               }
@@ -107,35 +107,35 @@
 
           return nodeEnter;
         },
-        (update: any) => update
-          .attr('transform', (d: any) => `translate(${d.y},${d.x})`),
-        (exit: any) => exit.remove()
+        update => update
+          .attr('transform', d => `translate(${d.y},${d.x})`),
+        exit => exit.remove()
       );
 
     // Create links between nodes
-    const link: d3.Selection<SVGPathElement, any, SVGGElement, any> = g
+    const link: d3.Selection<SVGPathElement, HierarchyNode<any>, SVGGElement, any> = g
       .selectAll('path')
       .data(root.links())
       .join(
-        (enter: any) => {
+        enter => {
           return enter.append('path')
             .attr('class', 'link')
             .attr('d', d3.linkHorizontal()
-              .x((d: any) => d.y)
-              .y((d: any) => d.x))
+              .x(d => d.y)
+              .y(d => d.x))
             .attr('fill', 'none')
             .attr('stroke', '#ccc')
             .attr('stroke-width', 1);
         },
-        (update: any) => update
+        update => update
           .attr('d', d3.linkHorizontal()
-            .x((d: any) => d.y)
-            .y((d: any) => d.x)),
-        (exit: any) => exit.remove()
+            .x(d => d.y)
+            .y(d => d.x)),
+        exit => exit.remove()
       );
   }
 
-  function clickHandler(d: any) {
+  function clickHandler(d: HierarchyNode<any>) {
     if (d.children) {
       d._children = d.children;
       d.children = null;
@@ -143,7 +143,7 @@
       d.children = d._children;
       d._children = null;
     }
-
+    
     createTree();
   }
 
@@ -175,6 +175,23 @@
     flex-grow: 1;
   }
 
+  circle {
+    cursor: pointer;
+    stroke: #333;
+    stroke-width: 1px;
+  }
+
+  text {
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .link {
+    fill: none;
+    stroke: #9ecae1;
+    stroke-width: 1.5px;
+  }
+
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
@@ -184,5 +201,5 @@
 
 <div class="hierarchy-tree-container">
   <h3 class="hierarchy-tree-title">{title}</h3>
-  <div bind:this={container} class="tree-container"></div>
+  <div bind:this={container} class="tree-container" />
 </div>

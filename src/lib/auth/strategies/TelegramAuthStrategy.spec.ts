@@ -1,20 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TelegramAuthStrategy } from './TelegramAuthStrategy';
 import type { IGraphQLClient } from '../interfaces';
-import type { TelegramAuthData, User, AuthResult } from '../types';
+import type { TelegramAuthData, User } from '../types';
 import { AUTH_STRATEGIES } from '../constants';
-
-function assertSuccess<T>(result: AuthResult<T>): asserts result is { success: true; data: T } {
-	if (!result.success) {
-		throw new Error(`Expected success, got error: ${result.error}`);
-	}
-}
-
-function assertFailure<T>(result: AuthResult<T>): asserts result is { success: false; error: string } {
-	if (result.success) {
-		throw new Error('Expected failure, got success');
-	}
-}
 
 describe('TelegramAuthStrategy', () => {
 	let strategy: TelegramAuthStrategy;
@@ -59,9 +47,9 @@ describe('TelegramAuthStrategy', () => {
 
 	describe('authenticate', () => {
 		const validTelegramData: TelegramAuthData = {
-			id: '123456789',
+			id: 123456789,
 			hash: 'telegram-hash-example',
-			authDate: '1234567890',
+			authDate: 1234567890,
 			firstName: 'Telegram',
 			lastName: 'User',
 			username: 'telegramuser',
@@ -80,7 +68,6 @@ describe('TelegramAuthStrategy', () => {
 			const result = await strategy.authenticate(validTelegramData);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data).toEqual({
 				user: mockUser,
 				tokens: mockTokens
@@ -110,9 +97,9 @@ describe('TelegramAuthStrategy', () => {
 
 		it('should authenticate with minimal Telegram data', async () => {
 			const minimalTelegramData: TelegramAuthData = {
-				id: '123456789',
+				id: 123456789,
 				hash: 'telegram-hash-example',
-				authDate: '1234567890',
+				authDate: 1234567890,
 				firstName: 'User'
 			};
 
@@ -127,7 +114,6 @@ describe('TelegramAuthStrategy', () => {
 			const result = await strategy.authenticate(minimalTelegramData);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(mockGraphQLClient.mutate).toHaveBeenCalledWith(
 				expect.any(String),
 				{
@@ -151,7 +137,6 @@ describe('TelegramAuthStrategy', () => {
 			const result = await strategy.authenticate(validTelegramData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 
@@ -162,7 +147,6 @@ describe('TelegramAuthStrategy', () => {
 			const result = await strategy.authenticate(validTelegramData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 
@@ -177,7 +161,6 @@ describe('TelegramAuthStrategy', () => {
 			const result = await strategy.authenticate(validTelegramData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 
@@ -187,7 +170,6 @@ describe('TelegramAuthStrategy', () => {
 			const result = await strategy.authenticate(validTelegramData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('Telegram authentication failed');
 		});
 
@@ -235,8 +217,7 @@ describe('TelegramAuthStrategy', () => {
 			const result = await strategy.authenticate(validTelegramData);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
-			expect(result.data.user.profile?.avatar).toBe('https://t.me/i/userpic/320/custom_photo.jpg');
+			expect(result.data?.user.profile?.avatar).toBe('https://t.me/i/userpic/320/custom_photo.jpg');
 		});
 
 		it('should handle Telegram data without username', async () => {
@@ -256,7 +237,6 @@ describe('TelegramAuthStrategy', () => {
 			const result = await strategy.authenticate(dataWithoutUsername);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(mockGraphQLClient.mutate).toHaveBeenCalledWith(
 				expect.any(String),
 				expect.objectContaining({

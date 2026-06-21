@@ -17,7 +17,8 @@ export async function graphqlRequest<T = any>(query: string, variables?: any, ac
 
 		// For SSR requests, add Origin header to satisfy CORS
 		if (typeof window === 'undefined') {
-			headers['Origin'] = 'http://humansontology_frontend:3000';
+			headers['Origin'] =
+				process.env.FRONTEND_URL || process.env.VITE_APP_URL || 'http://localhost:5173';
 		}
 
 		const response = await fetch(GRAPHQL_URL, {

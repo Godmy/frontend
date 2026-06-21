@@ -24,10 +24,8 @@ export async function exportSvgToPng(svgElement: SVGElement, filename: string = 
   // Create an image element to draw to canvas
   const img = new Image();
   img.onload = () => {
-    const svgRoot = svgElement as SVGSVGElement;
-    const viewBox = svgRoot.viewBox?.baseVal;
-    canvas.width = viewBox?.width || svgRoot.clientWidth;
-    canvas.height = viewBox?.height || svgRoot.clientHeight;
+    canvas.width = svgElement.viewBox.baseVal.width || svgElement.clientWidth;
+    canvas.height = svgElement.viewBox.baseVal.height || svgElement.clientHeight;
     
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     

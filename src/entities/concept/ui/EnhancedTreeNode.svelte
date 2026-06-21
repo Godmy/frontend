@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Concept, TreeConcept } from '../model/types';
-  import Self from './EnhancedTreeNode.svelte';
 
   type Props = {
     concept: TreeConcept;
@@ -45,7 +44,7 @@
   let isExpanded = $derived(expandedNodes.has(concept.id));
   let isLoading = $derived(loadingNodes.has(concept.id));
   let hasChildren = $derived(
-    (concept.children && concept.children.length > 0) ||
+    (concept.children && concept.children.length > 0) || 
     (lazyLoadedChildren[concept.id] && lazyLoadedChildren[concept.id].length > 0)
   );
   let childCount = $derived(getChildCount(concept.id));
@@ -136,7 +135,7 @@
   ];
 
   let depthColor = $derived(depthColors[level % depthColors.length]);
-
+  
   // Определение всех дочерних элементов (включая lazy-загруженные)
   let allChildren = $derived([
     ...(concept.children || []),
@@ -160,13 +159,13 @@
     class="node-content px-6 py-3 hover:bg-gray-50 cursor-pointer border-l-4 {depthColor}"
     style="padding-left: {level * 24 + 24}px"
     draggable={true}
-    ondragstart={handleDragStart}
-    ondragend={handleDragEnd}
-    ondragover={(e: any) => handleDragOver(e, 'inside')}
-    ondragleave={handleDragLeave}
-    ondrop={handleDrop}
-    oncontextmenu={handleContextMenu}
-    onkeydown={handleKeyDown}
+    on:dragstart={handleDragStart}
+    on:dragend={handleDragEnd}
+    on:dragover={(e) => handleDragOver(e, 'inside')}
+    on:dragleave={handleDragLeave}
+    on:drop={handleDrop}
+    on:contextmenu={handleContextMenu}
+    on:keydown={handleKeyDown}
     role="treeitem"
     tabindex="0"
     aria-expanded={hasChildren ? isExpanded : undefined}
@@ -178,7 +177,7 @@
         <!-- Expand/Collapse button -->
         {#if hasChildren || lazyLoadedChildren[concept.id]}
           <button
-            onclick={() => dispatch('toggleNode', concept.id)}
+            on:click={() => dispatch('toggleNode', concept.id)}
             class="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700 focus:outline-none"
             aria-label={isExpanded ? 'Collapse' : 'Expand'}
           >
@@ -240,14 +239,14 @@
       <!-- Actions -->
       <div class="flex gap-2 ml-4 flex-shrink-0">
         <button
-          onclick={() => onEdit(concept)}
+          on:click={() => onEdit(concept)}
           class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           aria-label="Edit concept"
         >
           Edit
         </button>
         <button
-          onclick={() => onDelete(concept.id)}
+          on:click={() => onDelete(concept.id)}
           class="px-3 py-1 text-xs font-medium text-white bg-red-600 border border-transparent rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
           aria-label="Delete concept"
         >
@@ -261,7 +260,7 @@
   {#if (isExpanded || concept.id in lazyLoadedChildren) && allChildren.length > 0}
     <ul class="children" role="group">
       {#each allChildren as child}
-        <Self
+        <svelte:self
           concept={child}
           {expandedNodes}
           {loadingNodes}
@@ -286,7 +285,7 @@
     style="left: {contextMenuX}px; top: {contextMenuY}px"
   >
     <button
-      onclick={() => {
+      on:click={() => {
         onEdit(concept);
         closeContextMenu();
       }}
@@ -295,7 +294,7 @@
       Edit
     </button>
     <button
-      onclick={() => {
+      on:click={() => {
         onDelete(concept.id);
         closeContextMenu();
       }}
@@ -305,7 +304,7 @@
     </button>
     {#if hasChildren}
       <button
-        onclick={() => {
+        on:click={() => {
           dispatch('toggleNode', concept.id);
           closeContextMenu();
         }}

@@ -1,241 +1,254 @@
 <script lang="ts">
-	import { ProtectedRoute, RequireRole } from '$features/auth';
+	import { ProtectedRoute, RequireRole } from '$lib/auth';
+	import { graphql } from '$houdini';
 	import type { PageData } from './$types';
-	import {
-		Shield,
-		UserCheck,
-		UserMinus,
-		Users
-	} from 'lucide-svelte';
+	import { Shield } from 'lucide-svelte';
+	import TableList from './components/TableList.svelte';
+	import TableDataView from './components/TableDataView.svelte';
+	import RecordModal from './components/RecordModal.svelte';
+	import DeleteConfirmModal from './components/DeleteConfirmModal.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	const adminStatsStore = data.GetAdminStats;
-	const adminData = $derived($adminStatsStore?.data ?? null);
-
-	const stats = $derived.by(() => [
-		{
-			name: 'Total Users',
-			value: String(
-				adminData?.systemStats?.users?.total ?? adminData?.allUsers?.total ?? 0
-			),
-			icon: Users,
-			iconBg: 'bg-blue-100',
-			iconColor: 'text-blue-600'
-		},
-		{
-			name: 'Total Roles',
-			value: String(adminData?.roles?.length ?? 0),
-			icon: Shield,
-			iconBg: 'bg-purple-100',
-			iconColor: 'text-purple-600'
-		},
-		{
-			name: 'Active Users',
-			value: String(
-				adminData?.systemStats?.users?.active ?? adminData?.allUsers?.users?.filter(u => u.isActive)?.length ?? 0
-			),
-			icon: UserCheck,
-			iconBg: 'bg-green-100',
-			iconColor: 'text-green-600'
-		},
-		{
-			name: 'Inactive Users',
-			value: String(
-				(adminData?.systemStats?.users?.total ?? adminData?.allUsers?.total ?? 0) -
-				(adminData?.systemStats?.users?.active ?? adminData?.allUsers?.users?.filter(u => u.isActive)?.length ?? 0)
-			),
-			icon: UserMinus,
-			iconBg: 'bg-red-100',
-			iconColor: 'text-red-600'
+	// GraphQL stores
+	const tablesStore = data.GetAdminTables;
+	const createRecordMutation = graphql(`
+		mutation CreateTableRecord($tableName: String!, $data: JSON!) {
+			createTableRecord(tableName: $tableName, data: $data)
 		}
-	]);
+	`);
+	const updateRecordMutation = graphql(`
+		mutation UpdateTableRecord($tableName: String!, $recordId: Int!, $data: JSON!) {
+			updateTableRecord(tableName: $tableName, recordId: $recordId, data: $data)
+		}
+	`);
+	const deleteRecordMutation = graphql(`
+		mutation DeleteTableRecord($tableName: String!, $recordId: Int!) {
+			deleteTableRecord(tableName: $tableName, recordId: $recordId)
+		}
+	`);
+
+	// State
+	let selectedTable = $state<string | null>(null);
+	let currentPage = $state(0);
+	let pageSize = $state(25);
+	let tableDetailsStore = $state<any>(null);
+	let isLoadingDetails = $state(false);
+
+	// Modal state
+	let isRecordModalOpen = $state(false);
+	let recordModalMode = $state<'create' | 'edit'>('create');
+	let editingRecord = $state<Record<string, any> | null>(null);
+	let isDeleteModalOpen = $state(false);
+	let deletingRecord = $state<Record<string, any> | null>(null);
+
+	// Derived state
+	const tables = $derived($tablesStore?.data?.allTables ?? []);
+	const tableData = $derived($state.snapshot(tableDetailsStore?.data?.tableData ?? null));
+	const tableSchema = $derived($state.snapshot(tableDetailsStore?.data?.tableSchema ?? null));
+	const primaryKeyColumn = $derived(() => {
+		return tableSchema?.columns?.find((col: any) => col.primaryKey)?.name || 'id';
+	});
+
+	// Load table details when table is selected or page changes
+	$effect(() => {
+		if (selectedTable) {
+			loadTableDetails();
+		}
+	});
+
+	async function loadTableDetails() {
+		if (!selectedTable) return;
+
+		isLoadingDetails = true;
+		try {
+			const offset = currentPage * pageSize;
+			const { data: detailsData } = await graphql(`
+				query GetTableDetails($tableName: String!, $limit: Int!, $offset: Int!) {
+					tableSchema(tableName: $tableName) {
+						tableName
+						columns {
+							name
+							type
+							nullable
+							primaryKey
+							default
+						}
+					}
+					tableData(tableName: $tableName, limit: $limit, offset: $offset) {
+						tableName
+						columns
+						rows
+						total
+						hasMore
+					}
+				}
+			`).fetch({
+				variables: {
+					tableName: selectedTable,
+					limit: pageSize,
+					offset
+				}
+			});
+
+			tableDetailsStore = { data: detailsData };
+		} catch (error) {
+			console.error('Error loading table details:', error);
+		} finally {
+			isLoadingDetails = false;
+		}
+	}
+
+	function handleSelectTable(tableName: string) {
+		selectedTable = tableName;
+		currentPage = 0; // Reset to first page
+	}
+
+	function handlePageChange(page: number) {
+		currentPage = page;
+	}
+
+	function handlePageSizeChange(size: number) {
+		pageSize = size;
+		currentPage = 0; // Reset to first page
+	}
+
+	function handleCreateRecord() {
+		recordModalMode = 'create';
+		editingRecord = null;
+		isRecordModalOpen = true;
+	}
+
+	function handleEditRecord(record: Record<string, any>) {
+		recordModalMode = 'edit';
+		editingRecord = record;
+		isRecordModalOpen = true;
+	}
+
+	function handleDeleteRecord(record: Record<string, any>) {
+		deletingRecord = record;
+		isDeleteModalOpen = true;
+	}
+
+	async function handleSaveRecord(formData: Record<string, any>) {
+		if (!selectedTable) return;
+
+		try {
+			if (recordModalMode === 'create') {
+				await createRecordMutation.mutate({
+					tableName: selectedTable,
+					data: formData
+				});
+			} else if (editingRecord) {
+				const recordId = editingRecord[primaryKeyColumn];
+				await updateRecordMutation.mutate({
+					tableName: selectedTable,
+					recordId: Number(recordId),
+					data: formData
+				});
+			}
+
+			// Reload table data
+			await loadTableDetails();
+		} catch (error) {
+			console.error('Error saving record:', error);
+			throw error; // Re-throw so modal can show error
+		}
+	}
+
+	async function handleConfirmDelete() {
+		if (!selectedTable || !deletingRecord) return;
+
+		try {
+			const recordId = deletingRecord[primaryKeyColumn];
+			await deleteRecordMutation.mutate({
+				tableName: selectedTable,
+				recordId: Number(recordId)
+			});
+
+			// Reload table data
+			await loadTableDetails();
+		} catch (error) {
+			console.error('Error deleting record:', error);
+			throw error; // Re-throw so modal can show error
+		}
+	}
 </script>
 
 <svelte:head>
-	<title>Admin Panel - Multipult</title>
+	<title>Admin Panel - Database Management</title>
 </svelte:head>
 
 <ProtectedRoute>
 	<RequireRole role="admin">
-		<div class="min-h-screen bg-gray-50">
-			<div class="py-10">
-				<!-- Header -->
-				<header class="mb-8">
-					<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-						<div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-xl p-8 text-white">
-							<div class="flex items-center space-x-4">
-								<div class="flex h-14 w-14 items-center justify-center rounded-full bg-white/10">
-									<Shield class="h-8 w-8 text-white" />
-								</div>
-								<div>
-									<h1 class="text-4xl font-bold">Admin Panel</h1>
-									<p class="text-orange-100 mt-2">Manage users, roles, and permissions</p>
-								</div>
-							</div>
+		<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+			<!-- Header -->
+			<header class="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+				<div class="mx-auto max-w-[1800px] px-6 py-6">
+					<div class="flex items-center gap-4">
+						<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30">
+							<Shield class="h-6 w-6 text-white" />
 						</div>
-					</div>
-				</header>
-
-				<!-- Stats Grid -->
-				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-						{#each stats as stat}
-							{@const Icon = stat.icon}
-							<div class="bg-white overflow-hidden shadow-lg rounded-xl hover:shadow-xl transition-shadow">
-								<div class="p-6">
-								<div class="flex items-center">
-									<div class="flex-shrink-0 p-3 rounded-lg {stat.iconBg}">
-										<Icon class={`h-6 w-6 ${stat.iconColor}`} />
-									</div>
-										<div class="ml-5 w-0 flex-1">
-											<dl>
-												<dt class="text-sm font-medium text-gray-500 truncate">
-													{stat.name}
-												</dt>
-												<dd class="text-3xl font-bold text-gray-900">
-													{stat.value}
-												</dd>
-											</dl>
-										</div>
-									</div>
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-
-				<!-- Main Content -->
-				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-						<!-- Users List -->
-						<div class="bg-white shadow-lg rounded-xl p-6">
-							<div class="flex justify-between items-center mb-6">
-								<h2 class="text-2xl font-bold text-gray-900">Users</h2>
-								<button
-									class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-								>
-									<svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-									</svg>
-									Add User
-								</button>
-							</div>
-
-							<div class="space-y-3 max-h-96 overflow-y-auto">
-								{#if adminData?.allUsers?.users && adminData?.allUsers?.users.length > 0}
-									{#each adminData?.allUsers?.users as user}
-										<div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-											<div class="flex items-center space-x-3">
-												<div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
-													{user.username?.charAt(0).toUpperCase()}
-												</div>
-												<div>
-													<p class="font-medium text-gray-900">{user.username}</p>
-													<p class="text-sm text-gray-500">{user.email}</p>
-												</div>
-											</div>
-											<div class="flex items-center space-x-2">
-												<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-													{user.isActive ? 'Active' : 'Inactive'}
-												</span>
-												<button
-													type="button"
-													aria-label={`Edit ${user.username}`}
-													class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-												>
-													<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-													</svg>
-												</button>
-											</div>
-										</div>
-									{/each}
-								{:else}
-									<div class="text-center py-8 text-gray-500">
-										<p>No users found</p>
-									</div>
-								{/if}
-							</div>
-						</div>
-
-						<!-- Roles List -->
-						<div class="bg-white shadow-lg rounded-xl p-6">
-							<div class="flex justify-between items-center mb-6">
-								<h2 class="text-2xl font-bold text-gray-900">Roles</h2>
-								<button
-									class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-purple-600 hover:bg-purple-700 transition-colors"
-								>
-									<svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-									</svg>
-									Add Role
-								</button>
-							</div>
-
-							<div class="space-y-3 max-h-96 overflow-y-auto">
-								{#if adminData?.roles && adminData?.roles?.length > 0}
-									{#each adminData?.roles as role}
-										<div class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-											<div class="flex justify-between items-start mb-2">
-												<div>
-													<h3 class="font-medium text-gray-900">{role.name}</h3>
-													{#if role.description}
-														<p class="text-sm text-gray-500 mt-1">{role.description}</p>
-													{/if}
-												</div>
-												<button
-													type="button"
-													aria-label={`Edit ${role.name}`}
-													class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-												>
-													<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-													</svg>
-												</button>
-											</div>
-											<div class="flex items-center justify-between">
-												<span class="text-xs text-gray-500">
-													{role.permissions?.length || 0} permissions
-												</span>
-												<div class="flex flex-wrap gap-1">
-													{#if role.permissions && role.permissions.length > 0}
-														{#each role.permissions.slice(0, 3) as permission}
-															<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
-																{permission.resource}:{permission.action}
-															</span>
-														{/each}
-														{#if role.permissions.length > 3}
-															<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700">
-																+{role.permissions.length - 3}
-															</span>
-														{/if}
-													{/if}
-												</div>
-											</div>
-										</div>
-									{/each}
-								{:else}
-									<div class="text-center py-8 text-gray-500">
-										<p>No roles found</p>
-									</div>
-								{/if}
-							</div>
-						</div>
-					</div>
-
-					<!-- Recent Activity -->
-					<div class="mt-8 bg-white shadow-lg rounded-xl p-6">
-						<h2 class="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h2>
-						<div class="text-center py-8 text-gray-500">
-							<svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-							</svg>
-							<p class="mt-2">Activity tracking coming soon</p>
+						<div>
+							<h1 class="text-2xl font-bold text-gray-900">Database Administration</h1>
+							<p class="text-sm text-gray-500">Manage all database tables and records</p>
 						</div>
 					</div>
 				</div>
-			</div>
+			</header>
+
+			<!-- Main Content -->
+			<main class="mx-auto max-w-[1800px] px-6 py-8">
+				<div class="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] lg:gap-8 h-[calc(100vh-200px)]">
+					<!-- Left Column: Table List -->
+					<div class="h-full">
+						<TableList
+							{tables}
+							{selectedTable}
+							onSelectTable={handleSelectTable}
+						/>
+					</div>
+
+					<!-- Right Column: Table Data View -->
+					<div class="h-full">
+						<TableDataView
+							tableName={selectedTable}
+							{tableData}
+							{tableSchema}
+							isLoading={isLoadingDetails}
+							{currentPage}
+							{pageSize}
+							onPageChange={handlePageChange}
+							onPageSizeChange={handlePageSizeChange}
+							onCreateRecord={handleCreateRecord}
+							onEditRecord={handleEditRecord}
+							onDeleteRecord={handleDeleteRecord}
+						/>
+					</div>
+				</div>
+			</main>
 		</div>
+
+		<!-- Modals -->
+		{#if tableSchema}
+			<RecordModal
+				isOpen={isRecordModalOpen}
+				mode={recordModalMode}
+				tableName={selectedTable ?? ''}
+				columns={tableSchema.columns}
+				initialData={editingRecord}
+				onClose={() => (isRecordModalOpen = false)}
+				onSave={handleSaveRecord}
+			/>
+
+			<DeleteConfirmModal
+				isOpen={isDeleteModalOpen}
+				tableName={selectedTable ?? ''}
+				record={deletingRecord}
+				primaryKeyColumn={primaryKeyColumn}
+				onClose={() => (isDeleteModalOpen = false)}
+				onConfirm={handleConfirmDelete}
+			/>
+		{/if}
 	</RequireRole>
 </ProtectedRoute>

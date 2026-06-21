@@ -37,11 +37,10 @@ class NotificationStore {
 		this.notifications.push(notification);
 
 		// Auto dismiss if duration is set
-		const duration = notification.duration ?? 0;
-		if (duration > 0) {
+		if (notification.duration > 0) {
 			setTimeout(() => {
 				this.dismiss(id);
-			}, duration);
+			}, notification.duration);
 		}
 
 		return id;

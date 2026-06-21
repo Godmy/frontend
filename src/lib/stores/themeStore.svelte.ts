@@ -4,7 +4,7 @@
  * Автоматически сохраняет выбор в localStorage и учитывает системные настройки
  */
 
-const STORAGE_KEY = 'multipult_theme';
+const STORAGE_KEY = 'vibe_management_pro_theme';
 
 class ThemeStore {
 	private _currentTheme = $state<'light' | 'dark' | 'auto'>('auto');

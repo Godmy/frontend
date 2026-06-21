@@ -63,7 +63,7 @@ export async function getRootDomainConcepts(languageCode: string = 'ru') {
 export async function getChildConcepts(parentId: number, languageCode: string = 'ru') {
   const query = `
     query GetChildConcepts($parentId: Int!) {
-      concepts(parent_id: $parentId) {
+      concepts(parentId: $parentId) {
         id
         path
         depth

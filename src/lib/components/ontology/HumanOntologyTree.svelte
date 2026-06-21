@@ -1,7 +1,6 @@
 <script lang="ts">
   import { getChildConcepts, type DomainConcept } from '$lib/api/domain-concepts';
   import { ChevronRight, ChevronDown, Loader2 } from 'lucide-svelte';
-  import Self from './HumanOntologyTree.svelte';
 
   // Props
   let { concept, languageCode = 'ru', onSelect = null }: {
@@ -87,7 +86,7 @@
     </button>
 
     <!-- Информация о концепте -->
-    <div class="flex-1 min-w-0" role="button" tabindex="0" onclick={handleSelect} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(); }}>
+    <div class="flex-1 min-w-0" onclick={handleSelect}>
       <div class="flex items-baseline gap-2 flex-wrap">
         <!-- Путь (ID) -->
         <span class="text-xs font-mono text-gray-400">{concept.path}</span>
@@ -119,7 +118,7 @@
   {#if isExpanded && children.length > 0}
     <div class="concept-children ml-2">
       {#each children as child (child.id)}
-        <Self concept={child} {languageCode} {onSelect} />
+        <svelte:self concept={child} {languageCode} {onSelect} />
       {/each}
     </div>
   {/if}

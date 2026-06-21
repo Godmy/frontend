@@ -3,7 +3,7 @@
   import ContextMenu from './ContextMenu.svelte';
 
   // Define types
-  type Node = {
+  export type Node = {
     id: string;
     label: string;
     title?: string;
@@ -15,7 +15,7 @@
     [key: string]: any; // Allow additional properties
   };
 
-  type Edge = {
+  export type Edge = {
     id: string;
     from: string;
     to: string;
@@ -25,7 +25,7 @@
     [key: string]: any; // Allow additional properties
   };
 
-  type NetworkData = {
+  export type NetworkData = {
     nodes: Node[];
     edges: Edge[];
   };
@@ -102,34 +102,34 @@
     network = new Network(container, networkData, options);
 
     // Add event listeners
-    network.on('click', (params: any) => {
+    network.on('click', (params) => {
       console.log('Node clicked:', params);
     });
 
-    network.on('doubleClick', (params: any) => {
+    network.on('doubleClick', (params) => {
       console.log('Node double-clicked:', params);
     });
 
-    network.on('oncontext', (params: any) => {
+    network.on('oncontext', (params) => {
       console.log('Node right-clicked:', params);
     });
 
-    network.on('hoverNode', (params: any) => {
+    network.on('hoverNode', (params) => {
       console.log('Node hovered:', params);
     });
 
-    network.on('blurNode', (params: any) => {
+    network.on('blurNode', (params) => {
       console.log('Node unhovered:', params);
     });
-
+    
     // Context menu for nodes
-    network.on('oncontext', (params: any) => {
+    network.on('oncontext', (params) => {
       params.event.preventDefault();
-
+      
       if (params.nodes.length > 0) {
         const nodeId = params.nodes[0];
         const node = originalNodes.find(n => n.id === nodeId);
-
+        
         if (node) {
           contextNodeId = nodeId;
           contextNode = node;
@@ -370,6 +370,25 @@
     overflow: hidden;
     flex-grow: 1;
   }
+
+  .vis-network {
+    width: 100%;
+    height: 100%;
+  }
+
+  .vis-tooltip {
+    position: absolute;
+    visibility: hidden;
+    padding: 5px;
+    white-space: nowrap;
+    font-family: verdana;
+    font-size: 14px;
+    color: #000000;
+    background-color: #f5f4ed;
+    border: 1px solid #808074;
+    border-radius: 3px;
+    opacity: 0.8;
+  }
 </style>
 
 <div class="network-explorer-container">
@@ -382,7 +401,7 @@
           <input
             type="text"
             placeholder="Search nodes..."
-            oninput={onSearchInput}
+            on:input={onSearchInput}
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
@@ -390,7 +409,7 @@
       
       {#if enableFilter}
         <select
-          onchange={onFilterChange}
+          on:change={onFilterChange}
           class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         >
           <option value="all">All Types</option>

@@ -13,7 +13,7 @@ describe('AuthStore', () => {
 			id: 1,
 			firstName: 'Test',
 			lastName: 'User',
-			avatar: undefined,
+			avatar: null,
 			language: 'en',
 			timezone: 'UTC'
 		}

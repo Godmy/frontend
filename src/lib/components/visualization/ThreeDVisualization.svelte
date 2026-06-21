@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  type Node3D = {
+  export type Node3D = {
     id: string;
     name: string;
     position: { x: number; y: number; z: number };
@@ -10,14 +10,14 @@
     size?: number;
   };
 
-  type Edge3D = {
+  export type Edge3D = {
     id: string;
     from: string;
     to: string;
     color?: string;
   };
 
-  type ThreeDData = {
+  export type ThreeDData = {
     nodes: Node3D[];
     edges: Edge3D[];
   };
@@ -208,7 +208,7 @@
     nodes.forEach(node => {
       if (node.material) {
         if (Array.isArray(node.material)) {
-          node.material.forEach((mat: any) => {
+          node.material.forEach(mat => {
             if (mat.color && node.userData) {
               mat.color.set(node.userData.color || 0x4682b4);
             }
@@ -222,7 +222,7 @@
     if (intersects.length > 0) {
       const object = intersects[0].object;
       if (Array.isArray(object.material)) {
-        object.material.forEach((mat: any) => {
+        object.material.forEach(mat => {
           if (mat.color) {
             mat.color.set(0xff0000);
           }
@@ -262,11 +262,11 @@
 
     if (scene) {
       // Dispose of geometries and materials
-      scene.traverse((object: any) => {
+      scene.traverse((object) => {
         if (object.isMesh) {
           object.geometry.dispose();
           if (Array.isArray(object.material)) {
-            object.material.forEach((material: any) => {
+            object.material.forEach(material => {
               if (material.dispose) {
                 material.dispose();
               }
@@ -309,9 +309,15 @@
     overflow: hidden;
     flex-grow: 1;
   }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 </style>
 
 <div class="three-d-visualization-container">
   <h3 class="three-d-visualization-title">{title}</h3>
-  <div bind:this={container} class="visualization-container"></div>
+  <div bind:this={container} class="visualization-container" />
 </div>

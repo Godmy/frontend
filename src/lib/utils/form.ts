@@ -1,4 +1,4 @@
-import { z, type ZodIssue, type ZodSchema } from 'zod';
+import { z, type ZodSchema } from 'zod';
 
 /**
  * Form validation errors state
@@ -10,7 +10,7 @@ export type FormErrors<T extends Record<string, any>> = {
 /**
  * Form validation result
  */
-export interface ValidationResult<T extends Record<string, any>> {
+export interface ValidationResult<T> {
 	success: boolean;
 	data?: T;
 	errors?: FormErrors<T>;
@@ -33,12 +33,12 @@ export function validateForm<T extends Record<string, any>>(
 	}
 
 	const errors: FormErrors<T> = {};
-	result.error.issues.forEach((issue: ZodIssue) => {
-		const path = issue.path.join('.') as keyof T;
+	result.error.errors.forEach((error) => {
+		const path = error.path.join('.') as keyof T;
 		if (!errors[path]) {
 			errors[path] = [];
 		}
-		errors[path]!.push(issue.message);
+		errors[path]!.push(error.message);
 	});
 
 	return {
@@ -66,9 +66,9 @@ export function validateField<T extends Record<string, any>>(
 		}
 
 		// Filter errors for this specific field
-		const fieldErrors = result.error.issues
-			.filter((issue: ZodIssue) => issue.path[0] === fieldName)
-			.map((issue: ZodIssue) => issue.message);
+		const fieldErrors = result.error.errors
+			.filter((error) => error.path[0] === fieldName)
+			.map((error) => error.message);
 
 		return fieldErrors.length > 0 ? fieldErrors : undefined;
 	} catch {

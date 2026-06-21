@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  type LegendItem = {
+  export type LegendItem = {
     label: string;
     color: string;
     type: string;
@@ -86,18 +86,10 @@
     <div class="legend-item">
       <div class="legend-color" style="background-color: {item.color}"></div>
       <div class="legend-label">{item.label}</div>
-      <div
-        class="legend-toggle"
-        onclick={() => toggleVisibility(item)}
-        onkeydown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggleVisibility(item);
-          }
-        }}
+      <div 
+        class="legend-toggle" 
+        on:click={() => toggleVisibility(item)}
         title={item.visible ? "Hide" : "Show"}
-        tabindex="0"
-        role="button"
       >
         {#if item.visible}
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

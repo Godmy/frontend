@@ -1,7 +1,0 @@
-query GetDashboardStats {
-	counts: dashboardStats {
-		concepts
-		languages
-		dictionaries
-	}
-}

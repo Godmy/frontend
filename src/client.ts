@@ -37,7 +37,8 @@ export default new HoudiniClient({
 
 		// For SSR requests, add Origin header to satisfy CORS
 		if (typeof window === 'undefined') {
-			headers['Origin'] = 'http://humansontology_frontend:3000';
+			headers['Origin'] =
+				process.env.FRONTEND_URL || process.env.VITE_APP_URL || 'http://localhost:5173';
 		} else {
 			// On client-side, add auth token if available
 			const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);

@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
 
   // Define types
-  type TreeNode = {
+  export type TreeNode = {
     id: string;
     name: string;
     children?: TreeNode[];
@@ -60,11 +60,11 @@
 
     // Create root node from data
     root = d3.hierarchy(data);
-
+    
     // Create radial tree layout
     treeLayout = d3.tree()
       .size([2 * Math.PI, radius])
-      .separation((a: any, b: any) => (a.parent === b.parent ? 1 : 2) / a.depth);
+      .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth);
 
     // Compute the tree layout
     treeLayout(root);
@@ -90,9 +90,9 @@
       .selectAll('path')
       .data(root.links())
       .join('path')
-        .attr('d', d3.linkRadial()
-          .angle((d: any) => d.x)
-          .radius((d: any) => d.y));
+        .attr('d', d3.linkRadial<any>()
+          .angle(d => d.x)
+          .radius(d => d.y));
 
     // Create nodes
     const node = g.append('g')
@@ -101,20 +101,20 @@
       .selectAll('g')
       .data(root.descendants())
       .join('g')
-        .attr('transform', (d: any) => `
+        .attr('transform', d => `
           rotate(${d.x * 180 / Math.PI - 90})
           translate(${d.y},0)
         `);
 
     node.append('circle')
-      .attr('fill', (d: any) => d.children ? '#4682b4' : '#e34f26')
+      .attr('fill', d => d.children ? '#4682b4' : '#e34f26')
       .attr('r', 4)
-      .on('mouseover', (event: any, d: any) => {
+      .on('mouseover', (event, d) => {
         tooltip
           .text(d.data.name || d.data.id)
           .style('visibility', 'visible');
       })
-      .on('mousemove', (event: any) => {
+      .on('mousemove', (event) => {
         tooltip
           .style('top', event.pageY - 10 + 'px')
           .style('left', event.pageX + 10 + 'px');
@@ -125,19 +125,19 @@
 
     node.append('text')
       .attr('dy', '0.31em')
-      .attr('x', (d: any) => d.x < Math.PI ? 6 : -6)
-      .attr('text-anchor', (d: any) => d.x < Math.PI ? 'start' : 'end')
-      .attr('transform', (d: any) => d.x >= Math.PI ? 'rotate(180)' : null)
-      .text((d: any) => d.data.name || d.data.id)
+      .attr('x', d => d.x < Math.PI ? 6 : -6)
+      .attr('text-anchor', d => d.x < Math.PI ? 'start' : 'end')
+      .attr('transform', d => d.x >= Math.PI ? 'rotate(180)' : null)
+      .text(d => d.data.name || d.data.id)
       .style('fill-opacity', 1)
       .style('font-size', '10px')
       .style('cursor', 'pointer')
-      .on('mouseover', (event: any, d: any) => {
+      .on('mouseover', (event, d) => {
         tooltip
           .text(d.data.name || d.data.id)
           .style('visibility', 'visible');
       })
-      .on('mousemove', (event: any) => {
+      .on('mousemove', (event) => {
         tooltip
           .style('top', event.pageY - 10 + 'px')
           .style('left', event.pageX + 10 + 'px');
@@ -149,7 +149,7 @@
     // Add zoom functionality
     const zoom = d3.zoom()
       .scaleExtent([0.1, 8])
-      .on('zoom', (event: any) => {
+      .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
 
@@ -184,6 +184,19 @@
     flex-grow: 1;
   }
 
+  .radial-tree-tooltip {
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  circle {
+    cursor: pointer;
+  }
+
+  text {
+    cursor: pointer;
+  }
+
   svg {
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
@@ -193,5 +206,5 @@
 
 <div class="radial-tree-container">
   <h3 class="radial-tree-title">{title}</h3>
-  <div bind:this={container} class="radial-tree-visualization-container"></div>
+  <div bind:this={container} class="radial-tree-visualization-container" />
 </div>

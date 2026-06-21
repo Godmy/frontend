@@ -15,7 +15,7 @@
     children?: ConceptHierarchy[];
   }
 
-  let svgElement: SVGElement = null as any;
+  let svgElement: SVGElement;
   const width = 800;
   const height = 800;
   const cx = width * 0.5;
@@ -96,9 +96,7 @@
 
     // Create D3 hierarchy
     const root = d3.hierarchy(rootData, (d: any) => d.children);
-    const treeLayout = d3.tree<ConceptHierarchy>()
-      .size([2 * Math.PI, radius])
-      .separation((a, b) => (a.parent === b.parent ? 1 : 2) / (a.depth + 1));
+    const treeLayout = d3.tree().size([2 * Math.PI, radius]).separation((a, b) => (a.parent === b.parent ? 1 : 2) / (a.depth + 1));
     const treeRoot = treeLayout(root);
 
     const svg = d3.select(svgElement)

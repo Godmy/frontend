@@ -12,19 +12,6 @@ import type {
 	User,
 	AuthTokens
 } from '../types';
-import type { AuthResult } from '../types';
-
-function assertSuccess<T>(result: AuthResult<T>): asserts result is { success: true; data: T } {
-	if (!result.success) {
-		throw new Error(`Expected success, got error: ${result.error}`);
-	}
-}
-
-function assertFailure<T>(result: AuthResult<T>): asserts result is { success: false; error: string } {
-	if (result.success) {
-		throw new Error('Expected failure, got success');
-	}
-}
 
 describe('AuthService', () => {
 	let authService: AuthService;
@@ -47,7 +34,7 @@ describe('AuthService', () => {
 			id: 1,
 			firstName: 'Test',
 			lastName: 'User',
-			avatar: undefined,
+			avatar: null,
 			language: 'en',
 			timezone: 'UTC'
 		}
@@ -88,7 +75,6 @@ describe('AuthService', () => {
 			const result = await authService.login(credentials);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data?.user).toEqual(mockUser);
 			expect(result.data?.tokens).toEqual(mockTokens);
 			expect(mockTokenStorage.saveTokens).toHaveBeenCalledWith(mockTokens);
@@ -102,7 +88,6 @@ describe('AuthService', () => {
 			const result = await authService.login(credentials);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(mockTokenStorage.saveTokens).not.toHaveBeenCalled();
 		});
 	});
@@ -124,7 +109,6 @@ describe('AuthService', () => {
 			const result = await authService.loginWithGoogle(googleData);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data?.user).toEqual(mockUser);
 			expect(result.data?.tokens).toEqual(mockTokens);
 			expect(mockTokenStorage.saveTokens).toHaveBeenCalledWith(mockTokens);
@@ -138,16 +122,15 @@ describe('AuthService', () => {
 			const result = await authService.loginWithGoogle(googleData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(mockTokenStorage.saveTokens).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('loginWithTelegram', () => {
 		const telegramData: TelegramAuthData = {
-			id: '123456789',
+			id: 123456789,
 			hash: 'telegram-hash',
-			authDate: '1234567890',
+			authDate: 1234567890,
 			firstName: 'Test'
 		};
 
@@ -163,7 +146,6 @@ describe('AuthService', () => {
 			const result = await authService.loginWithTelegram(telegramData);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data?.user).toEqual(mockUser);
 			expect(result.data?.tokens).toEqual(mockTokens);
 			expect(mockTokenStorage.saveTokens).toHaveBeenCalledWith(mockTokens);
@@ -177,7 +159,6 @@ describe('AuthService', () => {
 			const result = await authService.loginWithTelegram(telegramData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(mockTokenStorage.saveTokens).not.toHaveBeenCalled();
 		});
 	});
@@ -203,7 +184,6 @@ describe('AuthService', () => {
 			const result = await authService.register(registrationData);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data?.user).toEqual(mockUser);
 			expect(result.data?.tokens).toEqual(mockTokens);
 			expect(mockTokenStorage.saveTokens).toHaveBeenCalledWith(mockTokens);
@@ -216,7 +196,6 @@ describe('AuthService', () => {
 			const result = await authService.register(registrationData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe(errorMessage);
 		});
 	});
@@ -245,7 +224,6 @@ describe('AuthService', () => {
 			const result = await authService.refreshToken();
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data).toEqual(newTokens);
 			expect(mockTokenStorage.saveTokens).toHaveBeenCalledWith(newTokens);
 		});
@@ -256,7 +234,6 @@ describe('AuthService', () => {
 			const result = await authService.refreshToken();
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('No refresh token available');
 		});
 
@@ -269,7 +246,6 @@ describe('AuthService', () => {
 			const result = await authService.refreshToken();
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('Invalid refresh token');
 		});
 	});
@@ -284,7 +260,6 @@ describe('AuthService', () => {
 			const result = await authService.getCurrentUser();
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data?.user).toEqual(mockUser);
 			expect(result.data?.tokens).toEqual(mockTokens);
 		});
@@ -295,7 +270,6 @@ describe('AuthService', () => {
 			const result = await authService.getCurrentUser();
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('Not authenticated');
 		});
 
@@ -308,7 +282,6 @@ describe('AuthService', () => {
 			const result = await authService.getCurrentUser();
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('User not found');
 		});
 	});
@@ -331,7 +304,6 @@ describe('AuthService', () => {
 			const result = await authService.requestPasswordReset(resetRequest);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data).toEqual(mockResponse);
 		});
 
@@ -343,7 +315,6 @@ describe('AuthService', () => {
 			const result = await authService.requestPasswordReset(resetRequest);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('Email not found');
 		});
 	});
@@ -367,7 +338,6 @@ describe('AuthService', () => {
 			const result = await authService.resetPassword(resetData);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data).toEqual(mockResponse);
 		});
 
@@ -379,7 +349,6 @@ describe('AuthService', () => {
 			const result = await authService.resetPassword(resetData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('Invalid or expired token');
 		});
 	});
@@ -402,7 +371,6 @@ describe('AuthService', () => {
 			const result = await authService.verifyEmail(verificationData);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data).toEqual(mockResponse);
 		});
 
@@ -414,7 +382,6 @@ describe('AuthService', () => {
 			const result = await authService.verifyEmail(verificationData);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('Invalid verification token');
 		});
 	});
@@ -435,7 +402,6 @@ describe('AuthService', () => {
 			const result = await authService.resendVerificationEmail(email);
 
 			expect(result.success).toBe(true);
-			assertSuccess(result);
 			expect(result.data).toEqual(mockResponse);
 		});
 
@@ -447,7 +413,6 @@ describe('AuthService', () => {
 			const result = await authService.resendVerificationEmail(email);
 
 			expect(result.success).toBe(false);
-			assertFailure(result);
 			expect(result.error).toBe('Email already verified');
 		});
 	});
