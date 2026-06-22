@@ -1,24 +1,27 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/stores';
+	import { setClientSession, setClientStarted } from '$houdini';
 	import { ToastContainer } from '$lib/notifications';
 	import { initializeErrorNotifications } from '$lib/errors/integrations';
 	import { languageStore } from '$lib/stores/languageStore.svelte';
 	import { t } from '$lib/utils/i18n';
 	import { onMount } from 'svelte';
 	import { useAuth } from '$lib/auth';
-	
+
 	let { children } = $props();
 	const auth = useAuth();
-	
+
+	// Required Houdini SvelteKit initialization: pass page data to the client
+	$effect(() => {
+		setClientStarted();
+		setClientSession(($page?.data ?? {}) as App.Session);
+	});
+
 	// Initialize on mount
 	onMount(() => {
-		// Initialize error notifications
 		const unsubscribe = initializeErrorNotifications();
-		
-		// Initialize language store from localStorage
 		languageStore.init();
-		
 		return () => {
 			unsubscribe?.();
 		};

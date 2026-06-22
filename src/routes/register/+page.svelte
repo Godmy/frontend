@@ -24,10 +24,12 @@
 		}
 		
 		try {
-			await auth.register(name, email, password);
-			
+			await auth.register({ username: name, email, password });
+
 			// После успешной регистрации сразу логинимся и перенаправляем
-			await auth.login(email, password);
+			const loginEmail = email;
+			const loginPassword = password;
+			await auth.login({ username: loginEmail, password: loginPassword });
 			
 			if (auth.user) {
 				const role = auth.user.role || 'user';

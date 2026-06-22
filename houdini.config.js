@@ -4,7 +4,7 @@
 const config = {
     "schemaPath": "./schema.graphql",
     "watchSchema": {
-        "url": process.env.API_BASE_URL ?? process.env.VITE_GRAPHQL_ENDPOINT ?? "http://localhost:8000/graphql"
+        "url": import.meta.env?.VITE_GRAPHQL_ENDPOINT ?? "http://localhost:8000/graphql"
     },
     "runtimeDir": ".houdini",
     "plugins": {

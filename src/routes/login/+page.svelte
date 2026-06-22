@@ -17,7 +17,7 @@
 		error = '';
 		
 		try {
-			await auth.login(email, password);
+			await auth.login({ username: email, password });
 			
 			// После успешной авторизации перенаправляем на страницу пользователя по роли
 			if (auth.user) {

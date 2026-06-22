@@ -3,8 +3,28 @@ import { defineConfig } from 'vitest/config';
 import { sveltekit } from '@sveltejs/kit/vite';
 import houdini from 'houdini/vite';
 
+// Patch for houdini-svelte 3.0.0-next.35 + Svelte 5 bug:
+// the injected $effect calls extractSession(page.data) where page is the
+// store object (not its value), so val === undefined → TypeError.
+// This transform adds a null guard before the throw site.
+function houdiniSessionFix() {
+	return {
+		name: 'houdini-session-fix',
+		enforce: 'post' as const,
+		transform(code: string, id: string) {
+			if (!id.includes('.houdini') || !id.includes('session')) return null;
+			if (code.includes('if (!val) return')) return null; // already patched
+			const patched = code.replace(
+				/return val\[sessionKeyName\]/,
+				'if (!val) return undefined;\n\treturn val[sessionKeyName]'
+			);
+			return patched !== code ? { code: patched, map: null } : null;
+		}
+	};
+}
+
 export default defineConfig({
-	plugins: [tailwindcss(), houdini(), sveltekit()],
+	plugins: [tailwindcss(), houdini(), sveltekit(), houdiniSessionFix()],
 	css: {
 		postcss: {},
 	},

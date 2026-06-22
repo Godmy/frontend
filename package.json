@@ -4,10 +4,10 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "dev": "yarn run prepare && vite dev",
+        "dev": "svelte-kit sync && vite dev",
         "build": "vite build",
         "preview": "vite preview",
-        "prepare": "svelte-kit sync && (houdini generate --pull-schema || houdini generate || echo '')",
+        "prepare": "svelte-kit sync && (houdini generate || echo '')",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
         "format": "prettier --write .",
