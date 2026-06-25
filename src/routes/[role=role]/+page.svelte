@@ -2,131 +2,237 @@
 	import { useAuth } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	
+	import AuthGuard from '$stylist/user/component/organism/auth-guard/index.svelte';
+
 	const auth = useAuth();
-	
-	// Если пользователь не авторизован, перенаправляем на login
+
+	let { data }: { data: { role: string } } = $props();
+	const role = $derived(data.role);
+
 	onMount(() => {
 		if (!auth.isAuthenticated) {
 			goto('/login');
+		} else if (auth.roles.length > 0 && !auth.roles.some((r) => r.name === role)) {
+			goto(`/${auth.roles[0]?.name ?? 'user'}`);
 		}
 	});
-	
-	// Получаем роль из параметров
-	let { data }: { data: { role: string } } = $props();
-	const { role } = data;
-	
-	// Убедимся, что пользователь принадлежит к этой роли
-	onMount(() => {
-		if (auth.user && auth.user.role !== role) {
-			// Если доступ запрещен, перенаправляем на свою роль или logout
-			const userRole = auth.user.role || 'user';
-			goto(`/${userRole}`);
-		}
-	});
-	
-	// Здесь будем использовать специфичные компоненты из full_interface
-	// в зависимости от роли пользователя
 </script>
 
-<div class="min-h-screen bg-gray-50">
-	<!-- Header for authenticated users -->
-	<header class="bg-white shadow">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<div class="flex justify-between items-center h-16">
-				<div class="flex items-center">
-					<h1 class="text-xl font-bold text-indigo-600">vibe-management.pro</h1>
-					<nav class="ml-10 flex space-x-8">
-						<a href={`/${role}`} class="text-gray-900 border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium">Dashboard</a>
-						<a href={`/${role}/settings`} class="text-gray-500 hover:text-gray-700 px-1 pt-1 text-sm font-medium">Settings</a>
+<AuthGuard
+	isAuthenticated={auth.isAuthenticated}
+	userRoles={auth.roles.map((r) => r.name)}
+	requiredRole={role}
+	redirectUrl="/login"
+>
+	<div class="c-dashboard">
+		<header class="c-dashboard__header">
+			<div class="c-dashboard__header-inner">
+				<div class="c-dashboard__header-left">
+					<h1 class="c-dashboard__brand">vibe-management.pro</h1>
+					<nav class="c-dashboard__nav">
+						<a href={`/${role}`} class="c-dashboard__nav-link c-dashboard__nav-link--active">
+							Dashboard
+						</a>
+						<a href={`/${role}/settings`} class="c-dashboard__nav-link">Settings</a>
 					</nav>
 				</div>
-				
-				<div class="flex items-center space-x-4">
+				<div class="c-dashboard__header-right">
 					{#if auth.user}
-						<span class="text-sm text-gray-700">Welcome, {auth.user.name}</span>
+						<span class="c-dashboard__username">Welcome, {auth.user.name}</span>
 					{/if}
-					<button 
+					<button
+						class="c-dashboard__logout"
 						onclick={() => {
 							auth.logout();
 							goto('/');
 						}}
-						class="ml-4 px-3 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
 					>
 						Logout
 					</button>
 				</div>
 			</div>
-		</div>
-	</header>
+		</header>
 
-	<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-		<div class="bg-white shadow rounded-lg p-6">
-			{#if role === 'admin'}
-				<!-- Admin dashboard with full functionality from full_interface -->
-				<h2 class="text-2xl font-bold text-gray-900 mb-4">Administrator Dashboard</h2>
-				<p class="text-gray-600 mb-4">
-					You have administrative privileges. Manage users, settings, and system configurations.
-				</p>
-				
-				<div class="space-y-6">
-					<section class="border rounded-lg p-4">
-						<h3 class="text-lg font-medium text-gray-900 mb-2">User Management</h3>
-						<p class="text-gray-600 mb-4">Manage all users in the system</p>
-						<button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-							View Users
-						</button>
-					</section>
-					
-					<section class="border rounded-lg p-4">
-						<h3 class="text-lg font-medium text-gray-900 mb-2">System Settings</h3>
-						<p class="text-gray-600 mb-4">Configure system-wide settings</p>
-						<button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-							Manage Settings
-						</button>
-					</section>
-					
-					<section class="border rounded-lg p-4">
-						<h3 class="text-lg font-medium text-gray-900 mb-2">Analytics</h3>
-						<p class="text-gray-600 mb-4">View system analytics and reports</p>
-						<button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-							View Reports
-						</button>
-					</section>
-				</div>
-			{:else}
-				<!-- User dashboard with standard functionality from full_interface -->
-				<h2 class="text-2xl font-bold text-gray-900 mb-4">User Dashboard</h2>
-				<p class="text-gray-600 mb-4">
-					Welcome to your personal workspace. Manage your content and preferences.
-				</p>
-				
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<section class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-						<h3 class="text-lg font-medium text-gray-900 mb-2">My Profile</h3>
-						<p class="text-gray-600 mb-4">Manage your personal information</p>
-						<button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-							Edit Profile
-						</button>
-					</section>
-					
-					<section class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-						<h3 class="text-lg font-medium text-gray-900 mb-2">Content Management</h3>
-						<p class="text-gray-600 mb-4">Manage your content items</p>
-						<button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-							View Content
-						</button>
-					</section>
-					
-					<section class="border rounded-lg p-4 hover:shadow-md transition-shadow md:col-span-2">
-						<h3 class="text-lg font-medium text-gray-900 mb-2">Preferences</h3>
-						<p class="text-gray-600 mb-4">Customize your experience</p>
-						<button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-							Manage Preferences
-						</button>
-					</section>
-				</div>
-			{/if}
-		</div>
-	</main>
-</div>
+		<main class="c-dashboard__main">
+			<div class="c-dashboard__card">
+				{#if role === 'admin'}
+					<h2 class="c-dashboard__title">Administrator Dashboard</h2>
+					<p class="c-dashboard__desc">
+						You have administrative privileges. Manage users, settings, and system configurations.
+					</p>
+					<div class="c-dashboard__sections">
+						<section class="c-dashboard__section">
+							<h3 class="c-dashboard__section-title">User Management</h3>
+							<p class="c-dashboard__section-desc">Manage all users in the system</p>
+							<button class="c-dashboard__btn">View Users</button>
+						</section>
+						<section class="c-dashboard__section">
+							<h3 class="c-dashboard__section-title">System Settings</h3>
+							<p class="c-dashboard__section-desc">Configure system-wide settings</p>
+							<button class="c-dashboard__btn">Manage Settings</button>
+						</section>
+						<section class="c-dashboard__section">
+							<h3 class="c-dashboard__section-title">Analytics</h3>
+							<p class="c-dashboard__section-desc">View system analytics and reports</p>
+							<button class="c-dashboard__btn">View Reports</button>
+						</section>
+					</div>
+				{:else}
+					<h2 class="c-dashboard__title">User Dashboard</h2>
+					<p class="c-dashboard__desc">
+						Welcome to your personal workspace. Manage your content and preferences.
+					</p>
+					<div class="c-dashboard__grid">
+						<section class="c-dashboard__section">
+							<h3 class="c-dashboard__section-title">My Profile</h3>
+							<p class="c-dashboard__section-desc">Manage your personal information</p>
+							<button class="c-dashboard__btn">Edit Profile</button>
+						</section>
+						<section class="c-dashboard__section">
+							<h3 class="c-dashboard__section-title">Content Management</h3>
+							<p class="c-dashboard__section-desc">Manage your content items</p>
+							<button class="c-dashboard__btn">View Content</button>
+						</section>
+						<section class="c-dashboard__section c-dashboard__section--wide">
+							<h3 class="c-dashboard__section-title">Preferences</h3>
+							<p class="c-dashboard__section-desc">Customize your experience</p>
+							<button class="c-dashboard__btn">Manage Preferences</button>
+						</section>
+					</div>
+				{/if}
+			</div>
+		</main>
+	</div>
+</AuthGuard>
+
+<style>
+	.c-dashboard {
+		min-height: 100vh;
+		background: var(--color-background-secondary, #f9fafb);
+	}
+	.c-dashboard__header {
+		background: var(--color-background-primary, #fff);
+		border-bottom: 1px solid var(--color-border-primary, #e5e7eb);
+		box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+	}
+	.c-dashboard__header-inner {
+		max-width: 80rem;
+		margin: 0 auto;
+		padding: 0 1.5rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 4rem;
+	}
+	.c-dashboard__header-left {
+		display: flex;
+		align-items: center;
+		gap: 2.5rem;
+	}
+	.c-dashboard__brand {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--color-primary-600, #4f46e5);
+		margin: 0;
+	}
+	.c-dashboard__nav {
+		display: flex;
+		gap: 2rem;
+	}
+	.c-dashboard__nav-link {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text-secondary, #6b7280);
+		text-decoration: none;
+		padding: 0.25rem 0;
+		border-bottom: 2px solid transparent;
+	}
+	.c-dashboard__nav-link--active {
+		color: var(--color-text-primary, #111827);
+		border-bottom-color: var(--color-primary-500, #6366f1);
+	}
+	.c-dashboard__header-right {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	.c-dashboard__username {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+	}
+	.c-dashboard__logout {
+		padding: 0.25rem 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text-inverse, #fff);
+		background: var(--color-error, #ef4444);
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		cursor: pointer;
+	}
+	.c-dashboard__logout:hover {
+		background: #dc2626;
+	}
+	.c-dashboard__main {
+		max-width: 80rem;
+		margin: 0 auto;
+		padding: 2rem 1.5rem;
+	}
+	.c-dashboard__card {
+		background: var(--color-background-primary, #fff);
+		border-radius: var(--radius-lg, 0.75rem);
+		box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+		padding: 1.5rem;
+	}
+	.c-dashboard__title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--color-text-primary, #111827);
+		margin: 0 0 0.5rem;
+	}
+	.c-dashboard__desc {
+		color: var(--color-text-secondary, #6b7280);
+		margin: 0 0 1.5rem;
+	}
+	.c-dashboard__sections {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+	.c-dashboard__grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1.5rem;
+	}
+	.c-dashboard__section {
+		border: 1px solid var(--color-border-primary, #e5e7eb);
+		border-radius: var(--radius-md, 0.5rem);
+		padding: 1rem;
+	}
+	.c-dashboard__section--wide {
+		grid-column: span 2;
+	}
+	.c-dashboard__section-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text-primary, #111827);
+		margin: 0 0 0.5rem;
+	}
+	.c-dashboard__section-desc {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+		margin: 0 0 1rem;
+	}
+	.c-dashboard__btn {
+		padding: 0.5rem 1rem;
+		background: var(--color-primary-600, #4f46e5);
+		color: var(--color-text-inverse, #fff);
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		font-size: 0.875rem;
+		cursor: pointer;
+	}
+	.c-dashboard__btn:hover {
+		background: var(--color-primary-700, #4338ca);
+	}
+</style>

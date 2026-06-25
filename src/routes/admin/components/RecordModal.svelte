@@ -26,17 +26,14 @@
 	let isSaving = $state(false);
 	let errors = $state<Record<string, string>>({});
 
-	// Initialize form data when modal opens or data changes
 	$effect(() => {
 		if (isOpen) {
 			if (mode === 'edit' && initialData) {
 				formData = { ...initialData };
 			} else {
-				// Initialize with empty values or defaults
 				const newData: Record<string, any> = {};
 				columns.forEach((col) => {
 					if (!col.primaryKey) {
-						// Don't include primary key for create
 						newData[col.name] = initialData?.[col.name] ?? '';
 					}
 				});
@@ -60,50 +57,34 @@
 
 	function getInputType(columnType: string): string {
 		const type = columnType.toLowerCase();
-		if (type.includes('int') || type.includes('numeric') || type.includes('decimal')) {
-			return 'number';
-		}
-		if (type.includes('bool')) {
-			return 'checkbox';
-		}
-		if (type.includes('date') && !type.includes('timestamp')) {
-			return 'date';
-		}
-		if (type.includes('timestamp') || type.includes('datetime')) {
-			return 'datetime-local';
-		}
-		if (type.includes('text')) {
-			return 'textarea';
-		}
+		if (type.includes('int') || type.includes('numeric') || type.includes('decimal')) return 'number';
+		if (type.includes('bool')) return 'checkbox';
+		if (type.includes('date') && !type.includes('timestamp')) return 'date';
+		if (type.includes('timestamp') || type.includes('datetime')) return 'datetime-local';
+		if (type.includes('text')) return 'textarea';
 		return 'text';
 	}
 
 	function validateForm(): boolean {
 		const newErrors: Record<string, string> = {};
-
 		columns.forEach((col) => {
-			if (col.primaryKey && mode === 'create') return; // Skip PK for create
-
+			if (col.primaryKey && mode === 'create') return;
 			const value = formData[col.name];
 			const isEmpty = value === null || value === undefined || value === '';
-
 			if (!col.nullable && isEmpty && !col.default) {
 				newErrors[col.name] = 'This field is required';
 			}
 		});
-
 		errors = newErrors;
 		return Object.keys(newErrors).length === 0;
 	}
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
-
 		if (!validateForm()) return;
 
 		isSaving = true;
 		try {
-			// Convert empty strings to null for nullable fields
 			const cleanedData: Record<string, any> = {};
 			Object.entries(formData).forEach(([key, value]) => {
 				const col = columns.find((c) => c.name === key);
@@ -113,7 +94,6 @@
 					cleanedData[key] = value;
 				}
 			});
-
 			await onSave(cleanedData);
 			handleClose();
 		} catch (error) {
@@ -124,14 +104,10 @@
 		}
 	}
 
-	// Handle escape key
 	onMount(() => {
 		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape' && isOpen) {
-				handleClose();
-			}
+			if (e.key === 'Escape' && isOpen) handleClose();
 		};
-
 		window.addEventListener('keydown', handleEscape);
 		return () => window.removeEventListener('keydown', handleEscape);
 	});
@@ -139,61 +115,53 @@
 
 {#if isOpen}
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+		class="c-record-modal"
 		onclick={handleBackdropClick}
 		onkeydown={(e) => e.key === 'Escape' && handleClose()}
 		role="dialog"
 		aria-modal="true"
 		tabindex={-1}
 	>
-		<div class="w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-xl shadow-2xl">
-			<!-- Header -->
-			<div class="flex items-center justify-between border-b border-gray-200 p-6">
+		<div class="c-record-modal__dialog">
+			<div class="c-record-modal__header">
 				<div>
-					<h2 class="text-xl font-bold text-gray-900">
+					<h2 class="c-record-modal__title">
 						{mode === 'create' ? 'Create New Record' : 'Edit Record'}
 					</h2>
-					<p class="mt-1 text-sm text-gray-500">Table: {tableName}</p>
+					<p class="c-record-modal__subtitle">Table: {tableName}</p>
 				</div>
-				<button
-					onclick={handleClose}
-					disabled={isSaving}
-					class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50 transition-colors"
-				>
-					<X class="h-5 w-5" />
+				<button class="c-record-modal__close" onclick={handleClose} disabled={isSaving}>
+					<X size={20} />
 				</button>
 			</div>
 
-			<!-- Form -->
-			<form onsubmit={handleSubmit} class="flex-1 overflow-y-auto p-6">
+			<form class="c-record-modal__form" onsubmit={handleSubmit}>
 				{#if errors._form}
-					<div class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-						{errors._form}
-					</div>
+					<div class="c-record-modal__form-error">{errors._form}</div>
 				{/if}
 
-				<div class="space-y-4">
+				<div class="c-record-modal__fields">
 					{#each columns as column}
 						{#if !column.primaryKey || mode === 'edit'}
-							<div>
-								<label for={column.name} class="block text-sm font-medium text-gray-700">
+							<div class="c-record-modal__field">
+								<label class="c-record-modal__label" for={column.name}>
 									{column.name}
 									{#if column.primaryKey}
-										<span class="text-xs text-indigo-600">(Primary Key)</span>
+										<span class="c-record-modal__pk-badge">(Primary Key)</span>
 									{/if}
 									{#if !column.nullable}
-										<span class="text-red-500">*</span>
+										<span class="c-record-modal__required">*</span>
 									{/if}
 								</label>
 
-								<div class="mt-1">
+								<div class="c-record-modal__control">
 									{#if getInputType(column.type) === 'checkbox'}
 										<input
 											id={column.name}
 											type="checkbox"
 											bind:checked={formData[column.name]}
 											disabled={column.primaryKey && mode === 'edit'}
-											class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50"
+											class="c-record-modal__checkbox"
 										/>
 									{:else if getInputType(column.type) === 'textarea'}
 										<textarea
@@ -201,7 +169,9 @@
 											bind:value={formData[column.name]}
 											disabled={column.primaryKey && mode === 'edit'}
 											rows={3}
-											class="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-100 disabled:opacity-50"
+											class="c-record-modal__input {column.primaryKey && mode === 'edit'
+												? 'c-record-modal__input--disabled'
+												: ''}"
 										></textarea>
 									{:else}
 										<input
@@ -209,18 +179,19 @@
 											type={getInputType(column.type)}
 											bind:value={formData[column.name]}
 											disabled={column.primaryKey && mode === 'edit'}
-											class="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-100 disabled:opacity-50"
+											class="c-record-modal__input {column.primaryKey && mode === 'edit'
+												? 'c-record-modal__input--disabled'
+												: ''}"
 										/>
 									{/if}
 
 									{#if errors[column.name]}
-										<p class="mt-1 text-xs text-red-600">{errors[column.name]}</p>
+										<p class="c-record-modal__field-error">{errors[column.name]}</p>
 									{/if}
-
-									<p class="mt-1 text-xs text-gray-500">
-										Type: {column.type}
-										{#if column.nullable} • Nullable{/if}
-										{#if column.default} • Default: {column.default}{/if}
+									<p class="c-record-modal__field-hint">
+										Type: {column.type}{column.nullable ? ' • Nullable' : ''}{column.default
+											? ` • Default: ${column.default}`
+											: ''}
 									</p>
 								</div>
 							</div>
@@ -229,27 +200,26 @@
 				</div>
 			</form>
 
-			<!-- Footer -->
-			<div class="flex items-center justify-end gap-3 border-t border-gray-200 p-6">
+			<div class="c-record-modal__footer">
 				<button
 					type="button"
+					class="c-record-modal__cancel"
 					onclick={handleClose}
 					disabled={isSaving}
-					class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
 				>
 					Cancel
 				</button>
 				<button
 					type="submit"
+					class="c-record-modal__save"
 					onclick={handleSubmit}
 					disabled={isSaving}
-					class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
 				>
 					{#if isSaving}
-						<div class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+						<span class="c-record-modal__spinner"></span>
 						Saving...
 					{:else}
-						<Save class="h-4 w-4" />
+						<Save size={16} />
 						{mode === 'create' ? 'Create' : 'Update'}
 					{/if}
 				</button>
@@ -257,3 +227,206 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	.c-record-modal {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		background: rgb(0 0 0 / 0.5);
+	}
+	.c-record-modal__dialog {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		max-width: 42rem;
+		max-height: 90vh;
+		background: var(--color-background-primary, #fff);
+		border-radius: var(--radius-xl, 0.75rem);
+		box-shadow: 0 20px 60px rgb(0 0 0 / 0.2);
+	}
+	.c-record-modal__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-bottom: 1px solid var(--color-border-primary, #e5e7eb);
+		padding: 1.25rem 1.5rem;
+		flex-shrink: 0;
+	}
+	.c-record-modal__title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--color-text-primary, #111827);
+		margin: 0;
+	}
+	.c-record-modal__subtitle {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+		margin: 0.25rem 0 0;
+	}
+	.c-record-modal__close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		background: transparent;
+		color: var(--color-text-tertiary, #9ca3af);
+		cursor: pointer;
+		transition: background 0.12s, color 0.12s;
+	}
+	.c-record-modal__close:hover {
+		background: var(--color-background-secondary, #f3f4f6);
+		color: var(--color-text-secondary, #374151);
+	}
+	.c-record-modal__close:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.c-record-modal__form {
+		flex: 1;
+		overflow-y: auto;
+		padding: 1.5rem;
+	}
+	.c-record-modal__form-error {
+		margin-bottom: 1rem;
+		padding: 0.75rem;
+		border-radius: var(--radius-md, 0.375rem);
+		background: #fef2f2;
+		color: #b91c1c;
+		font-size: 0.875rem;
+	}
+	.c-record-modal__fields {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	.c-record-modal__field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+	.c-record-modal__label {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text-secondary, #374151);
+	}
+	.c-record-modal__pk-badge {
+		font-size: 0.75rem;
+		color: var(--color-primary-600, #4f46e5);
+	}
+	.c-record-modal__required {
+		color: #ef4444;
+	}
+	.c-record-modal__control {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	.c-record-modal__input {
+		display: block;
+		width: 100%;
+		border: 1px solid var(--color-border-primary, #d1d5db);
+		border-radius: var(--radius-md, 0.375rem);
+		padding: 0.5rem 0.75rem;
+		font-size: 0.875rem;
+		color: var(--color-text-primary, #111827);
+		background: var(--color-background-primary, #fff);
+		box-sizing: border-box;
+	}
+	.c-record-modal__input:focus {
+		outline: none;
+		border-color: var(--color-primary-500, #6366f1);
+		box-shadow: 0 0 0 2px rgb(99 102 241 / 0.15);
+	}
+	.c-record-modal__input--disabled,
+	.c-record-modal__input:disabled {
+		background: var(--color-background-secondary, #f9fafb);
+		opacity: 0.7;
+		cursor: not-allowed;
+	}
+	.c-record-modal__checkbox {
+		width: 1rem;
+		height: 1rem;
+		accent-color: var(--color-primary-600, #4f46e5);
+	}
+	.c-record-modal__field-error {
+		font-size: 0.75rem;
+		color: #dc2626;
+		margin: 0;
+	}
+	.c-record-modal__field-hint {
+		font-size: 0.75rem;
+		color: var(--color-text-tertiary, #9ca3af);
+		margin: 0;
+	}
+	.c-record-modal__footer {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.75rem;
+		border-top: 1px solid var(--color-border-primary, #e5e7eb);
+		padding: 1rem 1.5rem;
+		flex-shrink: 0;
+	}
+	.c-record-modal__cancel {
+		padding: 0.5rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text-secondary, #374151);
+		background: var(--color-background-primary, #fff);
+		border: 1px solid var(--color-border-primary, #d1d5db);
+		border-radius: var(--radius-md, 0.375rem);
+		cursor: pointer;
+		transition: background 0.12s;
+	}
+	.c-record-modal__cancel:hover {
+		background: var(--color-background-secondary, #f9fafb);
+	}
+	.c-record-modal__cancel:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.c-record-modal__save {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #fff;
+		background: var(--color-primary-600, #4f46e5);
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		cursor: pointer;
+		transition: background 0.12s;
+	}
+	.c-record-modal__save:hover {
+		background: var(--color-primary-700, #4338ca);
+	}
+	.c-record-modal__save:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.c-record-modal__spinner {
+		display: inline-block;
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid rgb(255 255 255 / 0.4);
+		border-top-color: #fff;
+		border-radius: 50%;
+		animation: spin 0.6s linear infinite;
+	}
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+</style>

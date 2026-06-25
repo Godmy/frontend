@@ -2,131 +2,151 @@
 	import { useAuth } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	
+	import AccountSettingsForm from '$stylist/user/component/organism/account-settings-form/index.svelte';
+	import type { AccountSettings } from '$stylist/user/type/object/account-settings';
+
 	const auth = useAuth();
-	
+
 	let { data }: { data: { role: string } } = $props();
-	const { role } = data;
-	
-	// Если пользователь не авторизован, перенаправляем на login
+	const role = $derived(data.role);
+
 	onMount(() => {
 		if (!auth.isAuthenticated) {
 			goto('/login');
-		}
-		// Проверяем, имеет ли пользователь право доступа к этой странице
-		if (auth.user && auth.user.role !== role) {
-			const userRole = auth.user.role || 'user';
-			goto(`/${userRole}`);
+		} else if (auth.roles.length > 0 && !auth.roles.some((r) => r.name === role)) {
+			goto(`/${auth.roles[0]?.name ?? 'user'}`);
 		}
 	});
-	
-	// Простая форма профиля
-	let profileData = $state({
-		email: auth.user?.email || '',
-		name: auth.user?.name || '',
-		phone: auth.user?.phone || ''
-	});
-	
-	let saving = $state(false);
-	
-	async function saveProfile(event: SubmitEvent) {
-		event.preventDefault();
-		saving = true;
-		// TODO: Реализовать сохранение профиля
-		console.log('Saving profile:', profileData);
-		// await auth.updateProfile(profileData);
-		saving = false;
-		alert('Profile updated successfully!');
+
+	function handleSaveSettings(settings: AccountSettings) {
+		console.log('Saving settings:', settings);
 	}
 </script>
 
-<div class="min-h-screen bg-gray-50">
-	<!-- Header for authenticated users -->
-	<header class="bg-white shadow">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<div class="flex justify-between items-center h-16">
-				<div class="flex items-center">
-					<h1 class="text-xl font-bold text-indigo-600">vibe-management.pro</h1>
-					<nav class="ml-10 flex space-x-8">
-						<a href={`/${role}`} class="text-gray-500 hover:text-gray-700 px-1 pt-1 text-sm font-medium">Dashboard</a>
-						<a href={`/${role}/settings`} class="text-gray-900 border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium">Settings</a>
-					</nav>
-				</div>
-				
-				<div class="flex items-center space-x-4">
-					{#if auth.user}
-						<span class="text-sm text-gray-700">Welcome, {auth.user.name}</span>
-					{/if}
-					<button 
-						onclick={() => {
-							auth.logout();
-							goto('/');
-						}}
-						class="ml-4 px-3 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-					>
-						Logout
-					</button>
-				</div>
+<div class="c-settings">
+	<header class="c-settings__header">
+		<div class="c-settings__header-inner">
+			<div class="c-settings__header-left">
+				<h1 class="c-settings__brand">vibe-management.pro</h1>
+				<nav class="c-settings__nav">
+					<a href={`/${role}`} class="c-settings__nav-link">Dashboard</a>
+					<a href={`/${role}/settings`} class="c-settings__nav-link c-settings__nav-link--active">
+						Settings
+					</a>
+				</nav>
+			</div>
+			<div class="c-settings__header-right">
+				{#if auth.user}
+					<span class="c-settings__username">Welcome, {auth.user.name}</span>
+				{/if}
+				<button
+					class="c-settings__logout"
+					onclick={() => {
+						auth.logout();
+						goto('/');
+					}}
+				>
+					Logout
+				</button>
 			</div>
 		</div>
 	</header>
 
-	<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-		<div class="bg-white shadow rounded-lg p-6">
-			<h2 class="text-2xl font-bold text-gray-900 mb-6">Account Settings</h2>
-			
-			<form onsubmit={saveProfile} class="space-y-6">
-				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-					<input
-						id="name"
-						name="name"
-						type="text"
-						bind:value={profileData.name}
-						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-					/>
-				</div>
-				
-				<div>
-					<label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-					<input
-						id="email"
-						name="email"
-						type="email"
-						bind:value={profileData.email}
-						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-					/>
-				</div>
-				
-				<div>
-					<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-					<input
-						id="phone"
-						name="phone"
-						type="tel"
-						bind:value={profileData.phone}
-						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-					/>
-				</div>
-				
-				<div class="flex items-center">
-					<button
-						type="submit"
-						disabled={saving}
-						class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition duration-200 disabled:opacity-50"
-					>
-						{saving ? 'Saving...' : 'Save Changes'}
-					</button>
-					
-					<button
-						type="button"
-						onclick={() => goto(`/${role}`)}
-						class="ml-3 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md transition duration-200"
-					>
-						Cancel
-					</button>
-				</div>
-			</form>
+	<main class="c-settings__main">
+		<div class="c-settings__card">
+			<h2 class="c-settings__title">Account Settings</h2>
+			<AccountSettingsForm
+				name={auth.user?.name}
+				email={auth.user?.email}
+				onSubmit={handleSaveSettings}
+			/>
 		</div>
 	</main>
 </div>
+
+<style>
+	.c-settings {
+		min-height: 100vh;
+		background: var(--color-background-secondary, #f9fafb);
+	}
+	.c-settings__header {
+		background: var(--color-background-primary, #fff);
+		border-bottom: 1px solid var(--color-border-primary, #e5e7eb);
+		box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+	}
+	.c-settings__header-inner {
+		max-width: 56rem;
+		margin: 0 auto;
+		padding: 0 1.5rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 4rem;
+	}
+	.c-settings__header-left {
+		display: flex;
+		align-items: center;
+		gap: 2.5rem;
+	}
+	.c-settings__brand {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--color-primary-600, #4f46e5);
+		margin: 0;
+	}
+	.c-settings__nav {
+		display: flex;
+		gap: 2rem;
+	}
+	.c-settings__nav-link {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text-secondary, #6b7280);
+		text-decoration: none;
+		padding: 0.25rem 0;
+		border-bottom: 2px solid transparent;
+	}
+	.c-settings__nav-link--active {
+		color: var(--color-text-primary, #111827);
+		border-bottom-color: var(--color-primary-500, #6366f1);
+	}
+	.c-settings__header-right {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	.c-settings__username {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+	}
+	.c-settings__logout {
+		padding: 0.25rem 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text-inverse, #fff);
+		background: var(--color-error, #ef4444);
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		cursor: pointer;
+	}
+	.c-settings__logout:hover {
+		background: #dc2626;
+	}
+	.c-settings__main {
+		max-width: 56rem;
+		margin: 0 auto;
+		padding: 2rem 1.5rem;
+	}
+	.c-settings__card {
+		background: var(--color-background-primary, #fff);
+		border-radius: var(--radius-lg, 0.75rem);
+		box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+		padding: 1.5rem;
+	}
+	.c-settings__title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--color-text-primary, #111827);
+		margin: 0 0 1.5rem;
+	}
+</style>

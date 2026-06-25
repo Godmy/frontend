@@ -3,8 +3,8 @@ name: vibe-management-pro-frontend
 services:
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: frontend/Dockerfile
     ports:
       - "3000:3000"
     environment:
@@ -32,8 +32,8 @@ services:
   # Development service with hot-reload
   frontend-dev:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: frontend/Dockerfile.dev
     ports:
       - "5173:5173"
       - "24678:24678"
@@ -47,8 +47,12 @@ services:
       - VITE_HMR_PORT=24678
       - WATCHPACK_POLLING=true
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/app/frontend
+      - ../stylist-svelte:/app/stylist-svelte
+      - /app/frontend/node_modules
+      - /app/frontend/.svelte-kit
+      - /app/stylist-svelte/node_modules
+      - /app/stylist-svelte/dist
     networks:
       - app-network
     profiles:

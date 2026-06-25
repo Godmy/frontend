@@ -43,7 +43,6 @@
 		}
 	}
 
-	// Handle escape key
 	onMount(() => {
 		const handleEscape = (e: KeyboardEvent) => {
 			if (e.key === 'Escape' && isOpen) {
@@ -58,43 +57,38 @@
 
 {#if isOpen && record}
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+		class="c-delete-modal"
 		onclick={handleBackdropClick}
 		onkeydown={(e) => e.key === 'Escape' && handleClose()}
 		role="dialog"
 		aria-modal="true"
 		tabindex={-1}
 	>
-		<div class="w-full max-w-md bg-white rounded-xl shadow-2xl">
-			<!-- Header -->
-			<div class="flex items-start gap-4 p-6">
-				<div class="flex-shrink-0 rounded-full bg-red-100 p-3">
-					<AlertTriangle class="h-6 w-6 text-red-600" />
+		<div class="c-delete-modal__dialog">
+			<div class="c-delete-modal__header">
+				<div class="c-delete-modal__icon">
+					<AlertTriangle size={24} />
 				</div>
-				<div class="flex-1">
-					<h3 class="text-lg font-semibold text-gray-900">Delete Record</h3>
-					<p class="mt-2 text-sm text-gray-500">
-						Are you sure you want to delete this record from <span class="font-medium"
-							>{tableName}</span
-						>? This action cannot be undone.
+				<div class="c-delete-modal__body">
+					<h3 class="c-delete-modal__title">Delete Record</h3>
+					<p class="c-delete-modal__description">
+						Are you sure you want to delete this record from
+						<strong class="c-delete-modal__table-name">{tableName}</strong>?
+						This action cannot be undone.
 					</p>
 
 					{#if record}
-						<div class="mt-4 rounded-lg bg-gray-50 p-3">
-							<p class="text-xs font-medium uppercase tracking-wide text-gray-500">
-								Record Details:
-							</p>
-							<dl class="mt-2 space-y-1">
+						<div class="c-delete-modal__record">
+							<p class="c-delete-modal__record-label">Record Details:</p>
+							<dl class="c-delete-modal__record-list">
 								{#each Object.entries(record).slice(0, 5) as [key, value]}
-									<div class="flex gap-2 text-sm">
-										<dt class="font-medium text-gray-700">{key}:</dt>
-										<dd class="text-gray-600 truncate">
-											{value === null || value === undefined ? '-' : String(value)}
-										</dd>
+									<div class="c-delete-modal__record-item">
+										<dt>{key}:</dt>
+										<dd>{value === null || value === undefined ? '-' : String(value)}</dd>
 									</div>
 								{/each}
 								{#if Object.entries(record).length > 5}
-									<p class="text-xs text-gray-500 italic">
+									<p class="c-delete-modal__record-more">
 										...and {Object.entries(record).length - 5} more fields
 									</p>
 								{/if}
@@ -103,41 +97,35 @@
 					{/if}
 
 					{#if error}
-						<div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-							{error}
-						</div>
+						<div class="c-delete-modal__error">{error}</div>
 					{/if}
 				</div>
-
 				<button
+					class="c-delete-modal__close"
 					onclick={handleClose}
 					disabled={isDeleting}
-					class="flex-shrink-0 rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50 transition-colors"
 				>
-					<X class="h-5 w-5" />
+					<X size={20} />
 				</button>
 			</div>
 
-			<!-- Footer -->
-			<div class="flex items-center justify-end gap-3 border-t border-gray-200 p-6">
+			<div class="c-delete-modal__footer">
 				<button
 					type="button"
+					class="c-delete-modal__cancel"
 					onclick={handleClose}
 					disabled={isDeleting}
-					class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
 				>
 					Cancel
 				</button>
 				<button
 					type="button"
+					class="c-delete-modal__confirm"
 					onclick={handleConfirm}
 					disabled={isDeleting}
-					class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
 				>
 					{#if isDeleting}
-						<div
-							class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
-						></div>
+						<span class="c-delete-modal__spinner"></span>
 						Deleting...
 					{:else}
 						Delete
@@ -147,3 +135,190 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	.c-delete-modal {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		background: rgb(0 0 0 / 0.5);
+	}
+	.c-delete-modal__dialog {
+		width: 100%;
+		max-width: 28rem;
+		background: var(--color-background-primary, #fff);
+		border-radius: var(--radius-xl, 0.75rem);
+		box-shadow: 0 20px 60px rgb(0 0 0 / 0.2);
+	}
+	.c-delete-modal__header {
+		display: flex;
+		align-items: flex-start;
+		gap: 1rem;
+		padding: 1.5rem;
+	}
+	.c-delete-modal__icon {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 3rem;
+		height: 3rem;
+		border-radius: 50%;
+		background: #fee2e2;
+		color: #dc2626;
+	}
+	.c-delete-modal__body {
+		flex: 1;
+	}
+	.c-delete-modal__title {
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--color-text-primary, #111827);
+		margin: 0 0 0.5rem;
+	}
+	.c-delete-modal__description {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+		margin: 0;
+	}
+	.c-delete-modal__table-name {
+		font-weight: 500;
+		color: var(--color-text-primary, #111827);
+	}
+	.c-delete-modal__record {
+		margin-top: 1rem;
+		padding: 0.75rem;
+		background: var(--color-background-secondary, #f9fafb);
+		border-radius: var(--radius-md, 0.375rem);
+	}
+	.c-delete-modal__record-label {
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--color-text-tertiary, #9ca3af);
+		margin: 0 0 0.5rem;
+	}
+	.c-delete-modal__record-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin: 0;
+	}
+	.c-delete-modal__record-item {
+		display: flex;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+	}
+	.c-delete-modal__record-item dt {
+		font-weight: 500;
+		color: var(--color-text-secondary, #374151);
+		white-space: nowrap;
+	}
+	.c-delete-modal__record-item dd {
+		color: var(--color-text-secondary, #6b7280);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		margin: 0;
+	}
+	.c-delete-modal__record-more {
+		font-size: 0.75rem;
+		color: var(--color-text-tertiary, #9ca3af);
+		font-style: italic;
+		margin: 0.25rem 0 0;
+	}
+	.c-delete-modal__error {
+		margin-top: 1rem;
+		padding: 0.75rem;
+		border-radius: var(--radius-md, 0.375rem);
+		background: #fef2f2;
+		color: #b91c1c;
+		font-size: 0.875rem;
+	}
+	.c-delete-modal__close {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		background: transparent;
+		color: var(--color-text-tertiary, #9ca3af);
+		cursor: pointer;
+		transition: background 0.12s, color 0.12s;
+	}
+	.c-delete-modal__close:hover {
+		background: var(--color-background-secondary, #f3f4f6);
+		color: var(--color-text-secondary, #374151);
+	}
+	.c-delete-modal__close:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.c-delete-modal__footer {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.75rem;
+		border-top: 1px solid var(--color-border-primary, #e5e7eb);
+		padding: 1rem 1.5rem;
+	}
+	.c-delete-modal__cancel {
+		padding: 0.5rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text-secondary, #374151);
+		background: var(--color-background-primary, #fff);
+		border: 1px solid var(--color-border-primary, #d1d5db);
+		border-radius: var(--radius-md, 0.375rem);
+		cursor: pointer;
+		transition: background 0.12s;
+	}
+	.c-delete-modal__cancel:hover {
+		background: var(--color-background-secondary, #f9fafb);
+	}
+	.c-delete-modal__cancel:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.c-delete-modal__confirm {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #fff;
+		background: #dc2626;
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		cursor: pointer;
+		transition: background 0.12s;
+	}
+	.c-delete-modal__confirm:hover {
+		background: #b91c1c;
+	}
+	.c-delete-modal__confirm:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.c-delete-modal__spinner {
+		display: inline-block;
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid rgb(255 255 255 / 0.4);
+		border-top-color: #fff;
+		border-radius: 50%;
+		animation: spin 0.6s linear infinite;
+	}
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+</style>

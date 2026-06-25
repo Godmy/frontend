@@ -7,11 +7,15 @@ WORKDIR /app
 # Install yarn 4.x (berry)
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
-# Copy package files from frontend subdirectory
-COPY frontend/package.json frontend/yarn.lock ./
+# Copy package files first for better Docker layer caching
+COPY stylist-svelte/package.json stylist-svelte/yarn.lock stylist-svelte/.yarnrc.yml ./stylist-svelte/
+COPY frontend/package.json frontend/yarn.lock frontend/.yarnrc.yml ./frontend/
 
-# Install all dependencies (including dev dependencies)
+WORKDIR /app/stylist-svelte
 RUN yarn install --frozen-lockfile
+
+WORKDIR /app/frontend
+RUN yarn install --no-immutable
 
 # Copy source code from frontend subdirectory
 COPY frontend/. .

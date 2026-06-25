@@ -58,6 +58,7 @@
     },
     "dependencies": {
         "graphql": "16.14.2",
-        "lucide-svelte": "1.0.1"
+        "lucide-svelte": "1.0.1",
+        "stylist-svelte": "portal:../stylist-svelte"
     }
 }

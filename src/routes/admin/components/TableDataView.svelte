@@ -72,99 +72,79 @@
 	}
 </script>
 
-<div class="flex h-full flex-col bg-white rounded-xl shadow-lg border border-gray-200">
+<div class="c-table-view">
 	{#if !tableName}
-		<!-- Empty State -->
-		<div class="flex h-full items-center justify-center p-8">
-			<div class="text-center">
-				<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-					<TableIcon class="h-8 w-8 text-gray-400" />
-				</div>
-				<h3 class="text-lg font-medium text-gray-900">No table selected</h3>
-				<p class="mt-1 text-sm text-gray-500">Select a table from the list to view its data</p>
+		<div class="c-table-view__empty">
+			<div class="c-table-view__empty-icon">
+				<TableIcon size={32} />
 			</div>
+			<h3 class="c-table-view__empty-title">No table selected</h3>
+			<p class="c-table-view__empty-desc">Select a table from the list to view its data</p>
 		</div>
 	{:else}
-		<!-- Header -->
-		<div class="border-b border-gray-200 p-4">
-			<div class="flex items-center justify-between">
-				<div>
-					<h2 class="text-xl font-bold text-gray-900">{tableName}</h2>
-					<p class="mt-1 text-sm text-gray-500">
-						{tableData?.total || 0} total records
-					</p>
-				</div>
-				<button
-					onclick={onCreateRecord}
-					class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
-				>
-					<Plus class="h-4 w-4" />
-					Add Record
-				</button>
+		<div class="c-table-view__header">
+			<div>
+				<h2 class="c-table-view__title">{tableName}</h2>
+				<p class="c-table-view__total">{tableData?.total || 0} total records</p>
 			</div>
+			<button class="c-table-view__add-btn" onclick={onCreateRecord}>
+				<Plus size={16} />
+				Add Record
+			</button>
 		</div>
 
-		<!-- Table Content -->
-		<div class="flex-1 overflow-auto">
+		<div class="c-table-view__body">
 			{#if isLoading}
-				<div class="flex h-full items-center justify-center">
-					<div class="text-center">
-						<div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
-						<p class="mt-2 text-sm text-gray-500">Loading data...</p>
-					</div>
+				<div class="c-table-view__loading">
+					<span class="c-table-view__spinner"></span>
+					<p>Loading data...</p>
 				</div>
 			{:else if !tableData || tableData.rows.length === 0}
-				<div class="flex h-full items-center justify-center p-8">
-					<div class="text-center">
-						<p class="text-sm text-gray-500">No records found</p>
-					</div>
+				<div class="c-table-view__no-data">
+					<p>No records found</p>
 				</div>
 			{:else}
-				<table class="min-w-full divide-y divide-gray-200">
-					<thead class="bg-gray-50 sticky top-0 z-10">
+				<table class="c-table-view__table">
+					<thead class="c-table-view__thead">
 						<tr>
 							{#each tableData.columns as column}
-								<th
-									class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-								>
-									<div class="flex items-center gap-1">
+								<th class="c-table-view__th">
+									<div class="c-table-view__th-inner">
 										{column}
 										{#if tableSchema?.columns.find((c) => c.name === column)?.primaryKey}
-											<span class="text-indigo-600" title="Primary Key">🔑</span>
+											<span title="Primary Key">🔑</span>
 										{/if}
 									</div>
 								</th>
 							{/each}
-							<th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-								Actions
-							</th>
+							<th class="c-table-view__th c-table-view__th--actions">Actions</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-gray-200 bg-white">
-						{#each tableData.rows as row, idx}
-							<tr class="hover:bg-gray-50 transition-colors">
+					<tbody class="c-table-view__tbody">
+						{#each tableData.rows as row}
+							<tr class="c-table-view__tr">
 								{#each tableData.columns as column}
-									<td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
+									<td class="c-table-view__td">
 										<span title={formatValue(row[column])}>
 											{truncate(formatValue(row[column]))}
 										</span>
 									</td>
 								{/each}
-								<td class="px-4 py-3 text-sm text-right whitespace-nowrap">
-									<div class="flex items-center justify-end gap-2">
+								<td class="c-table-view__td c-table-view__td--actions">
+									<div class="c-table-view__actions">
 										<button
+											class="c-table-view__edit-btn"
 											onclick={() => onEditRecord(row)}
-											class="rounded-lg p-1.5 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
 											title="Edit record"
 										>
-											<Edit class="h-4 w-4" />
+											<Edit size={16} />
 										</button>
 										<button
+											class="c-table-view__delete-btn"
 											onclick={() => onDeleteRecord(row)}
-											class="rounded-lg p-1.5 text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
 											title="Delete record"
 										>
-											<Trash2 class="h-4 w-4" />
+											<Trash2 size={16} />
 										</button>
 									</div>
 								</td>
@@ -175,51 +155,295 @@
 			{/if}
 		</div>
 
-		<!-- Pagination -->
 		{#if tableData && tableData.rows.length > 0}
-			<div class="border-t border-gray-200 p-4">
-				<div class="flex items-center justify-between">
-					<!-- Page Size Selector -->
-					<div class="flex items-center gap-2">
-						<span class="text-sm text-gray-700">Rows per page:</span>
-						<select
-							bind:value={pageSize}
-							onchange={(e) => onPageSizeChange(Number((e.target as HTMLSelectElement).value))}
-							class="rounded-lg border border-gray-300 px-3 py-1 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+			<div class="c-table-view__pagination">
+				<div class="c-table-view__page-size">
+					<span>Rows per page:</span>
+					<select
+						bind:value={pageSize}
+						onchange={(e) => onPageSizeChange(Number((e.target as HTMLSelectElement).value))}
+						class="c-table-view__page-select"
+					>
+						<option value={10}>10</option>
+						<option value={25}>25</option>
+						<option value={50}>50</option>
+						<option value={100}>100</option>
+					</select>
+				</div>
+				<div class="c-table-view__page-info">
+					<span>Page {currentPage + 1} of {totalPages || 1}</span>
+					<div class="c-table-view__page-btns">
+						<button
+							class="c-table-view__page-btn"
+							onclick={() => onPageChange(currentPage - 1)}
+							disabled={currentPage === 0}
 						>
-							<option value={10}>10</option>
-							<option value={25}>25</option>
-							<option value={50}>50</option>
-							<option value={100}>100</option>
-						</select>
-					</div>
-
-					<!-- Pagination Info -->
-					<div class="flex items-center gap-4">
-						<span class="text-sm text-gray-700">
-							Page {currentPage + 1} of {totalPages || 1}
-						</span>
-
-						<!-- Pagination Buttons -->
-						<div class="flex items-center gap-1">
-							<button
-								onclick={() => onPageChange(currentPage - 1)}
-								disabled={currentPage === 0}
-								class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
-							>
-								<ChevronLeft class="h-4 w-4" />
-							</button>
-							<button
-								onclick={() => onPageChange(currentPage + 1)}
-								disabled={!tableData.hasMore}
-								class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
-							>
-								<ChevronRight class="h-4 w-4" />
-							</button>
-						</div>
+							<ChevronLeft size={16} />
+						</button>
+						<button
+							class="c-table-view__page-btn"
+							onclick={() => onPageChange(currentPage + 1)}
+							disabled={!tableData.hasMore}
+						>
+							<ChevronRight size={16} />
+						</button>
 					</div>
 				</div>
 			</div>
 		{/if}
 	{/if}
 </div>
+
+<style>
+	.c-table-view {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		background: var(--color-background-primary, #fff);
+		border-radius: var(--radius-lg, 0.75rem);
+		border: 1px solid var(--color-border-primary, #e5e7eb);
+		box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+		overflow: hidden;
+	}
+
+	/* Empty state */
+	.c-table-view__empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		padding: 2rem;
+		text-align: center;
+	}
+	.c-table-view__empty-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 4rem;
+		height: 4rem;
+		border-radius: 50%;
+		background: var(--color-background-secondary, #f3f4f6);
+		color: var(--color-text-tertiary, #9ca3af);
+		margin-bottom: 1rem;
+	}
+	.c-table-view__empty-title {
+		font-size: 1.125rem;
+		font-weight: 500;
+		color: var(--color-text-primary, #111827);
+		margin: 0 0 0.25rem;
+	}
+	.c-table-view__empty-desc {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+		margin: 0;
+	}
+
+	/* Header */
+	.c-table-view__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-bottom: 1px solid var(--color-border-primary, #e5e7eb);
+		padding: 1rem 1.25rem;
+		flex-shrink: 0;
+	}
+	.c-table-view__title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--color-text-primary, #111827);
+		margin: 0;
+	}
+	.c-table-view__total {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+		margin: 0.25rem 0 0;
+	}
+	.c-table-view__add-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #fff;
+		background: var(--color-primary-600, #4f46e5);
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		cursor: pointer;
+		transition: background 0.12s;
+	}
+	.c-table-view__add-btn:hover {
+		background: var(--color-primary-700, #4338ca);
+	}
+
+	/* Body */
+	.c-table-view__body {
+		flex: 1;
+		overflow: auto;
+	}
+	.c-table-view__loading,
+	.c-table-view__no-data {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+	}
+	.c-table-view__spinner {
+		display: inline-block;
+		width: 2rem;
+		height: 2rem;
+		border: 3px solid var(--color-border-primary, #e5e7eb);
+		border-top-color: var(--color-primary-600, #4f46e5);
+		border-radius: 50%;
+		animation: spin 0.6s linear infinite;
+	}
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+
+	/* Table */
+	.c-table-view__table {
+		width: 100%;
+		min-width: 100%;
+		border-collapse: collapse;
+	}
+	.c-table-view__thead {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background: var(--color-background-secondary, #f9fafb);
+	}
+	.c-table-view__th {
+		padding: 0.75rem 1rem;
+		text-align: left;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--color-text-secondary, #6b7280);
+		white-space: nowrap;
+		border-bottom: 1px solid var(--color-border-primary, #e5e7eb);
+	}
+	.c-table-view__th--actions {
+		text-align: right;
+	}
+	.c-table-view__th-inner {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+	.c-table-view__tbody .c-table-view__tr {
+		border-bottom: 1px solid var(--color-border-primary, #f3f4f6);
+		transition: background 0.1s;
+	}
+	.c-table-view__tbody .c-table-view__tr:hover {
+		background: var(--color-background-secondary, #f9fafb);
+	}
+	.c-table-view__td {
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		color: var(--color-text-primary, #111827);
+		white-space: nowrap;
+	}
+	.c-table-view__td--actions {
+		text-align: right;
+	}
+	.c-table-view__actions {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.375rem;
+	}
+	.c-table-view__edit-btn,
+	.c-table-view__delete-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		background: transparent;
+		cursor: pointer;
+		transition: background 0.12s, color 0.12s;
+	}
+	.c-table-view__edit-btn {
+		color: var(--color-text-secondary, #6b7280);
+	}
+	.c-table-view__edit-btn:hover {
+		background: var(--color-primary-50, #eef2ff);
+		color: var(--color-primary-600, #4f46e5);
+	}
+	.c-table-view__delete-btn {
+		color: var(--color-text-secondary, #6b7280);
+	}
+	.c-table-view__delete-btn:hover {
+		background: #fef2f2;
+		color: #dc2626;
+	}
+
+	/* Pagination */
+	.c-table-view__pagination {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-top: 1px solid var(--color-border-primary, #e5e7eb);
+		padding: 0.75rem 1.25rem;
+		flex-shrink: 0;
+	}
+	.c-table-view__page-size {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #374151);
+	}
+	.c-table-view__page-select {
+		border: 1px solid var(--color-border-primary, #d1d5db);
+		border-radius: var(--radius-md, 0.375rem);
+		padding: 0.2rem 0.5rem;
+		font-size: 0.875rem;
+	}
+	.c-table-view__page-select:focus {
+		outline: none;
+		border-color: var(--color-primary-500, #6366f1);
+		box-shadow: 0 0 0 2px rgb(99 102 241 / 0.15);
+	}
+	.c-table-view__page-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #374151);
+	}
+	.c-table-view__page-btns {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+	.c-table-view__page-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		background: transparent;
+		color: var(--color-text-secondary, #6b7280);
+		cursor: pointer;
+		transition: background 0.12s;
+	}
+	.c-table-view__page-btn:hover:not(:disabled) {
+		background: var(--color-background-secondary, #f3f4f6);
+	}
+	.c-table-view__page-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+</style>

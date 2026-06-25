@@ -24,9 +24,4 @@ export { authStoreWritable, user, isAuthenticated, isLoading, error, roles } fro
 export { useAuth } from './composables/useAuth.svelte';
 export { usePermissions } from './composables/usePermissions.svelte';
 
-// Components
-export { default as LoginForm } from './components/LoginForm.svelte';
-export { default as RegisterForm } from './components/RegisterForm.svelte';
-export { default as ProtectedRoute } from './components/ProtectedRoute.svelte';
-export { default as RequirePermission } from './components/RequirePermission.svelte';
-export { default as RequireRole } from './components/RequireRole.svelte';
+// UI компоненты авторизации перенесены в $stylist/user/component/organism/auth-guard

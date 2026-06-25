@@ -2,6 +2,16 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
 import { sveltekit } from '@sveltejs/kit/vite';
 import houdini from 'houdini/vite';
+import path from 'path';
+import { existsSync } from 'fs';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Stylist-svelte может быть на ../stylist-svelte (frontend в /app/frontend)
+// или на ./stylist-svelte (frontend в /app — старый Docker-образ)
+const stylistPath = existsSync(path.resolve(__dirname, '../stylist-svelte/src/lib'))
+	? path.resolve(__dirname, '../stylist-svelte/src/lib')
+	: path.resolve(__dirname, 'stylist-svelte/src/lib');
 
 // Patch for houdini-svelte 3.0.0-next.35 + Svelte 5 bug:
 // the injected $effect calls extractSession(page.data) where page is the
@@ -25,12 +35,18 @@ function houdiniSessionFix() {
 
 export default defineConfig({
 	plugins: [tailwindcss(), houdini(), sveltekit(), houdiniSessionFix()],
+	resolve: {
+		alias: {
+			'$stylist':  stylistPath,
+			'$frontend': path.resolve(__dirname, 'src')
+		}
+	},
 	css: {
 		postcss: {},
 	},
 	server: {
 		fs: {
-			allow: ['.', '.houdini', 'src', 'node_modules', '.svelte-kit']
+			allow: ['.', '..', '.houdini', 'src', 'node_modules', '.svelte-kit', '../stylist-svelte']
 		},
 		proxy: {
 			'/graphql': {
@@ -39,6 +55,9 @@ export default defineConfig({
 				rewrite: (path) => path.replace(/^\/graphql$/, '/graphql/')
 			}
 		}
+	},
+	ssr: {
+		noExternal: ['stylist-svelte']
 	},
 	test: {
 		expect: { requireAssertions: true },
