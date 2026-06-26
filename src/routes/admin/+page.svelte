@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { useAuth } from '$lib/auth';
 	import { graphql } from '$houdini';
+	import { graphqlClient } from '$lib/graphql-client';
 	import AuthGuard from '$stylist/user/component/organism/auth-guard/index.svelte';
 	import type { PageData } from './$types';
-	import { Shield } from 'lucide-svelte';
 	import TableList from './components/TableList.svelte';
-	import TableDataView from './components/TableDataView.svelte';
+	import DataTableShell from '$stylist/table/component/organism/data-table-shell/index.svelte';
+	import type { TableSchema } from '$stylist/table/type/schema/table';
+	import type { CellType } from '$stylist/table/type/enum/cell-type';
 	import RecordModal from './components/RecordModal.svelte';
 	import DeleteConfirmModal from './components/DeleteConfirmModal.svelte';
+	import ThemeModeToggle from '$stylist/theme/component/atom/theme-mode-toggle/index.svelte';
+	import { STORAGE_KEYS } from '$lib/auth/constants';
 
 	const auth = useAuth();
 
@@ -33,68 +37,71 @@
 
 	// State
 	let selectedTable = $state<string | null>(null);
-	let currentPage = $state(0);
-	let pageSize = $state(25);
-	let tableDetailsStore = $state<any>(null);
+	let tableData = $state<{ columns: string[]; rows: Record<string, unknown>[]; total: number; hasMore: boolean } | null>(null);
+	let tableSchema = $state<{ columns: { name: string; type: string; nullable: boolean; primaryKey: boolean; default: string | null }[] } | null>(null);
 	let isLoadingDetails = $state(false);
 
 	// Modal state
 	let isRecordModalOpen = $state(false);
 	let recordModalMode = $state<'create' | 'edit'>('create');
-	let editingRecord = $state<Record<string, any> | null>(null);
+	let editingRecord = $state<Record<string, any> | undefined>(undefined);
 	let isDeleteModalOpen = $state(false);
 	let deletingRecord = $state<Record<string, any> | null>(null);
 
 	// Derived state
 	const tables = $derived($tablesStore?.data?.allTables ?? []);
-	const tableData = $derived($state.snapshot(tableDetailsStore?.data?.tableData ?? null));
-	const tableSchema = $derived($state.snapshot(tableDetailsStore?.data?.tableSchema ?? null));
-	const primaryKeyColumn = $derived(() => {
-		return tableSchema?.columns?.find((col: any) => col.primaryKey)?.name || 'id';
+	const primaryKeyColumn = $derived(
+		tableSchema?.columns?.find((col) => col.primaryKey)?.name ?? 'id'
+	);
+
+	// Адаптер: GraphQL columns → TableSchema для DataTableShell
+	const shellSchema: TableSchema<Record<string, unknown>> = $derived.by(() => {
+		const cols: string[] = tableData?.columns ?? [];
+		return cols.map((colName) => {
+			const info = tableSchema?.columns?.find((c) => c.name === colName);
+			const rawType = (info?.type ?? '').toLowerCase();
+			let cell: CellType = 'text';
+			if (/int|numeric|float|double|decimal/.test(rawType)) cell = 'number';
+			else if (/timestamp|date|time/.test(rawType)) cell = 'date';
+			else if (/bool/.test(rawType)) cell = 'pill';
+			return {
+				key: colName,
+				header: colName + (info?.primaryKey ? ' 🔑' : ''),
+				cell,
+				sortable: true
+			};
+		});
 	});
 
-	// Load table details when table is selected or page changes
+	const shellData: Record<string, unknown>[] = $derived(tableData?.rows ?? []);
+
 	$effect(() => {
-		if (selectedTable) {
-			loadTableDetails();
-		}
+		if (selectedTable) loadTableDetails(selectedTable);
 	});
 
-	async function loadTableDetails() {
-		if (!selectedTable) return;
-
+	async function loadTableDetails(tableName: string) {
 		isLoadingDetails = true;
+		tableData = null;
+		tableSchema = null;
 		try {
-			const offset = currentPage * pageSize;
-			const { data: detailsData } = await graphql(`
-				query GetTableDetails($tableName: String!, $limit: Int!, $offset: Int!) {
+			const token = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) : null;
+			const result = await graphqlClient.query<{
+				tableSchema: { columns: { name: string; type: string; nullable: boolean; primaryKey: boolean; default: string | null }[] };
+				tableData: { columns: string[]; rows: Record<string, unknown>[]; total: number; hasMore: boolean };
+			}>(
+				`query GetTableDetails($tableName: String!, $limit: Int!, $offset: Int!) {
 					tableSchema(tableName: $tableName) {
-						tableName
-						columns {
-							name
-							type
-							nullable
-							primaryKey
-							default
-						}
+						columns { name type nullable primaryKey default }
 					}
 					tableData(tableName: $tableName, limit: $limit, offset: $offset) {
-						tableName
-						columns
-						rows
-						total
-						hasMore
+						columns rows total hasMore
 					}
-				}
-			`).fetch({
-				variables: {
-					tableName: selectedTable,
-					limit: pageSize,
-					offset
-				}
-			});
-
-			tableDetailsStore = { data: detailsData };
+				}`,
+				{ tableName, limit: 200, offset: 0 },
+				token ?? undefined
+			);
+			tableSchema = result.tableSchema;
+			tableData = result.tableData;
 		} catch (error) {
 			console.error('Error loading table details:', error);
 		} finally {
@@ -104,21 +111,11 @@
 
 	function handleSelectTable(tableName: string) {
 		selectedTable = tableName;
-		currentPage = 0; // Reset to first page
-	}
-
-	function handlePageChange(page: number) {
-		currentPage = page;
-	}
-
-	function handlePageSizeChange(size: number) {
-		pageSize = size;
-		currentPage = 0; // Reset to first page
 	}
 
 	function handleCreateRecord() {
 		recordModalMode = 'create';
-		editingRecord = null;
+		editingRecord = undefined;
 		isRecordModalOpen = true;
 	}
 
@@ -129,7 +126,7 @@
 	}
 
 	function handleDeleteRecord(record: Record<string, any>) {
-		deletingRecord = record;
+		deletingRecord = record ?? null;
 		isDeleteModalOpen = true;
 	}
 
@@ -152,7 +149,7 @@
 			}
 
 			// Reload table data
-			await loadTableDetails();
+			await loadTableDetails(selectedTable);
 		} catch (error) {
 			console.error('Error saving record:', error);
 			throw error; // Re-throw so modal can show error
@@ -170,7 +167,7 @@
 			});
 
 			// Reload table data
-			await loadTableDetails();
+			await loadTableDetails(selectedTable);
 		} catch (error) {
 			console.error('Error deleting record:', error);
 			throw error; // Re-throw so modal can show error
@@ -192,11 +189,14 @@
 		<header class="c-admin__header">
 			<div class="c-admin__header-inner">
 				<div class="c-admin__header-icon">
-					<Shield size={24} />
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
 				</div>
 				<div>
 					<h1 class="c-admin__header-title">Database Administration</h1>
 					<p class="c-admin__header-sub">Manage all database tables and records</p>
+				</div>
+				<div class="c-admin__header-actions">
+					<ThemeModeToggle class="c-admin__theme-toggle" />
 				</div>
 			</div>
 		</header>
@@ -211,19 +211,31 @@
 					/>
 				</div>
 				<div class="c-admin__content">
-					<TableDataView
-						tableName={selectedTable}
-						{tableData}
-						{tableSchema}
-						isLoading={isLoadingDetails}
-						{currentPage}
-						{pageSize}
-						onPageChange={handlePageChange}
-						onPageSizeChange={handlePageSizeChange}
-						onCreateRecord={handleCreateRecord}
-						onEditRecord={handleEditRecord}
-						onDeleteRecord={handleDeleteRecord}
-					/>
+					{#if !selectedTable}
+						<div class="c-admin__empty">
+							<p class="c-admin__empty-text">Выберите таблицу для просмотра данных</p>
+						</div>
+					{:else}
+						<div class="c-admin__table-panel">
+							<div class="c-admin__table-header">
+								<div>
+									<h2 class="c-admin__table-title">{selectedTable}</h2>
+									<p class="c-admin__table-total">{tableData?.total ?? 0} записей</p>
+								</div>
+								<button class="c-admin__add-btn" onclick={handleCreateRecord}>
+									+ Добавить
+								</button>
+							</div>
+							<DataTableShell
+								data={shellData}
+								schema={shellSchema}
+								loading={isLoadingDetails}
+								onRowClick={(row) => handleEditRecord(row as Record<string, any>)}
+								defaultPageSize={25}
+								showColumnManager={true}
+							/>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</main>
@@ -269,6 +281,16 @@
 		margin: 0 auto;
 		padding: 1.25rem 1.5rem;
 	}
+	.c-admin__header-actions {
+		display: flex;
+		align-items: center;
+		margin-left: auto;
+	}
+	:global(.c-admin__theme-toggle) {
+		min-width: 2.25rem;
+		min-height: 2.25rem;
+		padding: 0.5rem;
+	}
 	.c-admin__header-icon {
 		display: flex;
 		align-items: center;
@@ -313,5 +335,54 @@
 	.c-admin__content {
 		height: 100%;
 		min-height: 0;
+	}
+	.c-admin__empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		border: 1px solid var(--color-border-primary, #e5e7eb);
+		border-radius: 0.5rem;
+		background: var(--color-background-primary, #fff);
+	}
+	.c-admin__empty-text {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #6b7280);
+	}
+	.c-admin__table-panel {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		gap: 0.75rem;
+	}
+	.c-admin__table-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-shrink: 0;
+	}
+	.c-admin__table-title {
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: var(--color-text-primary, #111827);
+		margin: 0;
+	}
+	.c-admin__table-total {
+		font-size: 0.8rem;
+		color: var(--color-text-secondary, #6b7280);
+		margin: 0.15rem 0 0;
+	}
+	.c-admin__add-btn {
+		padding: 0.4rem 0.875rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #fff;
+		background: var(--color-primary-600, #4f46e5);
+		border: none;
+		border-radius: var(--radius-md, 0.375rem);
+		cursor: pointer;
+	}
+	.c-admin__add-btn:hover {
+		background: var(--color-primary-700, #4338ca);
 	}
 </style>

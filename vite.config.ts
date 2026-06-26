@@ -1,4 +1,3 @@
-import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
 import { sveltekit } from '@sveltejs/kit/vite';
 import houdini from 'houdini/vite';
@@ -34,7 +33,7 @@ function houdiniSessionFix() {
 }
 
 export default defineConfig({
-	plugins: [tailwindcss(), houdini(), sveltekit(), houdiniSessionFix()],
+	plugins: [houdini(), sveltekit(), houdiniSessionFix()],
 	resolve: {
 		alias: {
 			'$stylist':  stylistPath,

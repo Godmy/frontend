@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { AlertTriangle, X } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -67,7 +66,7 @@
 		<div class="c-delete-modal__dialog">
 			<div class="c-delete-modal__header">
 				<div class="c-delete-modal__icon">
-					<AlertTriangle size={24} />
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
 				</div>
 				<div class="c-delete-modal__body">
 					<h3 class="c-delete-modal__title">Delete Record</h3>
@@ -104,8 +103,9 @@
 					class="c-delete-modal__close"
 					onclick={handleClose}
 					disabled={isDeleting}
+					aria-label="Close"
 				>
-					<X size={20} />
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
 				</button>
 			</div>
 

@@ -19,10 +19,6 @@ const config = {
             $houdini:  ".houdini/",
             $stylist:  stylistPath,
             $frontend: resolve(__dirname, 'src'),
-            $shared:   resolve(__dirname, 'src/full_interface/shared'),
-            $entities: resolve(__dirname, 'src/entities'),
-            $features: resolve(__dirname, 'src/full_interface/features'),
-            $widgets:  resolve(__dirname, 'src/full_interface/widgets'),
             $pages:    resolve(__dirname, 'src/pages')
         }
     }

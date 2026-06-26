@@ -18,7 +18,6 @@ export { authContext, getAuthService, getPermissionService, getTokenStorage } fr
 
 // Stores
 export { authStore } from './stores/authStore.svelte';
-export { authStoreWritable, user, isAuthenticated, isLoading, error, roles } from './stores/authStore';
 
 // Composables
 export { useAuth } from './composables/useAuth.svelte';

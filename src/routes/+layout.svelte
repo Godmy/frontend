@@ -2,14 +2,28 @@
 	import '../app.css';
 	import { page } from '$app/stores';
 	import { setClientSession, setClientStarted } from '$houdini';
-	import { ToastContainer } from '$lib/notifications';
+	import { notificationStore } from '$lib/notifications';
 	import { initializeErrorNotifications } from '$lib/errors/integrations';
 	import { languageStore } from '$lib/stores/languageStore.svelte';
 	import { onMount } from 'svelte';
 	import { useAuth } from '$lib/auth';
+	import ToastStack from '$stylist/notification/component/molecule/toast-stack/index.svelte';
+	import ThemeModeToggle from '$stylist/theme/component/atom/theme-mode-toggle/index.svelte';
 
 	let { children } = $props();
 	const auth = useAuth();
+
+	const toasts = $derived(
+		notificationStore.items.map((n) => ({
+			id: n.id,
+			type: n.type,
+			title: n.title,
+			message: n.message,
+			duration: n.duration,
+			onDismiss: n.dismissible ? () => notificationStore.dismiss(n.id) : undefined,
+			actions: n.action ? [{ label: n.action.label, onClick: n.action.callback }] : undefined
+		}))
+	);
 
 	$effect(() => {
 		setClientStarted();
@@ -34,6 +48,7 @@
 		<div class="c-app-header__inner">
 			<a href="/" class="c-app-header__brand">vibe-management.pro</a>
 			<nav class="c-app-header__nav">
+				<ThemeModeToggle class="c-app-header__theme-toggle" />
 				<a href="/login" class="c-app-header__link">Sign In</a>
 				<a href="/register" class="c-app-header__link c-app-header__link--primary">Sign Up</a>
 			</nav>
@@ -45,7 +60,7 @@
 	{@render children?.()}
 </div>
 
-<ToastContainer />
+<ToastStack toasts={toasts} position="bottom-right" />
 
 <style>
 	.c-app-header {
@@ -92,6 +107,11 @@
 	.c-app-header__link--primary:hover {
 		background: var(--color-primary-700, #4338ca);
 		color: var(--color-text-inverse, #fff);
+	}
+	:global(.c-app-header__theme-toggle) {
+		min-width: 2.25rem;
+		min-height: 2.25rem;
+		padding: 0.5rem;
 	}
 	.c-app-shell {
 		min-height: 100vh;
