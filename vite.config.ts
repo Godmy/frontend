@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { playwright } from '@vitest/browser-playwright';
 import { sveltekit } from '@sveltejs/kit/vite';
 import houdini from 'houdini/vite';
 import path from 'path';
@@ -36,12 +37,12 @@ export default defineConfig({
 	plugins: [houdini(), sveltekit(), houdiniSessionFix()],
 	resolve: {
 		alias: {
-			'$stylist':  stylistPath,
-			'$frontend': path.resolve(__dirname, 'src')
+			$stylist: stylistPath,
+			$frontend: path.resolve(__dirname, 'src')
 		}
 	},
 	css: {
-		postcss: {},
+		postcss: {}
 	},
 	server: {
 		fs: {
@@ -96,10 +97,11 @@ export default defineConfig({
 				extends: './vite.config.ts',
 				test: {
 					name: 'client',
-					environment: 'browser',
+					// `environment` must stay unset here: vitest 4 rejects
+					// `environment: 'browser'` in favour of `browser.enabled`.
 					browser: {
 						enabled: true,
-						provider: 'playwright',
+						provider: playwright(),
 						instances: [{ browser: 'chromium' }]
 					},
 					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
