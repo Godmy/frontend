@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TelegramAuthStrategy } from './index';
-import type { IGraphQLClient } from '$stylist/auth';
-import type { TelegramAuthData, User } from '$stylist/auth';
-import { AUTH_STRATEGIES } from '$stylist/auth';
+import type { IGraphQLClient } from '$module/auth';
+import type { User } from '$module/auth';
+import type { TelegramAuthData } from '$lib/auth/type/object/telegram-auth-data';
+import { AUTH_STRATEGIES } from '$module/auth';
 
 describe('TelegramAuthStrategy', () => {
 	let strategy: TelegramAuthStrategy;

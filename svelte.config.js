@@ -1,13 +1,12 @@
 import adapter from '@sveltejs/adapter-node';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { createRequire } from 'module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const stylistPath = existsSync(resolve(__dirname, '../stylist-svelte/src/lib'))
-	? resolve(__dirname, '../stylist-svelte/src/lib')
-	: resolve(__dirname, 'stylist-svelte/src/lib');
+// dist установленного из npm пакета stylist-svelte (resolve учитывает hoisting в workspace)
+const stylistDist = dirname(createRequire(import.meta.url).resolve('stylist-svelte'));
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -26,7 +25,12 @@ const config = {
 
         alias: {
             $houdini:  ".houdini/",
-            $stylist:  stylistPath,
+            // Приватные модули (git submodules в src/module/*)
+            $module:   resolve(__dirname, 'src/module'),
+            // Модули импортируют себя как $stylist/<module>/..., а библиотеку — как $stylist/<domain>/...
+            // Более специфичный alias модуля должен идти раньше общего $stylist.
+            '$stylist/auth': resolve(__dirname, 'src/module/auth'),
+            $stylist:  stylistDist,
             $frontend: resolve(__dirname, 'src'),
             $pages:    resolve(__dirname, 'src/pages')
         }

@@ -3,7 +3,7 @@
  * SRP: Управляет состоянием авторизации
  */
 
-import type { User, AuthTokens, Role } from '$stylist/auth';
+import type { User, AuthTokens, Role } from '$module/auth';
 
 type AuthStoreState = {
 	user: User | null;

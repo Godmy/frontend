@@ -8,13 +8,13 @@ import { getAuthService, getPermissionService } from '../../../class/context/aut
 import type {
 	LoginCredentials,
 	RegistrationData,
-	GoogleAuthData,
-	TelegramAuthData,
 	PasswordResetRequest,
-	PasswordReset,
-	EmailVerification,
 	Role
-} from '$stylist/auth';
+} from '$module/auth';
+import type { GoogleAuthData } from '$lib/auth/type/object/google-auth-data';
+import type { TelegramAuthData } from '$lib/auth/type/object/telegram-auth-data';
+import type { PasswordReset } from '$lib/auth/type/object/password-reset';
+import type { EmailVerification } from '$lib/auth/type/object/email-verification';
 
 export function useAuth() {
 	const authService = getAuthService();

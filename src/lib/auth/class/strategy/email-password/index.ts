@@ -4,9 +4,9 @@
  * SRP: Отвечает только за авторизацию через email/password
  */
 
-import type { IAuthStrategy, IGraphQLClient } from '$stylist/auth';
-import type { LoginCredentials, AuthResponse, AuthResult } from '$stylist/auth';
-import { AUTH_STRATEGIES } from '$stylist/auth';
+import type { IAuthStrategy, IGraphQLClient } from '$module/auth';
+import type { LoginCredentials, AuthResponse, AuthResult } from '$module/auth';
+import { AUTH_STRATEGIES } from '$module/auth';
 
 export class EmailPasswordStrategy implements IAuthStrategy {
 	private graphqlClient: IGraphQLClient;

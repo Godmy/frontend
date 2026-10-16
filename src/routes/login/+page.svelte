@@ -2,8 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { useAuth } from '$lib/auth';
-	import LoginPage from '$stylist/auth/component/organism/login-page/index.svelte';
-	import type { LoginCredentials } from '$stylist/auth/type/object/login-credentials';
+	import LoginPage from '$module/auth/component/organism/login-page/index.svelte';
+	import type { LoginCredentials } from '$module/auth/type/object/login-credentials';
 
 	const auth = useAuth();
 

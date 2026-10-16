@@ -4,8 +4,8 @@
  * DIP: Зависит от абстракций (интерфейсов)
  */
 
-import type { IPermissionChecker, IGraphQLClient } from '$stylist/auth';
-import type { Role, Permission } from '$stylist/auth';
+import type { IPermissionChecker, IGraphQLClient } from '$module/auth';
+import type { Role, Permission } from '$module/auth';
 
 export class PermissionService implements IPermissionChecker {
 	private graphqlClient: IGraphQLClient;

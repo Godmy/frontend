@@ -1,0 +1,3 @@
+[submodule "src/module/auth"]
+	path = src/module/auth
+	url = https://github.com/Godmy/stylist-svelte-auth.git

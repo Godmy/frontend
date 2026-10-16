@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TokenStorage } from './index';
-import type { AuthTokens } from '$stylist/auth';
-import { STORAGE_KEYS } from '$stylist/auth';
+import type { AuthTokens } from '$module/auth';
+import { STORAGE_KEYS } from '$module/auth';
 
 describe('TokenStorage', () => {
 	let storage: TokenStorage;

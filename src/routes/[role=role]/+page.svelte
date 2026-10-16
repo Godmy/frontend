@@ -2,8 +2,8 @@
 	import { useAuth } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import AuthGuard from '$stylist/auth/component/organism/auth-guard/index.svelte';
-	import AppHeader from '$stylist/navigation/component/organism/app-header/index.svelte';
+	import AuthGuard from '$module/auth/component/organism/auth-guard/index.svelte';
+	import AppHeader from '$stylist/menu/component/organism/app-header/index.svelte';
 
 	const auth = useAuth();
 

@@ -2,9 +2,9 @@
 	import { onMount } from 'svelte';
 	import { useAuth } from '$lib/auth';
 	import { graphqlClient } from '$lib/graphql-client';
-	import AuthGuard from '$stylist/auth/component/organism/auth-guard/index.svelte';
+	import AuthGuard from '$module/auth/component/organism/auth-guard/index.svelte';
 	import Schema from '$stylist/erd/component/organism/schema/index.svelte';
-	import { STORAGE_KEYS } from '$stylist/auth';
+	import { STORAGE_KEYS } from '$module/auth';
 
 	const auth = useAuth();
 

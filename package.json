@@ -52,6 +52,6 @@
     },
     "dependencies": {
         "graphql": "16.14.2",
-        "stylist-svelte": "portal:../stylist-svelte"
+        "stylist-svelte": "2.0.0"
     }
 }

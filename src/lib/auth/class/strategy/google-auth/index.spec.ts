@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GoogleAuthStrategy } from './index';
-import type { IGraphQLClient } from '$stylist/auth';
-import type { GoogleAuthData, User } from '$stylist/auth';
-import { AUTH_STRATEGIES } from '$stylist/auth';
+import type { IGraphQLClient } from '$module/auth';
+import type { User } from '$module/auth';
+import type { GoogleAuthData } from '$lib/auth/type/object/google-auth-data';
+import { AUTH_STRATEGIES } from '$module/auth';
 
 describe('GoogleAuthStrategy', () => {
 	let strategy: GoogleAuthStrategy;

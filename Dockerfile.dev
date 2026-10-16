@@ -8,11 +8,8 @@ WORKDIR /app
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
 # Copy package files first for better Docker layer caching
-COPY stylist-svelte/package.json stylist-svelte/yarn.lock stylist-svelte/.yarnrc.yml ./stylist-svelte/
+# stylist-svelte ставится из npm как обычная зависимость
 COPY frontend/package.json frontend/yarn.lock frontend/.yarnrc.yml ./frontend/
-
-WORKDIR /app/stylist-svelte
-RUN yarn install --frozen-lockfile
 
 WORKDIR /app/frontend
 RUN yarn install --no-immutable

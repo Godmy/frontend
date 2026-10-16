@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { authStore } from './index.svelte';
-import type { User, AuthTokens, Role } from '$stylist/auth';
+import type { User, AuthTokens, Role } from '$module/auth';
 
 describe('AuthStore', () => {
 	const mockUser: User = {

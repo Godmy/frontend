@@ -2,11 +2,12 @@
 	import { useAuth } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import Transcriber from '$stylist/audio/component/organism/transcriber/index.svelte';
-	import type { TypeTranscriptionResult } from '$stylist/audio';
+	import AudioRecordButton from '$stylist/audio/component/atom/audio-record-button/index.svelte';
+	import type { SlotAudioRecording } from '$stylist/audio/interface/slot/audio-recording';
 
 	const auth = useAuth();
 
+	let transcript = $state('');
 	let reply = $state('');
 	let isSending = $state(false);
 	let sendError = $state('');
@@ -15,16 +16,25 @@
 		if (auth.isAuthenticated) goto(`/${auth.roles[0]?.name ?? 'user'}`);
 	});
 
-	async function handleTranscribed(result: TypeTranscriptionResult) {
-		if (!result.text.trim()) return;
+	// Запись → /api/transcription (whisper) → /api/voice-chat (локальная LLM)
+	async function handleRecorded(recording: SlotAudioRecording) {
 		isSending = true;
 		sendError = '';
+		transcript = '';
 		reply = '';
 		try {
+			const form = new FormData();
+			form.set('file', recording.file, recording.fileName);
+			const transcription = await fetch('/api/transcription', { method: 'POST', body: form });
+			const transcriptionPayload = await transcription.json();
+			if (!transcription.ok) throw new Error(transcriptionPayload.message ?? 'Transcription failed');
+			transcript = transcriptionPayload.text ?? '';
+			if (!transcript.trim()) return;
+
 			const response = await fetch('/api/voice-chat', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ text: result.text })
+				body: JSON.stringify({ text: transcript })
 			});
 			const payload = await response.json();
 			if (!response.ok) throw new Error(payload.message ?? 'Request failed');
@@ -47,7 +57,15 @@
 		<h1 class="c-landing__title">Voice Assistant</h1>
 		<p class="c-landing__subtitle">Record your voice — the transcript is sent to the local AI</p>
 
-		<Transcriber onTranscribed={handleTranscribed} />
+		<AudioRecordButton
+			onRecorded={handleRecorded}
+			onError={(err) => (sendError = err.message)}
+			disabled={isSending}
+		/>
+
+		{#if transcript}
+			<p class="c-landing__transcript">{transcript}</p>
+		{/if}
 
 		{#if isSending}
 			<p class="c-landing__status">Waiting for the AI response…</p>
@@ -71,6 +89,11 @@
 		align-items: center;
 		justify-content: center;
 		padding: 1rem;
+	}
+	.c-landing__transcript {
+		margin-top: 1rem;
+		color: var(--color-text-secondary, #4b5563);
+		font-style: italic;
 	}
 	.c-landing__card {
 		max-width: 32rem;

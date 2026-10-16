@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { useAuth } from '$lib/auth';
-	import ForgotPasswordPage from '$stylist/auth/component/organism/forgot-password-page/index.svelte';
-	import type { PasswordResetRequest } from '$stylist/auth/type/object/password-reset-request';
+	import ForgotPasswordPage from '$module/auth/component/organism/forgot-password-page/index.svelte';
+	import type { PasswordResetRequest } from '$module/auth/type/object/password-reset-request';
 
 	const auth = useAuth();
 

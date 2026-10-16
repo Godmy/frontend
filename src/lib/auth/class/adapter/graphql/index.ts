@@ -4,7 +4,7 @@
  * SRP: Отвечает только за коммуникацию с GraphQL API
  */
 
-import type { IGraphQLClient, ITokenStorage } from '$stylist/auth';
+import type { IGraphQLClient, ITokenStorage } from '$module/auth';
 
 export class GraphQLAdapter implements IGraphQLClient {
 	private endpoint: string;

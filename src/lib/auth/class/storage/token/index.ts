@@ -3,9 +3,9 @@
  * SRP: Отвечает только за хранение и получение токенов
  */
 
-import type { ITokenStorage } from '$stylist/auth';
-import type { AuthTokens } from '$stylist/auth';
-import { STORAGE_KEYS } from '$stylist/auth';
+import type { ITokenStorage } from '$module/auth';
+import type { AuthTokens } from '$module/auth';
+import { STORAGE_KEYS } from '$module/auth';
 
 export class TokenStorage implements ITokenStorage {
 	private storage: Storage;

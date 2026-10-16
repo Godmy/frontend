@@ -4,9 +4,10 @@
  * SRP: Отвечает только за авторизацию через Telegram
  */
 
-import type { IAuthStrategy, IGraphQLClient } from '$stylist/auth';
-import type { TelegramAuthData, AuthResponse, AuthResult } from '$stylist/auth';
-import { AUTH_STRATEGIES } from '$stylist/auth';
+import type { IAuthStrategy, IGraphQLClient } from '$module/auth';
+import type { AuthResponse, AuthResult } from '$module/auth';
+import type { TelegramAuthData } from '$lib/auth/type/object/telegram-auth-data';
+import { AUTH_STRATEGIES } from '$module/auth';
 
 export class TelegramAuthStrategy implements IAuthStrategy {
 	private graphqlClient: IGraphQLClient;

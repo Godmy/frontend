@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EmailPasswordStrategy } from './index';
-import type { IGraphQLClient } from '$stylist/auth';
-import type { LoginCredentials, User, AuthTokens } from '$stylist/auth';
-import { AUTH_STRATEGIES } from '$stylist/auth';
+import type { IGraphQLClient } from '$module/auth';
+import type { LoginCredentials, User, AuthTokens } from '$module/auth';
+import { AUTH_STRATEGIES } from '$module/auth';
 
 describe('EmailPasswordStrategy', () => {
 	let strategy: EmailPasswordStrategy;

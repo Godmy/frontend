@@ -2,9 +2,9 @@
 	import { useAuth } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import AccountSettingsForm from '$stylist/user/component/organism/account-settings-form/index.svelte';
-	import type { AccountSettings } from '$stylist/user/type/object/account-settings';
-	import AppHeader from '$stylist/navigation/component/organism/app-header/index.svelte';
+	import AccountSettingsForm from '$lib/user/component/organism/account-settings-form/index.svelte';
+	import type { AccountSettings } from '$lib/user/type/object/account-settings';
+	import AppHeader from '$stylist/menu/component/organism/app-header/index.svelte';
 
 	const auth = useAuth();
 

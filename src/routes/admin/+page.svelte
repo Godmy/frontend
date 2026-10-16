@@ -2,16 +2,16 @@
 	import { useAuth } from '$lib/auth';
 	import { graphql } from '$houdini';
 	import { graphqlClient } from '$lib/graphql-client';
-	import AuthGuard from '$stylist/auth/component/organism/auth-guard/index.svelte';
+	import AuthGuard from '$module/auth/component/organism/auth-guard/index.svelte';
 	import type { PageData } from './$types';
 	import TableListPanel from '$stylist/table/component/organism/table-list-panel/index.svelte';
 	import DataTableShell from '$stylist/table/component/organism/data-table-shell/index.svelte';
-	import type { TableSchema } from '$stylist/table/type/schema/table';
-	import type { CellType } from '$stylist/table/type/enum/cell-type';
+	import type { TableSchema } from '$stylist/table/type/object/table';
+	import type { CellType } from '$stylist/table/type/alias/cell-type';
 	import SchemaFormDialog from '$stylist/form/component/organism/schema-form-dialog/index.svelte';
 	import DialogConfirm from '$stylist/dialog/component/molecule/dialog-confirm/index.svelte';
 	import ThemeModeToggle from '$stylist/theme/component/atom/theme-mode-toggle/index.svelte';
-	import { STORAGE_KEYS } from '$stylist/auth';
+	import { STORAGE_KEYS } from '$module/auth';
 
 	const auth = useAuth();
 

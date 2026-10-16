@@ -9,15 +9,8 @@ RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 WORKDIR /app
 
 # Copy package files first for better Docker layer caching
-COPY stylist-svelte/package.json stylist-svelte/yarn.lock stylist-svelte/.yarnrc.yml ./stylist-svelte/
+# stylist-svelte ставится из npm как обычная зависимость
 COPY frontend/package.json frontend/yarn.lock frontend/.yarnrc.yml ./frontend/
-
-WORKDIR /app/stylist-svelte
-RUN yarn install --frozen-lockfile
-
-# Build the local component library before frontend installs file:../stylist-svelte
-COPY stylist-svelte/. .
-RUN yarn build
 
 WORKDIR /app/frontend
 RUN yarn install --no-immutable
@@ -51,13 +44,10 @@ RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
 WORKDIR /app
 
-# Copy package files and the built local component library without builder node_modules
+# Copy package files without builder node_modules
 COPY frontend/package.json frontend/yarn.lock frontend/.yarnrc.yml ./frontend/
-COPY --from=builder /app/stylist-svelte/package.json ./stylist-svelte/package.json
-COPY --from=builder /app/stylist-svelte/dist ./stylist-svelte/dist
 
 WORKDIR /app/frontend
-# Install dependencies against the local file:../stylist-svelte package
 RUN yarn install --no-immutable
 
 # Copy built application from builder

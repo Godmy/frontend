@@ -1,6 +1,6 @@
 import { HoudiniClient } from '$houdini';
 import { config } from '$lib/config';
-import { STORAGE_KEYS } from '$stylist/auth';
+import { STORAGE_KEYS } from '$module/auth';
 
 // Resolve GraphQL endpoint in a way that works for both browser and SSR execution paths
 function getGraphQLEndpoint(): string {

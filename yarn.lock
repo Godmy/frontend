@@ -1596,7 +1596,7 @@ __metadata:
     postcss: "npm:8.5.15"
     prettier: "npm:3.8.4"
     prettier-plugin-svelte: "npm:4.1.1"
-    stylist-svelte: "portal:../stylist-svelte"
+    stylist-svelte: "npm:2.0.0"
     svelte: "npm:5.56.3"
     svelte-check: "npm:4.6.0"
     typescript: "npm:5.9.2"
@@ -4193,9 +4193,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stylist-svelte@portal:../stylist-svelte::locator=%40vibe-management-pro%2Ffrontend-template%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "stylist-svelte@portal:../stylist-svelte::locator=%40vibe-management-pro%2Ffrontend-template%40workspace%3A."
+"stylist-svelte@npm:2.0.0":
+  version: 2.0.0
+  resolution: "stylist-svelte@npm:2.0.0"
   dependencies:
     marked: "npm:^17.0.0"
     shiki: "npm:^3.15.0"
@@ -4204,8 +4204,9 @@ __metadata:
   peerDependenciesMeta:
     zod:
       optional: true
+  checksum: 10c0/036b03d0fd2937adde682b39e392647c160a7187caf423721c1636c89a1690b0037e38930f2b2129d196a12cf409185263be059d5eceae71f80b79168632b751
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "supports-color@npm:^7.1.0":
   version: 7.2.0

@@ -4,9 +4,10 @@
  * SRP: Отвечает только за авторизацию через Google
  */
 
-import type { IAuthStrategy, IGraphQLClient } from '$stylist/auth';
-import type { GoogleAuthData, AuthResponse, AuthResult } from '$stylist/auth';
-import { AUTH_STRATEGIES } from '$stylist/auth';
+import type { IAuthStrategy, IGraphQLClient } from '$module/auth';
+import type { AuthResponse, AuthResult } from '$module/auth';
+import type { GoogleAuthData } from '$lib/auth/type/object/google-auth-data';
+import { AUTH_STRATEGIES } from '$module/auth';
 
 export class GoogleAuthStrategy implements IAuthStrategy {
 	private graphqlClient: IGraphQLClient;

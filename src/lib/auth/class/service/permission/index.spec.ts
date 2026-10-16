@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PermissionService } from './index';
-import type { IGraphQLClient } from '$stylist/auth';
-import type { Role, Permission } from '$stylist/auth';
+import type { IGraphQLClient } from '$module/auth';
+import type { Role, Permission } from '$module/auth';
 
 describe('PermissionService', () => {
 	let permissionService: PermissionService;

@@ -8,7 +8,7 @@ import { TokenStorage } from '../../storage/token';
 import { GraphQLAdapter } from '../../adapter/graphql';
 import { AuthService } from '../../service/auth';
 import { PermissionService } from '../../service/permission';
-import type { ITokenStorage, IGraphQLClient } from '$stylist/auth';
+import type { ITokenStorage, IGraphQLClient } from '$module/auth';
 
 class AuthContext {
 	private static instance: AuthContext;

@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AuthService } from './index';
-import type { ITokenStorage, IGraphQLClient } from '$stylist/auth';
+import type { ITokenStorage, IGraphQLClient } from '$module/auth';
 import type {
 	LoginCredentials,
 	RegistrationData,
-	GoogleAuthData,
-	TelegramAuthData,
 	PasswordResetRequest,
-	PasswordReset,
-	EmailVerification,
 	User,
 	AuthTokens
-} from '$stylist/auth';
+} from '$module/auth';
+import type { GoogleAuthData } from '$lib/auth/type/object/google-auth-data';
+import type { TelegramAuthData } from '$lib/auth/type/object/telegram-auth-data';
+import type { PasswordReset } from '$lib/auth/type/object/password-reset';
+import type { EmailVerification } from '$lib/auth/type/object/email-verification';
 
 describe('AuthService', () => {
 	let authService: AuthService;

@@ -11,20 +11,20 @@ import type {
 	IEmailVerification,
 	ITokenStorage,
 	IGraphQLClient
-} from '$stylist/auth';
+} from '$module/auth';
 import type {
 	LoginCredentials,
 	RegistrationData,
-	GoogleAuthData,
-	TelegramAuthData,
 	PasswordResetRequest,
-	PasswordReset,
-	EmailVerification,
 	AuthResponse,
 	AuthTokens,
 	MessageResponse,
 	AuthResult
-} from '$stylist/auth';
+} from '$module/auth';
+import type { GoogleAuthData } from '$lib/auth/type/object/google-auth-data';
+import type { TelegramAuthData } from '$lib/auth/type/object/telegram-auth-data';
+import type { PasswordReset } from '$lib/auth/type/object/password-reset';
+import type { EmailVerification } from '$lib/auth/type/object/email-verification';
 import { EmailPasswordStrategy } from '../../strategy/email-password';
 import { GoogleAuthStrategy } from '../../strategy/google-auth';
 import { TelegramAuthStrategy } from '../../strategy/telegram-auth';

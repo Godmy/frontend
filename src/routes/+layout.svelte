@@ -9,7 +9,7 @@
 	import { useAuth } from '$lib/auth';
 	import ToastStack from '$stylist/notification/component/molecule/toast-stack/index.svelte';
 	import ThemeModeToggle from '$stylist/theme/component/atom/theme-mode-toggle/index.svelte';
-	import AppHeader from '$stylist/navigation/component/organism/app-header/index.svelte';
+	import AppHeader from '$stylist/menu/component/organism/app-header/index.svelte';
 
 	let { children } = $props();
 	const auth = useAuth();
